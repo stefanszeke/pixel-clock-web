@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0c1511">
-  <meta name="description" content="A free, customizable pixel clock for Android and the browser.">
+  <meta name="description" content="A customizable pixel clock and swipeable calendar for Android and the browser.">
   <link rel="manifest" href="manifest.webmanifest">
   <title>Little Pixel Clock</title>
   <style>
@@ -108,24 +108,115 @@
       .screen:not(:fullscreen){min-height:90px;padding:5px 7px}.screen:not(:fullscreen) .clock-canvas{height:65px}
       .preview-head{padding:6px 10px}.foot{padding:5px 10px}
     }
+
+    /* Clock / calendar pages share the same screen and colors. */
+    .screen {min-height:385px;padding:0;touch-action:pan-y;user-select:none;--date-font:system-ui,sans-serif;--date-size:1}
+    .screen-view {position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:30px 24px 49px;min-width:0;animation:appear .18s ease-out}
+    .screen-view[hidden] {display:none!important}
+    .clock-view .ampm {position:absolute}
+    .date-text {font-family:var(--date-font);font-size:clamp(12px,calc(1.7vw * var(--date-size)),34px);white-space:pre-line;letter-spacing:.035em;max-width:100%;overflow-wrap:anywhere}
+    .screen-view .clock-canvas {max-width:100%;}
+    .view-tabs {position:absolute;z-index:3;bottom:11px;left:50%;transform:translateX(-50%);display:flex;gap:5px;padding:4px;border:1px solid color-mix(in srgb,var(--clock) 22%,transparent);background:color-mix(in srgb,var(--screen) 85%,transparent);border-radius:100px;box-shadow:0 2px 12px #0002}
+    .view-tab {border:0;background:transparent;color:var(--screen-ink);font-weight:700;letter-spacing:.04em;font-size:10px;padding:6px 12px;border-radius:40px;white-space:nowrap}
+    .view-tab[aria-pressed="true"] {background:var(--clock);color:var(--screen);}
+    .calendar-view {font-family:var(--date-font);color:var(--clock);padding:21px 33px 48px}
+    .calendar-inner {width:min(100%,520px);margin:auto;min-width:0}
+    .calendar-top {display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 13px}
+    .month-title {color:var(--clock);font-size:clamp(16px,2.1vw,25px);font-weight:760;letter-spacing:-.035em;min-width:0;text-align:center}
+    .calendar-nav {display:flex;align-items:center;gap:5px}
+    .calendar-arrow,.today-button {color:var(--clock);background:transparent;border:1px solid color-mix(in srgb,var(--clock) 38%,transparent);padding:5px 9px;border-radius:8px;font-size:13px;font-weight:680}
+    .calendar-arrow:hover,.today-button:hover {background:color-mix(in srgb,var(--clock) 16%,transparent)}
+    .calendar-weekdays,.calendar-grid {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;gap:3px}
+    .calendar-weekdays {color:var(--screen-ink);font-size:10px;font-weight:750;margin-bottom:6px;letter-spacing:.06em}
+    .calendar-weekdays > span {padding:3px 0}
+    .calendar-grid {grid-auto-rows:minmax(31px,1fr)}
+    .calendar-day {border:1px solid transparent;background:transparent;color:var(--clock);font-size:clamp(11px,1.15vw,15px);border-radius:9px;position:relative;min-width:0;min-height:31px;display:grid;place-items:center;padding:2px;line-height:1}
+    .calendar-day:hover {background:color-mix(in srgb,var(--clock) 14%,transparent)}
+    .calendar-day.outside {color:var(--screen-ink);opacity:.42}
+    .calendar-day.today {border-color:var(--clock);font-weight:800}
+    .calendar-day.selected {background:var(--clock);color:var(--screen);font-weight:800}
+    .calendar-selected {margin:9px 0 0;font-size:11px;color:var(--screen-ink);text-align:center;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .inline-help {font-size:11px;color:var(--muted);line-height:1.6;margin:5px 0 0}
+    .text-field {max-width:100%;width:100%;border:1px solid #394655;border-radius:9px;background:#0e1720;color:var(--text);padding:10px 12px;font-size:13px}
+    .text-field[aria-invalid="true"] {border-color:#ff8282}
+    .format-sample {font-size:12px;color:#bdccda;padding:9px 12px;background:#0e1720;border:1px solid var(--edge);border-radius:9px;margin-top:9px;white-space:pre-line;overflow-wrap:anywhere}
+    .date-controls {margin-top:12px}
+    .color-hex-input {width:95px;min-width:0;background:#0e1720;color:#dbe7f0;border:1px solid #394655;border-radius:8px;padding:8px;font:600 12px ui-monospace,Consolas,monospace;text-transform:uppercase}
+    .color-hex-input[aria-invalid="true"] {border-color:#ff8282}
+    .setting-row select {width:auto;min-width:115px;max-width:185px}
+    .label-stack {display:flex;flex-direction:column;gap:4px}
+    .label-stack small {font-size:11px;color:var(--muted)}
+    .section h3 .new-pill {font-size:9px;border-radius:6px;margin-left:6px;background:#354d41;color:#b6ffb2;padding:3px 5px}
+    .calendar-hint {font-size:11px;color:var(--muted);line-height:1.5}
+    @keyframes appear {from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}
+    .screen:fullscreen {padding:0}
+    .screen:fullscreen .screen-view {padding:7vh 7vw 72px}
+    .screen:fullscreen .calendar-inner {width:min(100%,780px)}
+    .screen:fullscreen .calendar-grid {grid-auto-rows:minmax(36px,7.2vh)}
+    .screen:fullscreen .month-title {font-size:clamp(20px,3vw,38px)}
+    .screen:fullscreen .calendar-day {font-size:clamp(16px,2vw,24px)}
+    .screen:fullscreen .calendar-weekdays {font-size:clamp(13px,1.5vw,19px)}
+    .screen:fullscreen .calendar-selected {font-size:clamp(12px,1.7vw,19px)}
+    .screen:fullscreen .date-text {font-size:clamp(16px,calc(3vw * var(--date-size)),52px)}
+    .screen:fullscreen .clock-canvas {max-width:none;height:min(34vh,330px)}
+    @media(max-width:780px) {
+      .screen:not(:fullscreen) {min-height:245px;padding:0}
+      .screen:not(:fullscreen) .screen-view {padding:8px 13px 42px}
+      .screen:not(:fullscreen) .clock-canvas {height:105px}
+      .screen:not(:fullscreen) .calendar-view {padding:12px 12px 44px}
+      .screen:not(:fullscreen) .calendar-top {margin-bottom:7px}
+      .screen:not(:fullscreen) .calendar-grid {grid-auto-rows:minmax(23px,1fr);gap:1px}
+      .screen:not(:fullscreen) .calendar-day {min-height:23px;font-size:11px;border-radius:6px}
+      .screen:not(:fullscreen) .calendar-weekdays {margin-bottom:2px}
+      .screen:not(:fullscreen) .month-title {font-size:16px}
+      .screen:not(:fullscreen) .calendar-selected {margin-top:5px}
+      .screen:not(:fullscreen) .date-text {font-size:clamp(11px,calc(3.2vw * var(--date-size)),25px)}
+      .screen:fullscreen .calendar-view {padding:14px 12px 62px}
+      .screen:fullscreen .calendar-grid {grid-auto-rows:minmax(33px,1fr)}
+      .screen:fullscreen .calendar-day {font-size:clamp(15px,3.3vw,22px)}
+      .screen:fullscreen .calendar-inner {width:min(100%,620px)}
+      .color-hex-input{width:100px}
+    }
+    @media(max-height:560px) and (max-width:780px) {
+      .screen:not(:fullscreen){min-height:240px}
+      .screen:not(:fullscreen) .clock-canvas{height:105px}
+    }
   </style>
 </head>
 <body>
 <div class="shell">
   <header class="headline">
-    <div class="brand"><div class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><h1>Little Pixel Clock</h1><div class="subtitle">A little desk clock for the web, Android and PC</div></div></div>
+    <div class="brand"><div class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><h1>Little Pixel Clock</h1><div class="subtitle">A customizable clock & calendar for any screen</div></div></div>
     <div class="tag">FREE · OFFLINE · NO ADS</div>
   </header>
   <main class="main">
     <section class="panel preview-panel" id="previewPanel">
       <div class="preview-head"><div class="preview-heading"><h2>Live preview</h2><span class="muted">· Uses your device's time</span></div><label class="pin-switch"><input type="checkbox" id="pinPreview" checked> Keep visible</label></div>
-      <div class="screen" id="screen" data-theme="matrix">
+      <div class="screen" id="screen" data-theme="matrix" tabindex="0" aria-label="Clock and calendar. Swipe left for calendar, right for clock.">
         <button class="fs-exit" id="exitFs" type="button">Exit full screen</button>
-        <span class="ampm" id="ampm" hidden></span>
-        <canvas id="clock" class="clock-canvas" aria-label="Current time" role="img"></canvas>
-        <div class="date-text" id="dateText"></div>
+        <div class="screen-view clock-view" id="clockView">
+          <span class="ampm" id="ampm" hidden></span>
+          <canvas id="clock" class="clock-canvas" aria-label="Current time" role="img"></canvas>
+          <div class="date-text" id="dateText"></div>
+        </div>
+        <div class="screen-view calendar-view" id="calendarView" hidden>
+          <div class="calendar-inner">
+            <div class="calendar-top">
+              <button type="button" class="calendar-arrow" id="previousMonth" aria-label="Previous month">‹</button>
+              <div class="month-title" id="calendarMonth"></div>
+              <div class="calendar-nav"><button type="button" class="today-button" id="calendarToday">Today</button><button type="button" class="calendar-arrow" id="nextMonth" aria-label="Next month">›</button></div>
+            </div>
+            <div class="calendar-weekdays" aria-label="Week starts Monday"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span></div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="calendar-selected" id="calendarSelected" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="view-tabs" role="group" aria-label="Select display">
+          <button class="view-tab" type="button" id="tabClock" aria-pressed="true">◷ Clock</button>
+          <button class="view-tab" type="button" id="tabCalendar" aria-pressed="false">▦ Calendar</button>
+        </div>
       </div>
-      <div class="foot"><span class="muted" id="status">Choose a style and make it yours.</span><button type="button" class="primary" id="fullscreen">⛶ Full screen</button></div>
+      <div class="foot"><span class="muted" id="status">Swipe left on the clock to open the calendar.</span><button type="button" class="primary" id="fullscreen">⛶ Full screen</button></div>
     </section>
     <section class="panel controls" aria-label="Clock settings">
       <h2>Customize your clock</h2>
@@ -140,18 +231,38 @@
         <label class="setting-row">Time format <select id="timeFormat"><option value="24">24-hour (14:30)</option><option value="12">12-hour (2:30 PM)</option></select></label>
         <label class="setting-row">Show seconds <span class="switch"><input type="checkbox" id="seconds"><span></span></span></label>
         <label class="setting-row">Show date <span class="switch"><input type="checkbox" id="date" checked><span></span></span></label>
-        <label class="setting-row">Date format <select id="dateFormat"><option value="long">31 October 2026</option><option value="shortmonth">31 Oct 2026</option><option value="dots">31.10.2026</option><option value="short">31/10/2026</option><option value="iso">2026-10-31</option><option value="us">10/31/2026</option></select></label>
-        <label class="setting-row">Show weekday <span class="switch"><input type="checkbox" id="weekday" checked><span></span></span></label>
+        <label class="setting-row">Date format <select id="dateFormat"><option value="long">31 October 2026</option><option value="shortmonth">31 Oct 2026</option><option value="monthFirst">October 31, 2026</option><option value="dots">31.10.2026</option><option value="short">31/10/2026</option><option value="iso">2026-10-31</option><option value="us">10/31/2026</option><option value="custom">Custom format…</option></select></label>
+        <div id="customFormatRow" class="date-controls" hidden><label for="customDate" class="subsection-title">Custom date template</label><input class="text-field" id="customDate" type="text" value="dddd · D MMMM YYYY" maxlength="100" spellcheck="false" placeholder="dddd · D MMMM YYYY"><p class="inline-help">Tokens: dddd / ddd = weekday, D / DD = day, MMMM / MMM = month, YYYY / YY = year. Use [text] for literal text.</p></div>
+        <div id="weekdaySettings">
+          <label class="setting-row">Show weekday <span class="switch"><input type="checkbox" id="weekday" checked><span></span></span></label>
+          <label class="setting-row">Weekday style <select id="weekdayStyle"><option value="long">Saturday</option><option value="short">Sat</option></select></label>
+          <label class="setting-row">Date separator <select id="dateSeparator"><option value="dot">· middle dot</option><option value="comma">, comma</option><option value="dash">— dash</option><option value="newline">New line</option><option value="space">Space</option></select></label>
+        </div>
+        <label class="setting-row">Date font <select id="dateFont"><option value="system">Clean (System)</option><option value="pixel">Pixel / Monospace</option><option value="rounded">Rounded</option><option value="serif">Classic Serif</option><option value="tech">Tech / Narrow</option></select></label>
+        <label class="slider-row" for="dateSize">Date text size <output id="dateSizeValue">100%</output></label><input id="dateSize" class="range" type="range" min="60" max="160" step="5" value="100">
+        <div class="format-sample" id="dateExample" aria-live="polite">Saturday · 31 October 2026</div>
       </section>
       <section class="section"><h3>COLORS</h3>
         <div class="subsection-title">Digits / pixels</div>
         <div class="colors" id="colors"></div>
-        <div class="color-line"><label for="pixelColor">Custom digit color</label><div class="color-input-group"><input class="color-picker" id="pixelColor" type="color" aria-label="Custom pixel color"><output class="color-hex" id="pixelHex"></output></div></div>
+        <div class="color-line"><label for="pixelColor">Pick any digit color</label><div class="color-input-group"><input class="color-picker" id="pixelColor" type="color" aria-label="Choose any digit color"><input class="color-hex-input" id="pixelHex" type="text" spellcheck="false" maxlength="7" aria-label="Digit hex color"></div></div>
         <div class="control-divider"></div>
         <div class="subsection-title">Background</div>
         <div class="colors" id="backgroundColors"></div>
-        <div class="color-line"><label for="backgroundColor">Custom background color</label><div class="color-input-group"><input class="color-picker" id="backgroundColor" type="color" aria-label="Custom background color"><output class="color-hex" id="backgroundHex"></output></div></div>
+        <div class="color-line"><label for="backgroundColor">Pick any background</label><div class="color-input-group"><input class="color-picker" id="backgroundColor" type="color" aria-label="Choose any background color"><input class="color-hex-input" id="backgroundHex" type="text" spellcheck="false" maxlength="7" aria-label="Background hex color"></div></div>
         <button type="button" id="resetBackground" class="subtle-button">Reset background to theme default</button>
+        <div class="control-divider"></div>
+        <div class="subsection-title">Date text & calendar secondary color</div>
+        <label class="setting-row">Match digit color <span class="switch"><input type="checkbox" id="matchDateColor" checked><span></span></span></label>
+        <div class="color-line"><label for="dateColor">Custom secondary color</label><div class="color-input-group"><input class="color-picker" id="dateColor" type="color" aria-label="Choose date color"><input class="color-hex-input" id="dateHex" type="text" spellcheck="false" maxlength="7" aria-label="Date hex color"></div></div>
+      </section>
+      <section class="section"><h3>FONTS & DISPLAY</h3>
+        <label class="setting-row">Smooth clock font <select id="clockFont"><option value="system">Modern</option><option value="mono">Monospace</option><option value="rounded">Rounded</option><option value="serif">Serif</option><option value="tech">Tech</option></select></label>
+        <p class="hint">Applies to the Minimal clock theme. LED Matrix, Pixel Arcade and Amber Glow use their own custom digit designs.</p>
+      </section>
+      <section class="section"><h3>CALENDAR <span class="new-pill">NEW</span></h3>
+        <p class="calendar-hint">Swipe left across the clock, or use the Clock / Calendar buttons below it. The calendar starts on <strong>Monday</strong>, inherits the current colors and lets you browse months.</p>
+        <button type="button" class="ghost" id="openCalendar" style="margin-top:10px">Open calendar in preview ↗</button>
       </section>
       <section class="section"><h3>SIZE & PIXELS</h3>
         <label class="slider-row" for="clockScale">Clock size <output id="clockScaleValue">90%</output></label>
@@ -176,7 +287,7 @@
     amber:{background:'#1c160b',color:'#ffa837',round:25},
     minimal:{background:'#f2f2ed',color:'#202c37',round:10}
   };
-  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,awake:false};
+  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
@@ -188,6 +299,7 @@
   const currentColor=()=>state.themeColors[state.theme]||themePalettes[state.theme].color;
   const currentBackground=()=>state.themeBackgrounds[state.theme]||themePalettes[state.theme].background;
   const currentRound=()=>state.themeRounds[state.theme]??themePalettes[state.theme].round;
+  const currentDateColor=()=>state.themeDateColors[state.theme]||currentColor();
   const $=id=>document.getElementById(id);
   const screen=$('screen'),canvas=$('clock'),ctx=canvas.getContext('2d'),dateText=$('dateText'),ampm=$('ampm');
   const colors=['#a2ff7c','#ffad42','#7cc9ff','#ff6b90','#e3e9f4','#bd94ff'];
@@ -211,6 +323,7 @@
   function set(key,value){state[key]=value;save();apply();}
   function chooseColor(color){state.themeColors={...state.themeColors,[state.theme]:color};save();apply();}
   function chooseBackground(color){state.themeBackgrounds={...state.themeBackgrounds,[state.theme]:color};save();apply();}
+  function chooseDateColor(color){state.themeDateColors={...state.themeDateColors,[state.theme]:color};save();apply();}
   function updateRound(value){state.themeRounds={...state.themeRounds,[state.theme]:value};save();apply();}
   function swatches(containerId,values,selected,onChoose){
     $(containerId).replaceChildren();
@@ -227,45 +340,89 @@
     screen.dataset.theme=state.theme;
     screen.style.setProperty('--clock',color);
     screen.style.setProperty('--screen',background);
-    screen.style.setProperty('--screen-ink',colorCss(color,.72));
+    screen.style.setProperty('--screen-ink',state.matchDateColor?colorCss(color,.75):currentDateColor());
+    screen.style.setProperty('--date-font',fontFamilies[state.dateFont]||fontFamilies.system);
+    screen.style.setProperty('--date-size',state.dateSize/100);
     screen.style.setProperty('--clock-size',state.clockScale+'%');
     for(const b of $('themes').querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.value===state.theme));
-    ['timeFormat','dateFormat'].forEach(id=>$(id).value=state[id]);
+    ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont'].forEach(id=>$(id).value=state[id]);
+    $('customDate').value=state.dateCustom;
+    $('customFormatRow').hidden=state.dateFormat!=='custom';
+    $('weekdaySettings').hidden=state.dateFormat==='custom';
+    $('dateExample').textContent=formatDate(new Date(2026,9,31));
+    $('dateSize').value=state.dateSize;$('dateSizeValue').textContent=state.dateSize+'%';
     ['seconds','date','weekday','awake'].forEach(id=>$(id).checked=state[id]);
     $('dateFormat').disabled=!state.date;$('weekday').disabled=!state.date;
+    $('dateFont').disabled=!state.date;$('dateSize').disabled=!state.date;
+    $('weekdayStyle').disabled=!state.date||!state.weekday; $('dateSeparator').disabled=!state.date||!state.weekday;
+    $('customDate').disabled=!state.date; 
     swatches('colors',colors,color,chooseColor);
     swatches('backgroundColors',backgrounds,background,chooseBackground);
-    $('pixelColor').value=color;$('pixelHex').textContent=color.toUpperCase();
-    $('backgroundColor').value=background;$('backgroundHex').textContent=background.toUpperCase();
+    $('pixelColor').value=color;$('pixelHex').value=color.toUpperCase();$('pixelHex').setAttribute('aria-invalid','false');
+    $('backgroundColor').value=background;$('backgroundHex').value=background.toUpperCase();$('backgroundHex').setAttribute('aria-invalid','false');
+    $('matchDateColor').checked=state.matchDateColor;
+    $('dateColor').disabled=state.matchDateColor; $('dateHex').disabled=state.matchDateColor;
+    $('dateColor').value=currentDateColor();$('dateHex').value=currentDateColor().toUpperCase();$('dateHex').setAttribute('aria-invalid','false');
     const pixelTheme=state.theme==='matrix'||state.theme==='arcade';
     $('clockScale').value=state.clockScale;$('clockScaleValue').textContent=state.clockScale+'%';
     $('pixelSize').value=state.pixelSize;$('pixelSizeValue').textContent=state.pixelSize+'%';
     $('pixelRound').value=round;$('pixelRoundValue').textContent=round+'%';
     $('pixelSize').disabled=!pixelTheme;$('pixelRound').disabled=!pixelTheme;$('resetShape').disabled=!pixelTheme;
     $('shapeHint').textContent=pixelTheme?'0% = square · 100% = round. Pixel size adjusts spacing between lit dots.':'Pixel shape controls are available with LED Matrix and Pixel Arcade.';
-    draw();
+    draw();renderCalendar();
   }
   $('pinPreview').addEventListener('change',e=>set('pinPreview',e.target.checked));
   $('themes').addEventListener('click',e=>{const b=e.target.closest('button[data-value]');if(b)set('theme',b.dataset.value);});
-  for(const key of ['timeFormat','dateFormat']) $(key).addEventListener('change',e=>set(key,e.target.value));
-  for(const key of ['seconds','date','weekday']) $(key).addEventListener('change',e=>set(key,e.target.checked));
+  for(const key of ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont']) $(key).addEventListener('change',e=>set(key,e.target.value));
+  for(const key of ['seconds','date','weekday','matchDateColor']) $(key).addEventListener('change',e=>set(key,e.target.checked));
   $('pixelColor').addEventListener('input',e=>chooseColor(e.target.value));
   $('backgroundColor').addEventListener('input',e=>chooseBackground(e.target.value));
+  $('dateColor').addEventListener('input',e=>chooseDateColor(e.target.value));
+  $('customDate').addEventListener('input',e=>{state.dateCustom=e.target.value;save();$('dateExample').textContent=formatDate(new Date(2026,9,31));draw();});
+  $('dateSize').addEventListener('input',e=>set('dateSize',Number(e.target.value)));
+  function hexBind(id,onColor,actual){
+    const field=$(id);
+    field.addEventListener('input',()=>{const valid=/^#[0-9a-f]{6}$/i.test(field.value.trim());field.setAttribute('aria-invalid',String(!valid));if(valid){onColor(field.value.trim().toLowerCase());field.focus();}});
+    field.addEventListener('blur',()=>{field.value=actual().toUpperCase();field.setAttribute('aria-invalid','false');});
+  }
+  hexBind('pixelHex',chooseColor,currentColor);
+  hexBind('backgroundHex',chooseBackground,currentBackground);
+  hexBind('dateHex',chooseDateColor,currentDateColor);
   $('resetBackground').addEventListener('click',()=>{const b={...state.themeBackgrounds};delete b[state.theme];set('themeBackgrounds',b);});
   $('clockScale').addEventListener('input',e=>set('clockScale',Number(e.target.value)));
   $('pixelSize').addEventListener('input',e=>set('pixelSize',Number(e.target.value)));
   $('pixelRound').addEventListener('input',e=>updateRound(Number(e.target.value)));
   $('resetShape').addEventListener('click',()=>{const r={...state.themeRounds};delete r[state.theme];set('themeRounds',r);});
-  const weekdayFormatter=new Intl.DateTimeFormat('en-GB',{weekday:'long'});
+  const fontFamilies={
+    system:"system-ui,-apple-system,'Segoe UI',sans-serif",
+    pixel:"ui-monospace,'Cascadia Code',Consolas,monospace",
+    rounded:"'Trebuchet MS',Verdana,sans-serif",
+    serif:"Georgia,'Times New Roman',serif",
+    tech:"'Arial Narrow','Roboto Condensed',Tahoma,sans-serif"
+  };
+  const weekdayLong=new Intl.DateTimeFormat('en-GB',{weekday:'long'});
+  const weekdayShort=new Intl.DateTimeFormat('en-GB',{weekday:'short'});
+  const monthLong=new Intl.DateTimeFormat('en-GB',{month:'long'});
+  const monthShort=new Intl.DateTimeFormat('en-GB',{month:'short'});
+  function customDate(now){
+    const tokens={dddd:weekdayLong.format(now),ddd:weekdayShort.format(now),D:String(now.getDate()),DD:String(now.getDate()).padStart(2,'0'),
+      MMMM:monthLong.format(now),MMM:monthShort.format(now),M:String(now.getMonth()+1),MM:String(now.getMonth()+1).padStart(2,'0'),
+      YYYY:String(now.getFullYear()),YY:String(now.getFullYear()).slice(-2)};
+    return state.dateCustom.replace(/\[[^\]]*\]|dddd|ddd|MMMM|MMM|YYYY|YY|DD|D|MM|M/g,t=>t.startsWith('[')?t.slice(1,-1):tokens[t]);
+  }
   function formatDate(now){
+    if(state.dateFormat==='custom')return customDate(now);
     let out='';const y=now.getFullYear(),m=String(now.getMonth()+1).padStart(2,'0'),d=String(now.getDate()).padStart(2,'0');
     if(state.dateFormat==='dots')out=`${d}.${m}.${y}`;
     else if(state.dateFormat==='short')out=`${d}/${m}/${y}`;
     else if(state.dateFormat==='us')out=`${m}/${d}/${y}`;
     else if(state.dateFormat==='iso')out=`${y}-${m}-${d}`;
     else if(state.dateFormat==='shortmonth')out=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric'}).format(now);
+    else if(state.dateFormat==='monthFirst')out=new Intl.DateTimeFormat('en-US',{month:'long',day:'numeric',year:'numeric'}).format(now);
     else out=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric'}).format(now);
-    return (state.weekday?weekdayFormatter.format(now)+' · ':'')+out;
+    if(!state.weekday)return out;
+    const separators={dot:' · ',comma:', ',dash:' — ',newline:'\n',space:' '};
+    return (state.weekdayStyle==='short'?weekdayShort:weekdayLong).format(now)+(separators[state.dateSeparator]||' · ')+out;
   }
   function timeString(now){
     let h=now.getHours();
@@ -307,9 +464,66 @@
     }
   }
   function drawMinimal(time,r){
-    const size=Math.min(r.height*.75, r.width/(time.length*.60));ctx.fillStyle=currentColor();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`650 ${size}px system-ui,-apple-system,sans-serif`;ctx.fillText(time,r.width/2,r.height/2+size*.025);
+    const size=Math.min(r.height*.75, r.width/(time.length*.60));ctx.fillStyle=currentColor();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`650 ${size}px ${fontFamilies[state.clockFont]||fontFamilies.system}`;ctx.fillText(time,r.width/2,r.height/2+size*.025);
   }
-  let lastTick=-1;
+  let displayMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+  let selectedDate=new Date();
+  let currentView='clock';
+  function showView(view){
+    currentView=view==='calendar'?'calendar':'clock';
+    $('clockView').hidden=currentView!=='clock';
+    $('calendarView').hidden=currentView!=='calendar';
+    $('tabClock').setAttribute('aria-pressed',String(currentView==='clock'));
+    $('tabCalendar').setAttribute('aria-pressed',String(currentView==='calendar'));
+    if(currentView==='clock')requestAnimationFrame(draw);else renderCalendar();
+  }
+  function renderCalendar(){
+    const year=displayMonth.getFullYear(),month=displayMonth.getMonth();
+    $('calendarMonth').textContent=new Intl.DateTimeFormat('en-GB',{month:'long',year:'numeric'}).format(displayMonth);
+    const grid=$('calendarGrid');grid.replaceChildren();
+    const first=(new Date(year,month,1).getDay()+6)%7; // Monday is 0
+    const days=new Date(year,month+1,0).getDate();
+    const weeks=Math.ceil((first+days)/7);
+    const today=new Date();
+    for(let i=0;i<weeks*7;i++){
+      const cellDate=new Date(year,month,i-first+1,12);
+      const inMonth=cellDate.getMonth()===month;
+      const isToday=cellDate.toDateString()===today.toDateString();
+      const isSelected=cellDate.toDateString()===selectedDate.toDateString();
+      const b=document.createElement('button');b.type='button';b.className='calendar-day';
+      if(!inMonth)b.classList.add('outside');
+      if(isToday)b.classList.add('today');
+      if(isSelected)b.classList.add('selected');
+      b.textContent=String(cellDate.getDate());
+      b.title=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(cellDate);
+      b.setAttribute('aria-label',b.title+(isToday?' (today)':''));
+      b.setAttribute('aria-pressed',String(isSelected));
+      b.addEventListener('click',()=>{selectedDate=cellDate;if(!inMonth)displayMonth=new Date(cellDate.getFullYear(),cellDate.getMonth(),1);renderCalendar();});
+      grid.appendChild(b);
+    }
+    $('calendarSelected').textContent=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(selectedDate);
+  }
+  function shiftMonth(amount){displayMonth=new Date(displayMonth.getFullYear(),displayMonth.getMonth()+amount,1);renderCalendar();}
+  $('tabClock').addEventListener('click',()=>showView('clock'));
+  $('tabCalendar').addEventListener('click',()=>showView('calendar'));
+  $('openCalendar').addEventListener('click',()=>{showView('calendar');$('previewPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+  $('previousMonth').addEventListener('click',()=>shiftMonth(-1));
+  $('nextMonth').addEventListener('click',()=>shiftMonth(1));
+  $('calendarToday').addEventListener('click',()=>{selectedDate=new Date();displayMonth=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1);renderCalendar();});
+  let touchStart=null;
+  screen.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.target.closest('button'))touchStart={x:e.clientX,y:e.clientY};});
+  screen.addEventListener('pointerup',e=>{
+    if(!touchStart||e.pointerType!=='touch')return;
+    const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;
+    if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.3)showView(dx<0?'calendar':'clock');
+  });
+  screen.addEventListener('pointercancel',()=>{touchStart=null;});
+  screen.addEventListener('keydown',e=>{
+    if(e.target.closest('button,input,select'))return;
+    if(e.key==='ArrowLeft'){showView('calendar');e.preventDefault();}
+    if(e.key==='ArrowRight'){showView('clock');e.preventDefault();}
+  });
+  let lastTick=-1;let lastDay='';
   function draw(){
     const now=new Date();const time=timeString(now);
     dateText.hidden=!state.date;dateText.textContent=state.date?formatDate(now):'';
@@ -320,7 +534,7 @@
     else drawMatrix(time,r,state.theme==='arcade');
     lastTick=now.getSeconds();
   }
-  setInterval(()=>{const n=new Date();if(n.getSeconds()!==lastTick)draw();},250);
+  setInterval(()=>{const n=new Date();if(n.getSeconds()!==lastTick)draw();const day=n.toDateString();if(day!==lastDay){lastDay=day;renderCalendar();}},250);
   const ro=new ResizeObserver(draw);ro.observe(canvas);
   $('fullscreen').addEventListener('click',async()=>{try{await screen.requestFullscreen();}catch{$('status').textContent='Full screen is not supported in this browser.';}});
   $('exitFs').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen();});

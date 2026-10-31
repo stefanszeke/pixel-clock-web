@@ -1,13 +1,26 @@
-# Little Pixel Clock v3 — GitHub Pages version
+# Little Pixel Clock v4 — GitHub Pages / offline PWA
 
-An entirely local, dependency-free clock. Date, themes, colors, clock size, pixel size and rounding are configurable. The **Keep visible** checkbox pins the live preview while you scroll settings; it is saved on your device. This version retains v2 settings using the same local-storage key.
+A single-page, no-dependency pixel clock with 4 themes and a Monday-first calendar.
 
-## Publish from GitHub (no command line)
+## What’s new
 
-1. Create a **public** GitHub repository, for example `little-pixel-clock`.
-2. Upload the **contents of this `github-pages` folder** into the repository root. Make sure `index.html` is at the root, not nested inside another folder.
-3. In the repository go to **Settings → Pages**. Under **Build and deployment**, choose **Deploy from a branch**, select `main`, select `/(root)` and click **Save**.
-4. Once GitHub Pages is deployed, the URL is `https://YOUR-USERNAME.github.io/little-pixel-clock/`. If the repository is named `YOUR-USERNAME.github.io`, it is `https://YOUR-USERNAME.github.io/`.
-5. Visit from Chrome on Android; from the browser menu choose **Install app** or **Add to Home screen**. Open the installed app once while online; subsequent launches are cached for offline use.
+- Swipe left on the clock to show the calendar; swipe right to return. Desktop users can click the Clock / Calendar tabs. Fullscreen works on either page.
+- Native pickers plus editable `#RRGGBB` color fields for digit, background and an optional separate date/calendar text color.
+- More date formats including the requested `Saturday · 31 October 2026` and custom template tokens `dddd ddd D DD MMMM MMM M MM YYYY YY`.
+- Weekday separators, date size, date font choices, and smooth-clock font choices (Minimal theme).
+- Monday-first calendar, previous/next months, Today shortcut, date selection, current-day highlight.
+- Colors and settings are saved locally per browser/device; existing v3 settings are retained.
 
-GitHub Pages serves static files, no server or account system is needed. Settings are stored separately in each browser/device and do **not** synchronize via GitHub Pages. The site can still show a correct date and time without an Internet connection because it uses your device clock.
+## Publish to GitHub Pages
+
+1. Create a public GitHub repository, e.g. `little-pixel-clock`.
+2. Upload the **contents** of this folder into the repository **root**. Do not include the containing `pixel-clock-v4` folder.
+3. In GitHub **Settings → Pages**, choose **Deploy from a branch**, `main`, `/ (root)`.
+4. Visit `https://YOUR-USERNAME.github.io/little-pixel-clock/`.
+5. On Android Chrome, select **Install app** or **Add to Home screen** to install the offline-capable PWA.
+
+## Test locally
+
+Use `python -m http.server 8000` in this folder and open `http://localhost:8000/` in a browser. Fullscreen and screen wake lock depend on your browser. The PWA service worker is available on HTTPS (GitHub Pages) or localhost. The clock and calendar can work offline once assets are cached.
+
+Date and time are taken from the local device. There is no account sync; configuration is per browser/device. The calendar is a month viewer, **not yet an events/scheduling app**.
