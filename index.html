@@ -196,8 +196,8 @@
     .calendar-inner {width:min(100%,630px);max-width:100%}
     .calendar-title-row {display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:0 0 16px}
     .calendar-kicker {font-family:system-ui,sans-serif;font-size:10px;font-weight:750;letter-spacing:.18em;color:var(--screen-ink);white-space:nowrap}
-    .calendar-back {justify-self:start;background:transparent;color:var(--screen-ink);border:1px solid color-mix(in srgb,var(--clock) 20%,transparent);border-radius:10px;padding:8px 12px;font-size:12px;min-height:35px;font-weight:650}
-    .today-button {justify-self:end;border-radius:10px;padding:8px 11px;min-height:35px}
+    .calendar-kicker {grid-column:2}
+    .today-button {grid-column:3;justify-self:end;border-radius:10px;padding:8px 11px;min-height:35px}
     .calendar-top {display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:10px;margin:0 0 15px}
     .calendar-arrow {height:46px;width:46px;display:grid;place-items:center;font-size:28px;line-height:1;padding:0;border-radius:13px;touch-action:manipulation}
     .month-title {font-size:clamp(22px,2.3vw,29px);line-height:1.22;font-weight:760}
@@ -208,7 +208,9 @@
     .calendar-grid.compact {grid-auto-rows:minmax(37px,1fr)}
     .calendar-day {background:color-mix(in srgb,var(--clock) 8%,transparent);min-height:44px;border-radius:11px;border:1px solid transparent;font-size:clamp(15px,1.3vw,19px);font-weight:650;touch-action:pan-y;-webkit-tap-highlight-color:transparent}
     .calendar-grid.compact .calendar-day {min-height:37px}
-    .calendar-day.outside {opacity:.5}
+    /* Neighboring-month dates are plain, dim text (never tiles or outlines). */
+    .calendar-day.outside {opacity:.5;background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+    .calendar-day.outside:hover,.calendar-day.outside:focus-visible {background:transparent!important;border-color:transparent!important}
     .calendar-day.empty {background:transparent;pointer-events:none;opacity:0}
     .calendar-day.today {border:2px solid var(--clock);font-weight:800}
     .calendar-day.selected {background:var(--clock)!important;color:var(--screen)!important;opacity:1!important;box-shadow:0 4px 16px color-mix(in srgb,var(--clock) 16%,transparent)}
@@ -254,7 +256,6 @@
       .calendar-selected span {display:none}
       .calendar-title-row {gap:3px}
       .screen.is-calendar:not(:fullscreen) .calendar-view {padding:9px 8px 42px}
-      .calendar-back {padding:7px;font-size:11px}
       .calendar-kicker {letter-spacing:.09em}
       .setting-tabs{margin-inline:-8px}
     }
@@ -299,7 +300,7 @@
   <main class="main">
     <section class="panel preview-panel" id="previewPanel">
       <div class="preview-head"><div class="preview-heading"><h2>Live preview</h2><span class="muted">· Uses your device's time</span></div><label class="pin-switch"><input type="checkbox" id="pinPreview" checked> Keep visible</label></div>
-      <div class="screen" id="screen" data-theme="matrix" tabindex="0" aria-label="Clock and calendar. Swipe left to open calendar; swipe calendar to change months.">
+      <div class="screen" id="screen" data-theme="matrix" tabindex="0" aria-label="Clock and calendar. Swipe left to open the calendar, then swipe right to return to the clock.">
         <button class="fs-exit" id="exitFs" type="button">Exit full screen</button>
         <div class="screen-view clock-view" id="clockView">
           <span class="ampm" id="ampm" hidden></span>
@@ -309,7 +310,6 @@
         <div class="screen-view calendar-view" id="calendarView" hidden>
           <div class="calendar-inner">
             <div class="calendar-title-row">
-              <button class="calendar-back" id="backToClock" type="button" title="Back to clock" aria-label="Back to clock">← Clock</button>
               <span class="calendar-kicker">MONTH VIEW</span>
               <button class="today-button" id="calendarToday" type="button">Today</button>
             </div>
@@ -376,7 +376,7 @@
         <p class="hint">Applies to the Minimal clock theme. LED Matrix, Pixel Arcade and Amber Glow use their own custom digit designs.</p>
       </section></div>
       <div class="settings-pane" id="settingsCalendar" role="tabpanel" aria-labelledby="settingsTabCalendar" hidden><section class="section"><h3>CALENDAR OPTIONS</h3>
-        <p class="calendar-hint">Monday is the first day of the week. Tap a day to select it; swipe left or right across the dates to change months. Use the large arrows for precise navigation.</p>
+        <p class="calendar-hint">Monday is the first day of the week. Tap a day to select it. Swipe right to return to the clock; use the large arrows to change months.</p>
         <label class="setting-row">Show Clock / Calendar buttons <span class="switch"><input type="checkbox" id="showSwitchButtons" checked><span></span></span></label>
         <label class="setting-row">Show other-month dates <span class="switch"><input type="checkbox" id="showOutsideDates" checked><span></span></span></label>
         <label class="setting-row">Day style <select id="calendarStyle"><option value="soft">Soft tiles</option><option value="outline">Outlined tiles</option><option value="simple">Minimal</option></select></label>
@@ -635,7 +635,7 @@
       const b=document.createElement('button');b.type='button';b.className='calendar-day';
       if(!inMonth){b.classList.add('outside');if(!state.showOutsideDates){b.classList.add('empty');b.disabled=true;}}
       if(isToday)b.classList.add('today');
-      if(isSelected)b.classList.add('selected');
+      if(isSelected&&inMonth)b.classList.add('selected');
       b.textContent=(!inMonth&&!state.showOutsideDates)?'':String(cellDate.getDate());
       b.title=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(cellDate);
       b.setAttribute('aria-label',b.title+(isToday?' (today)':''));
@@ -646,7 +646,6 @@
     $('calendarSelected').textContent=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(selectedDate);
   }
   function shiftMonth(amount){displayMonth=new Date(displayMonth.getFullYear(),displayMonth.getMonth()+amount,1);renderCalendar();}
-  $('backToClock').addEventListener('click',()=>showView('clock'));
   $('tabClock').addEventListener('click',()=>showView('clock'));
   $('tabCalendar').addEventListener('click',()=>showView('calendar'));
   $('openCalendar').addEventListener('click',()=>{showView('calendar');$('previewPanel').scrollIntoView({behavior:'smooth',block:'start'});});
@@ -654,7 +653,7 @@
   $('nextMonth').addEventListener('click',()=>shiftMonth(1));
   $('calendarToday').addEventListener('click',()=>{selectedDate=new Date();displayMonth=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1);renderCalendar();});
   let touchStart=null, suppressClickUntil=0;
-  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,#backToClock,.view-tab,#exitFs');
+  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,.view-tab,#exitFs');
   screen.addEventListener('pointerdown',e=>{
     if(e.pointerType==='touch' && !gestureIgnored(e.target)) touchStart={x:e.clientX,y:e.clientY,pointerId:e.pointerId};
   });
@@ -663,8 +662,10 @@
     const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;
     if(Math.abs(dx)<48 || Math.abs(dx)<Math.abs(dy)*1.4)return;
     if(currentView==='calendar'){
+      // Gesture is for changing screens, never for navigating calendar months.
+      // Suppress the synthetic tap if the gesture started on a date cell.
       suppressClickUntil=Date.now()+500;
-      shiftMonth(dx<0?1:-1);
+      if(dx>0)showView('clock');
     } else if(dx<0) showView('calendar');
   });
   screen.addEventListener('pointercancel',()=>{touchStart=null;});
@@ -673,8 +674,8 @@
   },true);
   screen.addEventListener('keydown',e=>{
     if(e.target.closest('button,input,select'))return;
-    if(e.key==='ArrowLeft'){if(currentView==='calendar')shiftMonth(-1);else showView('calendar');e.preventDefault();}
-    if(e.key==='ArrowRight'){if(currentView==='calendar')shiftMonth(1);e.preventDefault();}
+    if(e.key==='ArrowLeft' && currentView==='clock'){showView('calendar');e.preventDefault();}
+    if(e.key==='ArrowRight' && currentView==='calendar'){showView('clock');e.preventDefault();}
     if(e.key==='Escape' && currentView==='calendar'){showView('clock');e.preventDefault();}
   });
   let lastTick=-1;let lastDay='';

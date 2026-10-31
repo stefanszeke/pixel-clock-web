@@ -1,15 +1,18 @@
-# Little Pixel Clock v5
+# Little Pixel Clock v5.1
 
-A standalone clock and calendar, with no backend. Customization now has Appearance, Time & Date, Calendar, and Display tabs. The month calendar always uses a stable six-row grid, with larger day tiles, Monday-first weeks, tap-to-select, swipe-for-months, next/previous buttons and an always-visible Back to Clock button. The bottom Clock/Calendar switch can be hidden from the Calendar settings tab.
+A free, offline-capable, customizable clock and month calendar for phones and desktops.
 
-## Deploy
+## Clock ↔ calendar navigation
 
-Upload all extracted files into the root of your GitHub Pages repository. Settings → Pages → Deploy from a branch → main / (root). Update your repository's existing files (especially `sw.js`) to ensure the offline cache changes from v4 to v5.
+- Swipe **left on the clock** to open the calendar.
+- Swipe **right on the calendar** to go back to the clock.
+- Calendar month changes are made only with the large **‹ / ›** buttons.
+- Tap a date to select it. Dates from adjacent months are dimmed **without tile backgrounds**, even in the outlined/soft styles.
+- You can show or hide the Clock/Calendar tabs in **Customize → Calendar**. No separate “Back to Clock” button.
+- Calendar uses a fixed six-row grid so changing months does not shift its position.
 
-## Offline
+## GitHub Pages
 
-Once opened online from GitHub Pages, the PWA can continue working offline using the registered service worker. Preferences are stored only on each device in localStorage.
+Upload the **contents** of this folder to the root of your GitHub repository. Under Settings → Pages, publish `main` / root. Include `sw.js` so the offline cache version updates from v5 to v5.1.
 
-## Android lock screen
-
-The web app cannot display above the Android lock screen. An Android native activity can opt into showing above the keyguard (setShowWhenLocked), and an Android DreamService can create a charging screensaver. Neither feature alone turns the app into a secure kiosk.
+Offline availability begins after a successful online visit. Appearance settings are saved locally per browser/device.
