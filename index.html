@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c1511">
+  <meta name="description" content="A free, customizable pixel clock for Android and the browser.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <title>Little Pixel Clock</title>
+  <style>
+    :root {font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color-scheme: dark; --page:#0b1017; --panel:#151d26; --edge:#273241; --text:#e7edf5; --muted:#9ba9b8; --accent:#9cff7b;}
+    * {box-sizing:border-box}
+    body {margin:0;background:var(--page);color:var(--text);min-height:100vh}
+    button,select,input {font:inherit}
+    button {cursor:pointer}
+    button:focus-visible,select:focus-visible,input:focus-visible {outline:2px solid var(--accent);outline-offset:3px}
+    .shell {max-width:1230px;margin:0 auto;padding:28px clamp(16px,4vw,44px) 40px}
+    .headline {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+    .brand {display:flex;align-items:center;gap:12px}
+    .mark {display:grid;grid-template-columns:repeat(3,6px);gap:4px;padding:10px;border-radius:13px;background:#223128}
+    .mark i {width:6px;height:6px;border-radius:2px;background:#a0f67d;display:block}
+    .mark i:nth-child(2),.mark i:nth-child(6) {opacity:.25}
+    h1 {font-size:clamp(21px,2.7vw,26px);letter-spacing:-.8px;margin:0}
+    .subtitle {color:var(--muted);font-size:13px;margin-top:3px}
+    .tag {border:1px solid var(--edge);border-radius:100px;padding:7px 12px;color:#b4c2ce;font-size:12px;white-space:nowrap}
+    .main {display:grid;grid-template-columns:minmax(0,1.65fr) minmax(295px,1fr);gap:20px;align-items:start}
+    .panel {background:var(--panel);border:1px solid var(--edge);border-radius:20px;overflow:hidden}
+    /* Pin only the preview so adjustments remain visible beside the clock. */
+    .preview-panel.is-pinned {position:sticky;top:18px;z-index:5;box-shadow:0 12px 40px #0004}
+    .pin-switch {display:flex;align-items:center;gap:9px;font-size:12px;color:#bbcadd;white-space:nowrap;cursor:pointer;user-select:none}
+    .pin-switch input {accent-color:#9cff7b;width:15px;height:15px;margin:0;cursor:pointer}
+    .preview-heading {display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+    .preview-panel.is-pinned .preview-head {background:var(--panel)}
+    .preview-head {display:flex;align-items:center;justify-content:space-between;padding:17px 20px;gap:10px}
+    h2 {font-size:15px;margin:0;font-weight:650;letter-spacing:-.2px}
+    .muted {color:var(--muted);font-size:12px}
+    .screen {--screen:#101d15;--clock:#a2ff7c;--screen-ink:#7e9d89;min-height:325px;padding:32px 20px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:var(--screen);color:var(--clock);transition:background .2s,color .2s}
+    .screen:after {content:'';pointer-events:none;position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.025),transparent 45%)}
+    .screen[data-theme="arcade"] {--screen:#121632;--clock:#7cc9ff;--screen-ink:#b7c9ed}
+    .screen[data-theme="amber"] {--screen:#1c160b;--clock:#ffa837;--screen-ink:#a38a67}
+    .screen[data-theme="minimal"] {--screen:#f2f2ed;--clock:#202c37;--screen-ink:#73808a}
+    .clock-canvas {display:block;width:var(--clock-size,90%);height:175px;max-width:780px;filter:none;flex-shrink:0}
+    .screen[data-theme="matrix"] .clock-canvas {filter:drop-shadow(0 0 12px color-mix(in srgb,var(--clock) 20%,transparent))}
+    .screen[data-theme="amber"] .clock-canvas {filter:drop-shadow(0 0 14px color-mix(in srgb,var(--clock) 27%,transparent))}
+    .date-text {color:var(--screen-ink);text-align:center;font-size:clamp(14px,1.7vw,20px);letter-spacing:.09em;font-weight:570;margin-top:3px;line-height:1.55}
+    .ampm {font-size:13px;letter-spacing:2px;font-weight:750;color:var(--screen-ink);position:absolute;right:27px;top:23px}
+    .foot {display:flex;justify-content:space-between;align-items:center;gap:10px;padding:17px 20px;flex-wrap:wrap}
+    .primary {background:#a2ff7c;color:#122210;border:0;padding:11px 17px;border-radius:11px;font-weight:750}
+    .ghost {border:1px solid var(--edge);background:transparent;color:var(--text);padding:10px 14px;border-radius:11px;font-weight:600}
+    .controls {padding:21px}
+    .section {margin-top:23px;padding-top:20px;border-top:1px solid var(--edge)}
+    .section h3 {margin:0 0 13px;font-size:13px;color:#d7e1ed;font-weight:700}
+    .themes {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .theme {border:2px solid #344050;background:transparent;border-radius:12px;overflow:hidden;text-align:left;padding:0;color:inherit}
+    .theme[aria-pressed="true"] {border-color:#a2ff7c}
+    .theme .mini {display:flex;align-items:center;justify-content:center;height:62px;font-family:ui-monospace,Consolas,monospace;font-size:26px;font-weight:850;letter-spacing:1px}
+    .theme .mini.matrix {background:#101d15;color:#a2ff7c;text-shadow:0 0 7px #4fff6499}
+    .theme .mini.arcade {background:#121632;color:#7cc9ff;font-family:monospace;text-shadow:3px 3px #244577}
+    .theme .mini.amber {background:#1c160b;color:#ffa837;text-shadow:0 0 9px #f8872877}
+    .theme .mini.minimal {background:#f2f2ed;color:#202c37;font-family:system-ui;font-weight:650}
+    .theme .name {display:block;font-size:12px;padding:9px 11px;font-weight:650}
+    .setting-row {display:flex;align-items:center;justify-content:space-between;gap:14px;margin:13px 0;font-size:14px}
+    .setting-row select {max-width:165px;min-width:115px;background:#0e1720;border:1px solid #394655;border-radius:9px;padding:8px 10px;color:var(--text)}
+    .switch {width:45px;height:25px;flex-shrink:0;position:relative}
+    .switch input {opacity:0;position:absolute;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+    .switch span {display:block;width:45px;height:25px;background:#3d4a59;border-radius:100px;transition:background .15s}
+    .switch span:before {content:'';position:absolute;left:4px;top:4px;width:17px;height:17px;background:white;border-radius:50%;transition:transform .15s}
+    .switch input:checked + span {background:#80bd6b}
+    .switch input:checked + span:before {transform:translateX(20px)}
+    .colors {display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .color-line {display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 0}
+    .color-line label {font-size:13px;color:var(--muted)}
+    .color-input-group {display:flex;align-items:center;gap:10px}
+    .color-picker {height:35px;width:41px;padding:3px;border:1px solid #526074;border-radius:9px;background:#0e1720;cursor:pointer}
+    .color-hex {min-width:74px;font:600 12px ui-monospace,Consolas,monospace;color:#ccd8e6}
+    .subtle-button {border:0;color:#a8bbcc;background:none;padding:4px 0;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+    .slider-row {display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 6px;font-size:14px}
+    .slider-row output {color:#b9cbd9;font:600 12px ui-monospace,Consolas,monospace;min-width:40px;text-align:right}
+    .range {display:block;width:100%;margin:9px 0 17px;accent-color:#a2ff7c;cursor:pointer}
+    .range:disabled {opacity:.33;cursor:not-allowed}
+    .shape-help {min-height:18px;margin-top:0}
+    .control-divider {height:1px;background:#2b3847;margin:18px 0}
+    .subsection-title {font-size:12px;font-weight:650;color:#e0e8f3;margin-top:13px;margin-bottom:10px}
+
+    .swatch {width:30px;height:30px;border-radius:100%;border:3px solid transparent;background:var(--swatch);box-shadow:0 0 0 1px #4b5868;cursor:pointer}
+    .swatch[aria-pressed="true"] {border-color:#17202a;outline:2px solid white;outline-offset:1px}
+    .hint {color:var(--muted);font-size:12px;line-height:1.6;margin-top:13px}
+    .screen:fullscreen {width:100vw;height:100dvh;min-height:100dvh;padding:8vw}
+    .screen:fullscreen .clock-canvas {max-width:none;height:min(34vh,330px)}
+    .screen:fullscreen .date-text {font-size:clamp(16px,3vw,35px);margin-top:15px}
+    .screen:fullscreen .ampm {top:25px;right:30px}
+    .fs-exit {display:none;position:absolute;z-index:2;top:15px;left:15px;border:1px solid #8885;background:#2228;color:inherit;border-radius:8px;padding:7px 10px;font-size:11px}
+    .screen:fullscreen .fs-exit {display:block;opacity:.3}
+    .screen:fullscreen .fs-exit:focus,.screen:fullscreen .fs-exit:hover {opacity:1}
+    @media(max-width:780px) {
+      .shell{padding:14px 12px 25px}.headline{padding:4px}.main{grid-template-columns:minmax(0,1fr);gap:12px}
+      .preview-panel.is-pinned{top:7px}
+      .screen{min-height:145px;padding:12px 8px}.clock-canvas{height:95px}
+      .preview-head{padding:10px 13px}.preview-head .muted{display:none}
+      .preview-panel .date-text{font-size:clamp(12px,3vw,16px);margin-top:0}
+      .foot{padding:9px 13px}.foot .muted{display:none}
+      .primary{padding:8px 12px;font-size:12px}
+      .controls{padding:17px}.tag{display:none}
+      .screen:fullscreen{min-height:100dvh;padding:4vw}.screen:fullscreen .clock-canvas{height:min(34vh,330px)}
+      .screen:fullscreen .date-text{font-size:clamp(16px,3vw,35px);margin-top:15px}
+    }
+    @media(max-height:560px) and (max-width:780px) {
+      .screen:not(:fullscreen){min-height:90px;padding:5px 7px}.screen:not(:fullscreen) .clock-canvas{height:65px}
+      .preview-head{padding:6px 10px}.foot{padding:5px 10px}
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="headline">
+    <div class="brand"><div class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><h1>Little Pixel Clock</h1><div class="subtitle">A little desk clock for the web, Android and PC</div></div></div>
+    <div class="tag">FREE · OFFLINE · NO ADS</div>
+  </header>
+  <main class="main">
+    <section class="panel preview-panel" id="previewPanel">
+      <div class="preview-head"><div class="preview-heading"><h2>Live preview</h2><span class="muted">· Uses your device's time</span></div><label class="pin-switch"><input type="checkbox" id="pinPreview" checked> Keep visible</label></div>
+      <div class="screen" id="screen" data-theme="matrix">
+        <button class="fs-exit" id="exitFs" type="button">Exit full screen</button>
+        <span class="ampm" id="ampm" hidden></span>
+        <canvas id="clock" class="clock-canvas" aria-label="Current time" role="img"></canvas>
+        <div class="date-text" id="dateText"></div>
+      </div>
+      <div class="foot"><span class="muted" id="status">Choose a style and make it yours.</span><button type="button" class="primary" id="fullscreen">⛶ Full screen</button></div>
+    </section>
+    <section class="panel controls" aria-label="Clock settings">
+      <h2>Customize your clock</h2>
+      <p class="muted" style="margin:6px 0 0">Changes update instantly and are saved on this device.</p>
+      <section class="section"><h3>THEME</h3><div class="themes" id="themes">
+        <button type="button" class="theme" data-value="matrix" aria-pressed="true"><span class="mini matrix">● 08:42</span><span class="name">LED Matrix</span></button>
+        <button type="button" class="theme" data-value="arcade" aria-pressed="false"><span class="mini arcade">▣ 08:42</span><span class="name">Pixel Arcade</span></button>
+        <button type="button" class="theme" data-value="amber" aria-pressed="false"><span class="mini amber">08:42</span><span class="name">Amber Glow</span></button>
+        <button type="button" class="theme" data-value="minimal" aria-pressed="false"><span class="mini minimal">08:42</span><span class="name">Minimal</span></button>
+      </div></section>
+      <section class="section"><h3>TIME & DATE</h3>
+        <label class="setting-row">Time format <select id="timeFormat"><option value="24">24-hour (14:30)</option><option value="12">12-hour (2:30 PM)</option></select></label>
+        <label class="setting-row">Show seconds <span class="switch"><input type="checkbox" id="seconds"><span></span></span></label>
+        <label class="setting-row">Show date <span class="switch"><input type="checkbox" id="date" checked><span></span></span></label>
+        <label class="setting-row">Date format <select id="dateFormat"><option value="long">31 October 2026</option><option value="shortmonth">31 Oct 2026</option><option value="dots">31.10.2026</option><option value="short">31/10/2026</option><option value="iso">2026-10-31</option><option value="us">10/31/2026</option></select></label>
+        <label class="setting-row">Show weekday <span class="switch"><input type="checkbox" id="weekday" checked><span></span></span></label>
+      </section>
+      <section class="section"><h3>COLORS</h3>
+        <div class="subsection-title">Digits / pixels</div>
+        <div class="colors" id="colors"></div>
+        <div class="color-line"><label for="pixelColor">Custom digit color</label><div class="color-input-group"><input class="color-picker" id="pixelColor" type="color" aria-label="Custom pixel color"><output class="color-hex" id="pixelHex"></output></div></div>
+        <div class="control-divider"></div>
+        <div class="subsection-title">Background</div>
+        <div class="colors" id="backgroundColors"></div>
+        <div class="color-line"><label for="backgroundColor">Custom background color</label><div class="color-input-group"><input class="color-picker" id="backgroundColor" type="color" aria-label="Custom background color"><output class="color-hex" id="backgroundHex"></output></div></div>
+        <button type="button" id="resetBackground" class="subtle-button">Reset background to theme default</button>
+      </section>
+      <section class="section"><h3>SIZE & PIXELS</h3>
+        <label class="slider-row" for="clockScale">Clock size <output id="clockScaleValue">90%</output></label>
+        <input id="clockScale" class="range" type="range" min="50" max="100" step="5" value="90">
+        <label class="slider-row" for="pixelSize">Pixel size <output id="pixelSizeValue">78%</output></label>
+        <input id="pixelSize" class="range" type="range" min="40" max="100" step="2" value="78">
+        <label class="slider-row" for="pixelRound">Pixel rounding <output id="pixelRoundValue">100%</output></label>
+        <input id="pixelRound" class="range" type="range" min="0" max="100" step="5" value="100">
+        <p class="hint shape-help" id="shapeHint">0% = square · 100% = round. Pixel options apply to the LED Matrix and Pixel Arcade themes.</p>
+        <button type="button" id="resetShape" class="subtle-button">Reset pixel shape to theme default</button>
+      </section>
+      <section class="section"><label class="setting-row" style="margin:0">Keep screen awake <span class="switch"><input type="checkbox" id="awake"><span></span></span></label><p class="hint">Works when supported by the browser. On Android, you may need to run the clock from a secure installed website.</p></section>
+    </section>
+  </main>
+</div>
+<script>
+(() => {
+  'use strict';
+  const themePalettes={
+    matrix:{background:'#101d15',color:'#a2ff7c',round:100},
+    arcade:{background:'#121632',color:'#7cc9ff',round:10},
+    amber:{background:'#1c160b',color:'#ffa837',round:25},
+    minimal:{background:'#f2f2ed',color:'#202c37',round:10}
+  };
+  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,awake:false};
+  let state={...defaults};
+  try {
+    const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
+    for(const key of Object.keys(defaults)) if(saved[key]!==undefined) state[key]=saved[key];
+    // Migrate color selected in the previous version without changing other themes.
+    if(typeof saved.color==='string' && !state.themeColors[state.theme]) state.themeColors[state.theme]=saved.color;
+  }catch{}
+  if(!themePalettes[state.theme])state.theme='matrix';
+  const currentColor=()=>state.themeColors[state.theme]||themePalettes[state.theme].color;
+  const currentBackground=()=>state.themeBackgrounds[state.theme]||themePalettes[state.theme].background;
+  const currentRound=()=>state.themeRounds[state.theme]??themePalettes[state.theme].round;
+  const $=id=>document.getElementById(id);
+  const screen=$('screen'),canvas=$('clock'),ctx=canvas.getContext('2d'),dateText=$('dateText'),ampm=$('ampm');
+  const colors=['#a2ff7c','#ffad42','#7cc9ff','#ff6b90','#e3e9f4','#bd94ff'];
+  const backgrounds=['#080d12','#101d15','#121632','#1c160b','#27192a','#f2f2ed'];
+  const glyphs={
+    '0':['01110','10001','10011','10101','11001','10001','01110'],
+    '1':['00100','01100','00100','00100','00100','00100','01110'],
+    '2':['01110','10001','00001','00010','00100','01000','11111'],
+    '3':['11110','00001','00001','01110','00001','00001','11110'],
+    '4':['00010','00110','01010','10010','11111','00010','00010'],
+    '5':['11111','10000','10000','11110','00001','00001','11110'],
+    '6':['01111','10000','10000','11110','10001','10001','01110'],
+    '7':['11111','00001','00010','00100','01000','01000','01000'],
+    '8':['01110','10001','10001','01110','10001','10001','01110'],
+    '9':['01110','10001','10001','01111','00001','00001','11110'],
+    ':':['00','11','11','00','11','11','00']
+  };
+  const segs={0:'abcedf',1:'bc',2:'abged',3:'abgcd',4:'fgbc',5:'afgcd',6:'afgecd',7:'abc',8:'abcdefg',9:'abcdfg'};
+  function colorCss(hex,a){const v=hex.replace('#','');const r=parseInt(v.slice(0,2),16),g=parseInt(v.slice(2,4),16),b=parseInt(v.slice(4,6),16);return `rgba(${r},${g},${b},${a})`;}
+  function save(){try{localStorage.setItem('little-pixel-clock',JSON.stringify(state));}catch{}}
+  function set(key,value){state[key]=value;save();apply();}
+  function chooseColor(color){state.themeColors={...state.themeColors,[state.theme]:color};save();apply();}
+  function chooseBackground(color){state.themeBackgrounds={...state.themeBackgrounds,[state.theme]:color};save();apply();}
+  function updateRound(value){state.themeRounds={...state.themeRounds,[state.theme]:value};save();apply();}
+  function swatches(containerId,values,selected,onChoose){
+    $(containerId).replaceChildren();
+    values.forEach(c=>{
+      const b=document.createElement('button');b.type='button';b.className='swatch';b.style.setProperty('--swatch',c);
+      b.setAttribute('aria-label',`Choose color ${c}`);b.setAttribute('aria-pressed',String(selected.toLowerCase()===c));
+      b.addEventListener('click',()=>onChoose(c));$(containerId).appendChild(b);
+    });
+  }
+  function apply(){
+    $('pinPreview').checked=state.pinPreview;
+    $('previewPanel').classList.toggle('is-pinned',state.pinPreview);
+    const color=currentColor(),background=currentBackground(),round=currentRound();
+    screen.dataset.theme=state.theme;
+    screen.style.setProperty('--clock',color);
+    screen.style.setProperty('--screen',background);
+    screen.style.setProperty('--screen-ink',colorCss(color,.72));
+    screen.style.setProperty('--clock-size',state.clockScale+'%');
+    for(const b of $('themes').querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.value===state.theme));
+    ['timeFormat','dateFormat'].forEach(id=>$(id).value=state[id]);
+    ['seconds','date','weekday','awake'].forEach(id=>$(id).checked=state[id]);
+    $('dateFormat').disabled=!state.date;$('weekday').disabled=!state.date;
+    swatches('colors',colors,color,chooseColor);
+    swatches('backgroundColors',backgrounds,background,chooseBackground);
+    $('pixelColor').value=color;$('pixelHex').textContent=color.toUpperCase();
+    $('backgroundColor').value=background;$('backgroundHex').textContent=background.toUpperCase();
+    const pixelTheme=state.theme==='matrix'||state.theme==='arcade';
+    $('clockScale').value=state.clockScale;$('clockScaleValue').textContent=state.clockScale+'%';
+    $('pixelSize').value=state.pixelSize;$('pixelSizeValue').textContent=state.pixelSize+'%';
+    $('pixelRound').value=round;$('pixelRoundValue').textContent=round+'%';
+    $('pixelSize').disabled=!pixelTheme;$('pixelRound').disabled=!pixelTheme;$('resetShape').disabled=!pixelTheme;
+    $('shapeHint').textContent=pixelTheme?'0% = square · 100% = round. Pixel size adjusts spacing between lit dots.':'Pixel shape controls are available with LED Matrix and Pixel Arcade.';
+    draw();
+  }
+  $('pinPreview').addEventListener('change',e=>set('pinPreview',e.target.checked));
+  $('themes').addEventListener('click',e=>{const b=e.target.closest('button[data-value]');if(b)set('theme',b.dataset.value);});
+  for(const key of ['timeFormat','dateFormat']) $(key).addEventListener('change',e=>set(key,e.target.value));
+  for(const key of ['seconds','date','weekday']) $(key).addEventListener('change',e=>set(key,e.target.checked));
+  $('pixelColor').addEventListener('input',e=>chooseColor(e.target.value));
+  $('backgroundColor').addEventListener('input',e=>chooseBackground(e.target.value));
+  $('resetBackground').addEventListener('click',()=>{const b={...state.themeBackgrounds};delete b[state.theme];set('themeBackgrounds',b);});
+  $('clockScale').addEventListener('input',e=>set('clockScale',Number(e.target.value)));
+  $('pixelSize').addEventListener('input',e=>set('pixelSize',Number(e.target.value)));
+  $('pixelRound').addEventListener('input',e=>updateRound(Number(e.target.value)));
+  $('resetShape').addEventListener('click',()=>{const r={...state.themeRounds};delete r[state.theme];set('themeRounds',r);});
+  const weekdayFormatter=new Intl.DateTimeFormat('en-GB',{weekday:'long'});
+  function formatDate(now){
+    let out='';const y=now.getFullYear(),m=String(now.getMonth()+1).padStart(2,'0'),d=String(now.getDate()).padStart(2,'0');
+    if(state.dateFormat==='dots')out=`${d}.${m}.${y}`;
+    else if(state.dateFormat==='short')out=`${d}/${m}/${y}`;
+    else if(state.dateFormat==='us')out=`${m}/${d}/${y}`;
+    else if(state.dateFormat==='iso')out=`${y}-${m}-${d}`;
+    else if(state.dateFormat==='shortmonth')out=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric'}).format(now);
+    else out=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric'}).format(now);
+    return (state.weekday?weekdayFormatter.format(now)+' · ':'')+out;
+  }
+  function timeString(now){
+    let h=now.getHours();
+    ampm.hidden=state.timeFormat!=='12';ampm.textContent=h<12?'AM':'PM';
+    if(state.timeFormat==='12')h=h%12||12;
+    const pad=n=>String(n).padStart(2,'0');
+    return `${pad(h)}:${pad(now.getMinutes())}`+(state.seconds?':'+pad(now.getSeconds()):'');
+  }
+  function resizeCanvas(){const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return null;const dpr=Math.min(3,window.devicePixelRatio||1);const w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);return {width:r.width,height:r.height};}
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
+  function drawMatrix(time,r,square){
+    const chars=[...time],widths=chars.map(c=>c===':'?2:5),gap=2,total=widths.reduce((a,b)=>a+b,0)+(chars.length-1)*gap;
+    const u=Math.min((r.width-14)/(total+1),(r.height-8)/8.2), gridW=u*total,gridH=u*7;
+    const x0=(r.width-gridW)/2,y0=(r.height-gridH)/2;
+    let col=0;
+    for(let n=0;n<chars.length;n++){
+      const glyph=glyphs[chars[n]]||glyphs['0'];const width=widths[n];
+      for(let row=0;row<7;row++) for(let c=0;c<width;c++){
+        const x=x0+(col+c+.5)*u,y=y0+(row+.5)*u;
+        const lit=glyph[row][c]==='1';
+        const color=currentColor(),scale=state.pixelSize/100,round=currentRound();
+        ctx.fillStyle=lit?color:colorCss(color,square?.065:.095);
+        const size=u*(lit?scale:scale*.86);
+        roundRect(x-size/2,y-size/2,size,size,size*(round/200));
+      }
+      col+=width+gap;
+    }
+  }
+  function drawAmber(time,r){
+    const chars=[...time],unit=10,gap=4, widths=chars.map(c=>c===':'?7:25),total=widths.reduce((a,b)=>a+b,0)+gap*(chars.length-1);
+    const scale=Math.min((r.width-20)/total,(r.height-12)/50),startX=(r.width-total*scale)/2,startY=(r.height-47*scale)/2;
+    const segments={a:[5,0,15,4],b:[20,4,4,17],c:[20,26,4,17],d:[5,43,15,4],e:[1,26,4,17],f:[1,4,4,17],g:[5,21.5,15,4]};
+    let x=0;
+    for(let i=0;i<chars.length;i++){
+      const ch=chars[i];ctx.save();ctx.translate(startX+x*scale,startY);ctx.scale(scale,scale);
+      if(ch===':'){ctx.fillStyle=currentColor();roundRect(2,12,4,5,1.5);roundRect(2,30,4,5,1.5);}
+      else for(const [s,rr] of Object.entries(segments)){ctx.fillStyle=colorCss(currentColor(),(segs[ch]||'').includes(s)?1:.08);roundRect(...rr,1.3);}
+      ctx.restore();x+=widths[i]+gap;
+    }
+  }
+  function drawMinimal(time,r){
+    const size=Math.min(r.height*.75, r.width/(time.length*.60));ctx.fillStyle=currentColor();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`650 ${size}px system-ui,-apple-system,sans-serif`;ctx.fillText(time,r.width/2,r.height/2+size*.025);
+  }
+  let lastTick=-1;
+  function draw(){
+    const now=new Date();const time=timeString(now);
+    dateText.hidden=!state.date;dateText.textContent=state.date?formatDate(now):'';
+    canvas.setAttribute('aria-label',`Current time ${time}`);
+    const r=resizeCanvas();if(!r)return;
+    if(state.theme==='minimal')drawMinimal(time,r);
+    else if(state.theme==='amber')drawAmber(time,r);
+    else drawMatrix(time,r,state.theme==='arcade');
+    lastTick=now.getSeconds();
+  }
+  setInterval(()=>{const n=new Date();if(n.getSeconds()!==lastTick)draw();},250);
+  const ro=new ResizeObserver(draw);ro.observe(canvas);
+  $('fullscreen').addEventListener('click',async()=>{try{await screen.requestFullscreen();}catch{$('status').textContent='Full screen is not supported in this browser.';}});
+  $('exitFs').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen();});
+  let wakeLock=null;
+  async function manageWake(){
+    if(wakeLock){try{await wakeLock.release();}catch{}wakeLock=null;}
+    if(!state.awake||document.visibilityState!=='visible')return;
+    if(!('wakeLock' in navigator)){$('status').textContent='Screen wake lock is not available in this browser.';return;}
+    try{wakeLock=await navigator.wakeLock.request('screen');$('status').textContent='Screen will stay awake while the clock is open.';}
+    catch{$('status').textContent='Wake lock unavailable; check your browser and screen settings.';}
+  }
+  $('awake').addEventListener('change',e=>{set('awake',e.target.checked);manageWake();});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){draw();if(state.awake)manageWake();}});
+  document.addEventListener('fullscreenchange',draw);
+  if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  apply();if(state.awake)manageWake();
+})();
+</script>
+</body>
+</html>
