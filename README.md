@@ -1,26 +1,15 @@
-# Little Pixel Clock v4 — GitHub Pages / offline PWA
+# Little Pixel Clock v5
 
-A single-page, no-dependency pixel clock with 4 themes and a Monday-first calendar.
+A standalone clock and calendar, with no backend. Customization now has Appearance, Time & Date, Calendar, and Display tabs. The month calendar always uses a stable six-row grid, with larger day tiles, Monday-first weeks, tap-to-select, swipe-for-months, next/previous buttons and an always-visible Back to Clock button. The bottom Clock/Calendar switch can be hidden from the Calendar settings tab.
 
-## What’s new
+## Deploy
 
-- Swipe left on the clock to show the calendar; swipe right to return. Desktop users can click the Clock / Calendar tabs. Fullscreen works on either page.
-- Native pickers plus editable `#RRGGBB` color fields for digit, background and an optional separate date/calendar text color.
-- More date formats including the requested `Saturday · 31 October 2026` and custom template tokens `dddd ddd D DD MMMM MMM M MM YYYY YY`.
-- Weekday separators, date size, date font choices, and smooth-clock font choices (Minimal theme).
-- Monday-first calendar, previous/next months, Today shortcut, date selection, current-day highlight.
-- Colors and settings are saved locally per browser/device; existing v3 settings are retained.
+Upload all extracted files into the root of your GitHub Pages repository. Settings → Pages → Deploy from a branch → main / (root). Update your repository's existing files (especially `sw.js`) to ensure the offline cache changes from v4 to v5.
 
-## Publish to GitHub Pages
+## Offline
 
-1. Create a public GitHub repository, e.g. `little-pixel-clock`.
-2. Upload the **contents** of this folder into the repository **root**. Do not include the containing `pixel-clock-v4` folder.
-3. In GitHub **Settings → Pages**, choose **Deploy from a branch**, `main`, `/ (root)`.
-4. Visit `https://YOUR-USERNAME.github.io/little-pixel-clock/`.
-5. On Android Chrome, select **Install app** or **Add to Home screen** to install the offline-capable PWA.
+Once opened online from GitHub Pages, the PWA can continue working offline using the registered service worker. Preferences are stored only on each device in localStorage.
 
-## Test locally
+## Android lock screen
 
-Use `python -m http.server 8000` in this folder and open `http://localhost:8000/` in a browser. Fullscreen and screen wake lock depend on your browser. The PWA service worker is available on HTTPS (GitHub Pages) or localhost. The clock and calendar can work offline once assets are cached.
-
-Date and time are taken from the local device. There is no account sync; configuration is per browser/device. The calendar is a month viewer, **not yet an events/scheduling app**.
+The web app cannot display above the Android lock screen. An Android native activity can opt into showing above the keyguard (setShowWhenLocked), and an Android DreamService can create a charging screensaver. Neither feature alone turns the app into a secure kiosk.

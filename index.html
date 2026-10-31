@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0c1511">
-  <meta name="description" content="A customizable pixel clock and swipeable calendar for Android and the browser.">
+  <meta name="description" content="A customizable pixel clock and calendar with large day buttons for Android and the browser.">
   <link rel="manifest" href="manifest.webmanifest">
   <title>Little Pixel Clock</title>
   <style>
@@ -181,6 +181,113 @@
       .screen:not(:fullscreen){min-height:240px}
       .screen:not(:fullscreen) .clock-canvas{height:105px}
     }
+
+    /* V5 — well separated settings tabs */
+    .setting-tabs {display:flex;gap:5px;margin:19px -5px 4px;padding:5px;background:#0b131b;border:1px solid #263441;border-radius:12px;overflow-x:auto;scrollbar-width:thin}
+    .setting-tab {color:#b4c4d0;white-space:nowrap;border:0;border-radius:9px;background:transparent;padding:10px 11px;font-size:12px;font-weight:720;flex:1;min-width:max-content}
+    .setting-tab[aria-selected="true"]{color:#132616;background:#a2ff7c;box-shadow:0 1px 8px #9cff7b24}
+    .settings-pane[hidden] {display:none!important}
+    .settings-pane >.section:first-child {margin-top:15px;padding-top:3px;border-top:0}
+    .controls {min-width:0}
+    /* V5 — clear, full-size month navigation and tappable days */
+    .screen {transition:min-height .22s, background .2s,color .2s}
+    .screen.is-calendar:not(:fullscreen){min-height:520px}
+    .calendar-view {font-family:var(--calendar-font,system-ui,sans-serif);color:var(--clock);padding:19px 26px 55px;touch-action:pan-y}
+    .calendar-inner {width:min(100%,630px);max-width:100%}
+    .calendar-title-row {display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:0 0 16px}
+    .calendar-kicker {font-family:system-ui,sans-serif;font-size:10px;font-weight:750;letter-spacing:.18em;color:var(--screen-ink);white-space:nowrap}
+    .calendar-back {justify-self:start;background:transparent;color:var(--screen-ink);border:1px solid color-mix(in srgb,var(--clock) 20%,transparent);border-radius:10px;padding:8px 12px;font-size:12px;min-height:35px;font-weight:650}
+    .today-button {justify-self:end;border-radius:10px;padding:8px 11px;min-height:35px}
+    .calendar-top {display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:10px;margin:0 0 15px}
+    .calendar-arrow {height:46px;width:46px;display:grid;place-items:center;font-size:28px;line-height:1;padding:0;border-radius:13px;touch-action:manipulation}
+    .month-title {font-size:clamp(22px,2.3vw,29px);line-height:1.22;font-weight:760}
+    .calendar-weekdays,.calendar-grid {gap:5px}
+    .calendar-weekdays {margin-bottom:8px;font-size:11px;letter-spacing:.045em}
+    .calendar-weekdays > span {padding:7px 0}
+    .calendar-grid {grid-auto-rows:minmax(44px,1fr)}
+    .calendar-grid.compact {grid-auto-rows:minmax(37px,1fr)}
+    .calendar-day {background:color-mix(in srgb,var(--clock) 8%,transparent);min-height:44px;border-radius:11px;border:1px solid transparent;font-size:clamp(15px,1.3vw,19px);font-weight:650;touch-action:pan-y;-webkit-tap-highlight-color:transparent}
+    .calendar-grid.compact .calendar-day {min-height:37px}
+    .calendar-day.outside {opacity:.5}
+    .calendar-day.empty {background:transparent;pointer-events:none;opacity:0}
+    .calendar-day.today {border:2px solid var(--clock);font-weight:800}
+    .calendar-day.selected {background:var(--clock)!important;color:var(--screen)!important;opacity:1!important;box-shadow:0 4px 16px color-mix(in srgb,var(--clock) 16%,transparent)}
+    .screen[data-calendar-style="outline"] .calendar-day:not(.selected){background:transparent;border:1px solid color-mix(in srgb,var(--clock) 24%,transparent)}
+    .screen[data-calendar-style="outline"] .calendar-day.today:not(.selected){border:2px solid var(--clock)}
+    .screen[data-calendar-style="simple"] .calendar-day:not(.selected){background:transparent}
+    .screen[data-calendar-style="simple"] .calendar-day.today:not(.selected){text-decoration:underline;text-underline-offset:5px}
+    .calendar-selected {display:flex;justify-content:center;align-items:center;gap:12px;white-space:normal;min-height:34px;margin-top:12px;color:var(--screen-ink);font-size:13px}
+    .calendar-selected span {font-size:10px;font-family:system-ui,sans-serif;letter-spacing:.1em;white-space:nowrap;opacity:.8}
+    .calendar-selected strong {color:var(--clock);font-size:13px;font-weight:730}
+    .view-tabs[hidden] {display:none!important}
+    .screen.is-calendar .view-tabs {bottom:9px}
+    .screen:fullscreen.is-calendar .calendar-inner {width:min(100%,680px)}
+    .screen:fullscreen.is-calendar .calendar-grid {grid-auto-rows:minmax(43px,7.5vh)}
+    .screen:fullscreen.is-calendar .calendar-grid.compact {grid-auto-rows:minmax(37px,6.6vh)}
+    .screen:fullscreen .calendar-day {font-size:clamp(17px,2.2vw,24px)}
+    .screen:fullscreen .calendar-arrow {width:52px;height:52px}
+    .screen:fullscreen .calendar-top {grid-template-columns:52px 1fr 52px}
+    @media (max-width:780px){
+      .screen.is-calendar:not(:fullscreen){min-height:508px}
+      .screen.is-calendar:not(:fullscreen) .calendar-view{padding:12px 13px 43px}
+      .screen.is-calendar:not(:fullscreen) .calendar-title-row {margin-bottom:7px}
+      .screen.is-calendar:not(:fullscreen) .calendar-top {margin-bottom:8px;grid-template-columns:43px 1fr 43px}
+      .screen.is-calendar:not(:fullscreen) .calendar-arrow {width:43px;height:43px;font-size:25px}
+      .screen.is-calendar:not(:fullscreen) .month-title {font-size:20px}
+      .screen.is-calendar:not(:fullscreen) .calendar-weekdays {margin-bottom:3px;font-size:10px}
+      .screen.is-calendar:not(:fullscreen) .calendar-weekdays >span {padding:4px 0}
+      .screen.is-calendar:not(:fullscreen) .calendar-grid {gap:3px;grid-auto-rows:minmax(44px,1fr)}
+      .screen.is-calendar:not(:fullscreen) .calendar-grid.compact {grid-auto-rows:minmax(38px,1fr)}
+      .screen.is-calendar:not(:fullscreen) .calendar-day {min-height:44px;font-size:15px;border-radius:9px}
+      .screen.is-calendar:not(:fullscreen) .calendar-grid.compact .calendar-day {min-height:38px}
+      .screen.is-calendar:not(:fullscreen) .calendar-selected {font-size:11px;margin-top:8px;gap:6px}
+      .screen.is-calendar:not(:fullscreen) .calendar-selected strong {font-size:11px}
+      .calendar-kicker {font-size:9px}
+      .setting-tab {font-size:12px;padding:10px}
+      .screen:fullscreen.is-calendar .calendar-view{padding:13px 10px 60px}
+      .screen:fullscreen.is-calendar .calendar-grid {grid-auto-rows:minmax(39px,7vh);gap:3px}
+      .screen:fullscreen.is-calendar .calendar-day {min-height:39px;font-size:clamp(16px,3.6vw,22px)}
+      .screen:fullscreen.is-calendar .calendar-top {grid-template-columns:48px 1fr 48px}
+      .screen:fullscreen.is-calendar .calendar-arrow {width:48px;height:48px}
+    }
+    @media (max-width:360px){
+      .calendar-selected span {display:none}
+      .calendar-title-row {gap:3px}
+      .screen.is-calendar:not(:fullscreen) .calendar-view {padding:9px 8px 42px}
+      .calendar-back {padding:7px;font-size:11px}
+      .calendar-kicker {letter-spacing:.09em}
+      .setting-tabs{margin-inline:-8px}
+    }
+    @media (prefers-reduced-motion:reduce){.screen-view{animation:none}.screen{transition:none}}
+
+
+    /* V5 stable calendar: every month occupies six fixed rows, regardless of day count. */
+    .calendar-grid {grid-template-rows:repeat(6,44px);grid-auto-rows:44px;align-content:start}
+    .calendar-grid.compact {grid-template-rows:repeat(6,38px);grid-auto-rows:38px}
+    .calendar-day {height:44px;min-height:44px}
+    .calendar-grid.compact .calendar-day {height:38px;min-height:38px}
+    .screen.is-calendar:not(:fullscreen) {min-height:570px}
+    .calendar-selected {height:34px;min-height:34px;margin-top:12px;overflow:hidden}
+    .screen:fullscreen.is-calendar .calendar-grid,
+    .screen:fullscreen.is-calendar .calendar-grid.compact {grid-template-rows:repeat(6,minmax(0,1fr));height:min(46vh,410px)}
+    .screen:fullscreen.is-calendar .calendar-day {height:auto;min-height:0}
+    @media(max-width:780px){
+      .screen.is-calendar:not(:fullscreen){min-height:515px}
+      .screen.is-calendar:not(:fullscreen) .calendar-grid {grid-template-rows:repeat(6,44px);grid-auto-rows:44px}
+      .screen.is-calendar:not(:fullscreen) .calendar-grid.compact {grid-template-rows:repeat(6,38px);grid-auto-rows:38px}
+      .screen.is-calendar:not(:fullscreen) .calendar-day {height:44px;min-height:44px}
+      .screen.is-calendar:not(:fullscreen) .calendar-grid.compact .calendar-day {height:38px;min-height:38px}
+      .screen.is-calendar:not(:fullscreen) .calendar-selected {height:34px;min-height:34px;margin-top:8px}
+    }
+    @media(max-width:780px) and (orientation:landscape) and (max-height:560px){
+      .screen.is-calendar:not(:fullscreen){min-height:515px}
+    }
+    @media(max-height:650px){
+      .screen:fullscreen.is-calendar .calendar-grid,
+      .screen:fullscreen.is-calendar .calendar-grid.compact {height:min(40vh,260px)}
+      .screen:fullscreen.is-calendar .calendar-view {overflow-y:auto;justify-content:flex-start}
+    }
+
   </style>
 </head>
 <body>
@@ -192,7 +299,7 @@
   <main class="main">
     <section class="panel preview-panel" id="previewPanel">
       <div class="preview-head"><div class="preview-heading"><h2>Live preview</h2><span class="muted">· Uses your device's time</span></div><label class="pin-switch"><input type="checkbox" id="pinPreview" checked> Keep visible</label></div>
-      <div class="screen" id="screen" data-theme="matrix" tabindex="0" aria-label="Clock and calendar. Swipe left for calendar, right for clock.">
+      <div class="screen" id="screen" data-theme="matrix" tabindex="0" aria-label="Clock and calendar. Swipe left to open calendar; swipe calendar to change months.">
         <button class="fs-exit" id="exitFs" type="button">Exit full screen</button>
         <div class="screen-view clock-view" id="clockView">
           <span class="ampm" id="ampm" hidden></span>
@@ -201,14 +308,19 @@
         </div>
         <div class="screen-view calendar-view" id="calendarView" hidden>
           <div class="calendar-inner">
+            <div class="calendar-title-row">
+              <button class="calendar-back" id="backToClock" type="button" title="Back to clock" aria-label="Back to clock">← Clock</button>
+              <span class="calendar-kicker">MONTH VIEW</span>
+              <button class="today-button" id="calendarToday" type="button">Today</button>
+            </div>
             <div class="calendar-top">
               <button type="button" class="calendar-arrow" id="previousMonth" aria-label="Previous month">‹</button>
               <div class="month-title" id="calendarMonth"></div>
-              <div class="calendar-nav"><button type="button" class="today-button" id="calendarToday">Today</button><button type="button" class="calendar-arrow" id="nextMonth" aria-label="Next month">›</button></div>
+              <button type="button" class="calendar-arrow" id="nextMonth" aria-label="Next month">›</button>
             </div>
             <div class="calendar-weekdays" aria-label="Week starts Monday"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span></div>
-            <div class="calendar-grid" id="calendarGrid"></div>
-            <div class="calendar-selected" id="calendarSelected" aria-live="polite"></div>
+            <div class="calendar-grid" id="calendarGrid" aria-label="Select a calendar date"></div>
+            <div class="calendar-selected"><span>SELECTED DAY</span><strong id="calendarSelected" aria-live="polite"></strong></div>
           </div>
         </div>
         <div class="view-tabs" role="group" aria-label="Select display">
@@ -219,15 +331,33 @@
       <div class="foot"><span class="muted" id="status">Swipe left on the clock to open the calendar.</span><button type="button" class="primary" id="fullscreen">⛶ Full screen</button></div>
     </section>
     <section class="panel controls" aria-label="Clock settings">
-      <h2>Customize your clock</h2>
-      <p class="muted" style="margin:6px 0 0">Changes update instantly and are saved on this device.</p>
-      <section class="section"><h3>THEME</h3><div class="themes" id="themes">
+      <h2>Customize</h2><p class="muted" style="margin:6px 0 0">Choose a tab. Your changes save automatically on this device.</p>
+      <div class="setting-tabs" role="tablist" aria-label="Customization categories">
+        <button type="button" role="tab" class="setting-tab" id="settingsTabAppearance" aria-controls="settingsAppearance" aria-selected="true" data-settings="appearance">Appearance</button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabTime" aria-controls="settingsTime" aria-selected="false" data-settings="time">Time &amp; Date</button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabCalendar" aria-controls="settingsCalendar" aria-selected="false" data-settings="calendar">Calendar</button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabDisplay" aria-controls="settingsDisplay" aria-selected="false" data-settings="display">Display</button>
+      </div>
+      <div class="settings-pane" id="settingsAppearance" role="tabpanel" aria-labelledby="settingsTabAppearance"><section class="section"><h3>THEME</h3><div class="themes" id="themes">
         <button type="button" class="theme" data-value="matrix" aria-pressed="true"><span class="mini matrix">● 08:42</span><span class="name">LED Matrix</span></button>
         <button type="button" class="theme" data-value="arcade" aria-pressed="false"><span class="mini arcade">▣ 08:42</span><span class="name">Pixel Arcade</span></button>
         <button type="button" class="theme" data-value="amber" aria-pressed="false"><span class="mini amber">08:42</span><span class="name">Amber Glow</span></button>
         <button type="button" class="theme" data-value="minimal" aria-pressed="false"><span class="mini minimal">08:42</span><span class="name">Minimal</span></button>
-      </div></section>
-      <section class="section"><h3>TIME & DATE</h3>
+      </div></section><section class="section"><h3>COLORS</h3>
+        <div class="subsection-title">Digits / pixels</div>
+        <div class="colors" id="colors"></div>
+        <div class="color-line"><label for="pixelColor">Pick any digit color</label><div class="color-input-group"><input class="color-picker" id="pixelColor" type="color" aria-label="Choose any digit color"><input class="color-hex-input" id="pixelHex" type="text" spellcheck="false" maxlength="7" aria-label="Digit hex color"></div></div>
+        <div class="control-divider"></div>
+        <div class="subsection-title">Background</div>
+        <div class="colors" id="backgroundColors"></div>
+        <div class="color-line"><label for="backgroundColor">Pick any background</label><div class="color-input-group"><input class="color-picker" id="backgroundColor" type="color" aria-label="Choose any background color"><input class="color-hex-input" id="backgroundHex" type="text" spellcheck="false" maxlength="7" aria-label="Background hex color"></div></div>
+        <button type="button" id="resetBackground" class="subtle-button">Reset background to theme default</button>
+        <div class="control-divider"></div>
+        <div class="subsection-title">Date text & calendar secondary color</div>
+        <label class="setting-row">Match digit color <span class="switch"><input type="checkbox" id="matchDateColor" checked><span></span></span></label>
+        <div class="color-line"><label for="dateColor">Custom secondary color</label><div class="color-input-group"><input class="color-picker" id="dateColor" type="color" aria-label="Choose date color"><input class="color-hex-input" id="dateHex" type="text" spellcheck="false" maxlength="7" aria-label="Date hex color"></div></div>
+      </section></div>
+      <div class="settings-pane" id="settingsTime" role="tabpanel" aria-labelledby="settingsTabTime" hidden><section class="section"><h3>TIME & DATE</h3>
         <label class="setting-row">Time format <select id="timeFormat"><option value="24">24-hour (14:30)</option><option value="12">12-hour (2:30 PM)</option></select></label>
         <label class="setting-row">Show seconds <span class="switch"><input type="checkbox" id="seconds"><span></span></span></label>
         <label class="setting-row">Show date <span class="switch"><input type="checkbox" id="date" checked><span></span></span></label>
@@ -241,30 +371,20 @@
         <label class="setting-row">Date font <select id="dateFont"><option value="system">Clean (System)</option><option value="pixel">Pixel / Monospace</option><option value="rounded">Rounded</option><option value="serif">Classic Serif</option><option value="tech">Tech / Narrow</option></select></label>
         <label class="slider-row" for="dateSize">Date text size <output id="dateSizeValue">100%</output></label><input id="dateSize" class="range" type="range" min="60" max="160" step="5" value="100">
         <div class="format-sample" id="dateExample" aria-live="polite">Saturday · 31 October 2026</div>
-      </section>
-      <section class="section"><h3>COLORS</h3>
-        <div class="subsection-title">Digits / pixels</div>
-        <div class="colors" id="colors"></div>
-        <div class="color-line"><label for="pixelColor">Pick any digit color</label><div class="color-input-group"><input class="color-picker" id="pixelColor" type="color" aria-label="Choose any digit color"><input class="color-hex-input" id="pixelHex" type="text" spellcheck="false" maxlength="7" aria-label="Digit hex color"></div></div>
-        <div class="control-divider"></div>
-        <div class="subsection-title">Background</div>
-        <div class="colors" id="backgroundColors"></div>
-        <div class="color-line"><label for="backgroundColor">Pick any background</label><div class="color-input-group"><input class="color-picker" id="backgroundColor" type="color" aria-label="Choose any background color"><input class="color-hex-input" id="backgroundHex" type="text" spellcheck="false" maxlength="7" aria-label="Background hex color"></div></div>
-        <button type="button" id="resetBackground" class="subtle-button">Reset background to theme default</button>
-        <div class="control-divider"></div>
-        <div class="subsection-title">Date text & calendar secondary color</div>
-        <label class="setting-row">Match digit color <span class="switch"><input type="checkbox" id="matchDateColor" checked><span></span></span></label>
-        <div class="color-line"><label for="dateColor">Custom secondary color</label><div class="color-input-group"><input class="color-picker" id="dateColor" type="color" aria-label="Choose date color"><input class="color-hex-input" id="dateHex" type="text" spellcheck="false" maxlength="7" aria-label="Date hex color"></div></div>
-      </section>
-      <section class="section"><h3>FONTS & DISPLAY</h3>
+      </section><section class="section"><h3>FONTS & DISPLAY</h3>
         <label class="setting-row">Smooth clock font <select id="clockFont"><option value="system">Modern</option><option value="mono">Monospace</option><option value="rounded">Rounded</option><option value="serif">Serif</option><option value="tech">Tech</option></select></label>
         <p class="hint">Applies to the Minimal clock theme. LED Matrix, Pixel Arcade and Amber Glow use their own custom digit designs.</p>
-      </section>
-      <section class="section"><h3>CALENDAR <span class="new-pill">NEW</span></h3>
-        <p class="calendar-hint">Swipe left across the clock, or use the Clock / Calendar buttons below it. The calendar starts on <strong>Monday</strong>, inherits the current colors and lets you browse months.</p>
-        <button type="button" class="ghost" id="openCalendar" style="margin-top:10px">Open calendar in preview ↗</button>
-      </section>
-      <section class="section"><h3>SIZE & PIXELS</h3>
+      </section></div>
+      <div class="settings-pane" id="settingsCalendar" role="tabpanel" aria-labelledby="settingsTabCalendar" hidden><section class="section"><h3>CALENDAR OPTIONS</h3>
+        <p class="calendar-hint">Monday is the first day of the week. Tap a day to select it; swipe left or right across the dates to change months. Use the large arrows for precise navigation.</p>
+        <label class="setting-row">Show Clock / Calendar buttons <span class="switch"><input type="checkbox" id="showSwitchButtons" checked><span></span></span></label>
+        <label class="setting-row">Show other-month dates <span class="switch"><input type="checkbox" id="showOutsideDates" checked><span></span></span></label>
+        <label class="setting-row">Day style <select id="calendarStyle"><option value="soft">Soft tiles</option><option value="outline">Outlined tiles</option><option value="simple">Minimal</option></select></label>
+        <label class="setting-row">Calendar font <select id="calendarFont"><option value="system">Clean</option><option value="rounded">Rounded</option><option value="pixel">Pixel / Mono</option><option value="serif">Classic Serif</option><option value="tech">Tech / Narrow</option></select></label>
+        <label class="setting-row">Calendar layout <select id="calendarDensity"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
+        <button type="button" class="ghost" id="openCalendar" style="margin-top:12px">Show calendar in preview</button>
+      </section></div>
+      <div class="settings-pane" id="settingsDisplay" role="tabpanel" aria-labelledby="settingsTabDisplay" hidden><section class="section"><h3>SIZE & PIXELS</h3>
         <label class="slider-row" for="clockScale">Clock size <output id="clockScaleValue">90%</output></label>
         <input id="clockScale" class="range" type="range" min="50" max="100" step="5" value="90">
         <label class="slider-row" for="pixelSize">Pixel size <output id="pixelSizeValue">78%</output></label>
@@ -273,8 +393,7 @@
         <input id="pixelRound" class="range" type="range" min="0" max="100" step="5" value="100">
         <p class="hint shape-help" id="shapeHint">0% = square · 100% = round. Pixel options apply to the LED Matrix and Pixel Arcade themes.</p>
         <button type="button" id="resetShape" class="subtle-button">Reset pixel shape to theme default</button>
-      </section>
-      <section class="section"><label class="setting-row" style="margin:0">Keep screen awake <span class="switch"><input type="checkbox" id="awake"><span></span></span></label><p class="hint">Works when supported by the browser. On Android, you may need to run the clock from a secure installed website.</p></section>
+      </section><section class="section"><label class="setting-row" style="margin:0">Keep screen awake <span class="switch"><input type="checkbox" id="awake"><span></span></span></label><p class="hint">Works when supported by the browser. On Android, you may need to run the clock from a secure installed website.</p></section></div>
     </section>
   </main>
 </div>
@@ -287,7 +406,7 @@
     amber:{background:'#1c160b',color:'#ffa837',round:25},
     minimal:{background:'#f2f2ed',color:'#202c37',round:10}
   };
-  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false};
+  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,showOutsideDates:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable'};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
@@ -338,6 +457,10 @@
     $('previewPanel').classList.toggle('is-pinned',state.pinPreview);
     const color=currentColor(),background=currentBackground(),round=currentRound();
     screen.dataset.theme=state.theme;
+    screen.dataset.calendarStyle=state.calendarStyle;
+    screen.style.setProperty('--calendar-font',fontFamilies[state.calendarFont]||fontFamilies.system);
+    $('calendarGrid').classList.toggle('compact',state.calendarDensity==='compact');
+    document.querySelector('.view-tabs').hidden=!state.showSwitchButtons;
     screen.style.setProperty('--clock',color);
     screen.style.setProperty('--screen',background);
     screen.style.setProperty('--screen-ink',state.matchDateColor?colorCss(color,.75):currentDateColor());
@@ -345,13 +468,13 @@
     screen.style.setProperty('--date-size',state.dateSize/100);
     screen.style.setProperty('--clock-size',state.clockScale+'%');
     for(const b of $('themes').querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.value===state.theme));
-    ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont'].forEach(id=>$(id).value=state[id]);
+    ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont','calendarStyle','calendarFont','calendarDensity'].forEach(id=>$(id).value=state[id]);
     $('customDate').value=state.dateCustom;
     $('customFormatRow').hidden=state.dateFormat!=='custom';
     $('weekdaySettings').hidden=state.dateFormat==='custom';
     $('dateExample').textContent=formatDate(new Date(2026,9,31));
     $('dateSize').value=state.dateSize;$('dateSizeValue').textContent=state.dateSize+'%';
-    ['seconds','date','weekday','awake'].forEach(id=>$(id).checked=state[id]);
+    ['seconds','date','weekday','awake','showSwitchButtons','showOutsideDates'].forEach(id=>$(id).checked=state[id]);
     $('dateFormat').disabled=!state.date;$('weekday').disabled=!state.date;
     $('dateFont').disabled=!state.date;$('dateSize').disabled=!state.date;
     $('weekdayStyle').disabled=!state.date||!state.weekday; $('dateSeparator').disabled=!state.date||!state.weekday;
@@ -371,10 +494,28 @@
     $('shapeHint').textContent=pixelTheme?'0% = square · 100% = round. Pixel size adjusts spacing between lit dots.':'Pixel shape controls are available with LED Matrix and Pixel Arcade.';
     draw();renderCalendar();
   }
+  const settingsTabs=[...document.querySelectorAll('.setting-tab')];
+  function showSettingsTab(name,focus=false){
+    for(const tab of settingsTabs){
+      const selected=tab.dataset.settings===name;
+      tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;
+      $(tab.getAttribute('aria-controls')).hidden=!selected;
+      if(selected&&focus)tab.focus();
+    }
+  }
+  settingsTabs.forEach((tab,i)=>{
+    tab.addEventListener('click',()=>showSettingsTab(tab.dataset.settings));
+    tab.addEventListener('keydown',e=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+      e.preventDefault();const index=e.key==='Home'?0:e.key==='End'?settingsTabs.length-1:(i+(e.key==='ArrowRight'?1:-1)+settingsTabs.length)%settingsTabs.length;
+      showSettingsTab(settingsTabs[index].dataset.settings,true);
+    });
+  });
+  showSettingsTab('appearance');
   $('pinPreview').addEventListener('change',e=>set('pinPreview',e.target.checked));
   $('themes').addEventListener('click',e=>{const b=e.target.closest('button[data-value]');if(b)set('theme',b.dataset.value);});
-  for(const key of ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont']) $(key).addEventListener('change',e=>set(key,e.target.value));
-  for(const key of ['seconds','date','weekday','matchDateColor']) $(key).addEventListener('change',e=>set(key,e.target.checked));
+  for(const key of ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont','calendarStyle','calendarFont','calendarDensity']) $(key).addEventListener('change',e=>set(key,e.target.value));
+  for(const key of ['seconds','date','weekday','matchDateColor','showSwitchButtons','showOutsideDates']) $(key).addEventListener('change',e=>set(key,e.target.checked));
   $('pixelColor').addEventListener('input',e=>chooseColor(e.target.value));
   $('backgroundColor').addEventListener('input',e=>chooseBackground(e.target.value));
   $('dateColor').addEventListener('input',e=>chooseDateColor(e.target.value));
@@ -471,6 +612,7 @@
   let currentView='clock';
   function showView(view){
     currentView=view==='calendar'?'calendar':'clock';
+    screen.classList.toggle('is-calendar',currentView==='calendar');
     $('clockView').hidden=currentView!=='clock';
     $('calendarView').hidden=currentView!=='calendar';
     $('tabClock').setAttribute('aria-pressed',String(currentView==='clock'));
@@ -483,7 +625,7 @@
     const grid=$('calendarGrid');grid.replaceChildren();
     const first=(new Date(year,month,1).getDay()+6)%7; // Monday is 0
     const days=new Date(year,month+1,0).getDate();
-    const weeks=Math.ceil((first+days)/7);
+    const weeks=6; // always draw 42 calendar cells
     const today=new Date();
     for(let i=0;i<weeks*7;i++){
       const cellDate=new Date(year,month,i-first+1,12);
@@ -491,10 +633,10 @@
       const isToday=cellDate.toDateString()===today.toDateString();
       const isSelected=cellDate.toDateString()===selectedDate.toDateString();
       const b=document.createElement('button');b.type='button';b.className='calendar-day';
-      if(!inMonth)b.classList.add('outside');
+      if(!inMonth){b.classList.add('outside');if(!state.showOutsideDates){b.classList.add('empty');b.disabled=true;}}
       if(isToday)b.classList.add('today');
       if(isSelected)b.classList.add('selected');
-      b.textContent=String(cellDate.getDate());
+      b.textContent=(!inMonth&&!state.showOutsideDates)?'':String(cellDate.getDate());
       b.title=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(cellDate);
       b.setAttribute('aria-label',b.title+(isToday?' (today)':''));
       b.setAttribute('aria-pressed',String(isSelected));
@@ -504,24 +646,36 @@
     $('calendarSelected').textContent=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(selectedDate);
   }
   function shiftMonth(amount){displayMonth=new Date(displayMonth.getFullYear(),displayMonth.getMonth()+amount,1);renderCalendar();}
+  $('backToClock').addEventListener('click',()=>showView('clock'));
   $('tabClock').addEventListener('click',()=>showView('clock'));
   $('tabCalendar').addEventListener('click',()=>showView('calendar'));
   $('openCalendar').addEventListener('click',()=>{showView('calendar');$('previewPanel').scrollIntoView({behavior:'smooth',block:'start'});});
   $('previousMonth').addEventListener('click',()=>shiftMonth(-1));
   $('nextMonth').addEventListener('click',()=>shiftMonth(1));
   $('calendarToday').addEventListener('click',()=>{selectedDate=new Date();displayMonth=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1);renderCalendar();});
-  let touchStart=null;
-  screen.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.target.closest('button'))touchStart={x:e.clientX,y:e.clientY};});
+  let touchStart=null, suppressClickUntil=0;
+  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,#backToClock,.view-tab,#exitFs');
+  screen.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='touch' && !gestureIgnored(e.target)) touchStart={x:e.clientX,y:e.clientY,pointerId:e.pointerId};
+  });
   screen.addEventListener('pointerup',e=>{
-    if(!touchStart||e.pointerType!=='touch')return;
+    if(!touchStart || e.pointerType!=='touch' || touchStart.pointerId!==e.pointerId)return;
     const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;
-    if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.3)showView(dx<0?'calendar':'clock');
+    if(Math.abs(dx)<48 || Math.abs(dx)<Math.abs(dy)*1.4)return;
+    if(currentView==='calendar'){
+      suppressClickUntil=Date.now()+500;
+      shiftMonth(dx<0?1:-1);
+    } else if(dx<0) showView('calendar');
   });
   screen.addEventListener('pointercancel',()=>{touchStart=null;});
+  $('calendarGrid').addEventListener('click',e=>{
+    if(Date.now()<suppressClickUntil){e.preventDefault();e.stopImmediatePropagation();}
+  },true);
   screen.addEventListener('keydown',e=>{
     if(e.target.closest('button,input,select'))return;
-    if(e.key==='ArrowLeft'){showView('calendar');e.preventDefault();}
-    if(e.key==='ArrowRight'){showView('clock');e.preventDefault();}
+    if(e.key==='ArrowLeft'){if(currentView==='calendar')shiftMonth(-1);else showView('calendar');e.preventDefault();}
+    if(e.key==='ArrowRight'){if(currentView==='calendar')shiftMonth(1);e.preventDefault();}
+    if(e.key==='Escape' && currentView==='calendar'){showView('clock');e.preventDefault();}
   });
   let lastTick=-1;let lastDay='';
   function draw(){
@@ -543,7 +697,7 @@
     if(wakeLock){try{await wakeLock.release();}catch{}wakeLock=null;}
     if(!state.awake||document.visibilityState!=='visible')return;
     if(!('wakeLock' in navigator)){$('status').textContent='Screen wake lock is not available in this browser.';return;}
-    try{wakeLock=await navigator.wakeLock.request('screen');$('status').textContent='Screen will stay awake while the clock is open.';}
+    try{wakeLock=await navigator.wakeLock.request('screen');$('status').textContent='Screen stays awake while this page is visible (phone remains unlocked).';}
     catch{$('status').textContent='Wake lock unavailable; check your browser and screen settings.';}
   }
   $('awake').addEventListener('change',e=>{set('awake',e.target.checked);manageWake();});
