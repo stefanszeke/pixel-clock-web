@@ -7,6 +7,10 @@
   <meta name="description" content="A customizable pixel clock and calendar with large day buttons for Android and the browser.">
   <link rel="manifest" href="manifest.webmanifest">
   <title>Little Pixel Clock</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <script>document.documentElement.classList.add('display-mode');</script>
   <style>
     :root {font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color-scheme: dark; --page:#0b1017; --panel:#151d26; --edge:#273241; --text:#e7edf5; --muted:#9ba9b8; --accent:#9cff7b;}
     * {box-sizing:border-box}
@@ -289,19 +293,264 @@
       .screen:fullscreen.is-calendar .calendar-view {overflow-y:auto;justify-content:flex-start}
     }
 
+
+    /* V6: three-page navigation, compact controls, and clean browser display mode. */
+    .preview-nav{display:flex;align-items:center;gap:5px;background:#0d141d;padding:4px;border:1px solid var(--edge);border-radius:12px}
+    .preview-icon{display:flex;gap:6px;align-items:center;justify-content:center;border:0;background:none;color:#aebfce;border-radius:9px;padding:8px 10px;font-weight:750;font-size:17px;white-space:nowrap}
+    .preview-icon span{font-size:11px;font-weight:650}
+    .preview-icon[aria-pressed=true]{color:#12210f;background:var(--accent)}
+    .foot-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .foot .ghost{font-size:12px;padding:10px 12px}
+    .setting-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin:13px 0 0;padding:4px;overflow:visible}
+    .setting-tab{min-width:0;padding:10px 3px;font-size:11px;white-space:normal}
+    .controls{padding:17px 19px}
+    .section{margin-top:15px;padding-top:15px}.section h3{margin-bottom:10px;font-size:11px;letter-spacing:.045em}
+    .setting-row{margin:10px 0;font-size:13px}.setting-row select{min-width:0;max-width:162px;font-size:12px;padding:7px}
+    .subsection-title{margin:11px 0 6px}.control-divider{margin:14px 0}
+    .slider-row{margin:13px 0 5px;font-size:13px}.range{margin:7px 0 12px}
+    .section .hint{margin-top:8px}
+    .screen.is-shortcuts:not(:fullscreen){min-height:420px}
+    .shortcuts-view{color:var(--clock);padding:25px 22px 55px}
+    .shortcuts-inner{width:min(100%,540px);margin:auto;overflow:auto;max-height:100%;scrollbar-width:thin}
+    .shortcut-heading{text-align:center;margin-bottom:19px}
+    .shortcut-heading h2{font-family:var(--date-font);font-size:clamp(24px,3vw,35px);font-weight:750;color:var(--clock)}
+    .shortcut-heading p{font-size:12px;color:var(--screen-ink);margin:6px 0 0}
+    .shortcut-kicker{color:var(--screen-ink);font-size:10px;letter-spacing:.19em;font-weight:700;margin-bottom:6px}
+    .shortcut-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+    .shortcut-tile{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:var(--screen-ink);min-width:0;border:1px solid transparent;border-radius:13px;padding:9px 3px;transition:transform .14s,background .14s}
+    .shortcut-tile:hover,.shortcut-tile:focus-visible{background:color-mix(in srgb,var(--clock) 10%,transparent);transform:translateY(-2px)}
+    .shortcut-icon{width:55px;height:55px;flex-shrink:0;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--clock) 24%,transparent);background:color-mix(in srgb,var(--clock) 11%,transparent);border-radius:15px;color:var(--clock);font:750 25px var(--date-font);box-shadow:0 5px 18px #0001}
+    .shortcut-caption{font-size:11px;font-weight:650;max-width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;text-align:center}
+    .shortcut-empty{font-size:12px;color:var(--screen-ink);text-align:center;padding:30px 8px;line-height:1.6}
+    .shortcut-list{display:flex;flex-direction:column;gap:6px}
+    .shortcut-item{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #2b3948;border-radius:11px;min-width:0}
+    .shortcut-item-icon{height:32px;width:32px;border-radius:9px;background:#233b2b;color:var(--accent);display:grid;place-items:center;flex-shrink:0}
+    .shortcut-item-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+    .shortcut-item-info strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .shortcut-item-info small{color:var(--muted);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mini-action{border:1px solid #384859;background:#0c151f;color:#c8d7e6;border-radius:7px;padding:6px;font-size:10px;flex-shrink:0}
+    .mini-action.danger{color:#ff9c9c}
+    .shortcut-form{display:flex;flex-direction:column;gap:12px}
+    .shortcut-form label{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:12px;font-weight:650;min-width:0}
+    .shortcut-form-row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px}
+    .shortcut-form-row .text-field{width:100%}.shortcut-form-row #shortcutIcon{text-align:center;font-size:18px}
+    .form-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .field-error{font-size:12px;color:#ff9999;margin:0}
+    .screen:fullscreen.is-shortcuts .shortcuts-inner{width:min(100%,850px)}
+    .screen:fullscreen.is-shortcuts .shortcut-icon{width:clamp(60px,9vh,90px);height:clamp(60px,9vh,90px);font-size:clamp(24px,4vh,38px)}
+    .screen:fullscreen.is-shortcuts .shortcut-grid{gap:15px}
+    .screen:fullscreen.is-shortcuts .shortcut-caption{font-size:clamp(12px,1.8vw,18px)}
+    .display-mode body{height:100dvh;overflow:hidden;background:var(--page)}
+    .display-mode .shell{padding:0;margin:0;max-width:none;height:100dvh}
+    .display-mode .headline,.display-mode .controls,.display-mode .preview-head,.display-mode .foot{display:none!important}
+    .display-mode .main{display:block;height:100dvh}
+    .display-mode .preview-panel{border:0;border-radius:0;background:transparent;box-shadow:none!important;position:static!important;height:100dvh}
+    .display-mode .screen{border-radius:0;width:100%;height:100dvh;min-height:100dvh!important}
+    .display-mode .fs-exit{display:none!important}
+    .display-mode .screen-view{padding:7vh 5vw 5vh}
+    .display-mode .clock-canvas{max-width:none;height:min(34vh,330px)}
+    .display-mode .date-text{font-size:clamp(16px,calc(3vw * var(--date-size)),52px);margin-top:15px}
+    .display-mode .calendar-inner{width:min(100%,680px)}
+    .display-mode .calendar-view{padding:13px 12px 20px}
+    .display-mode .calendar-grid,.display-mode .calendar-grid.compact{grid-template-rows:repeat(6,minmax(0,1fr));height:min(46vh,410px)}
+    .display-mode .calendar-day{height:auto;min-height:0;font-size:clamp(16px,2vw,23px)}
+    .display-mode .month-title{font-size:clamp(22px,3vw,37px)}
+    .display-mode .calendar-arrow{width:52px;height:52px}
+    .display-mode .calendar-top{grid-template-columns:52px 1fr 52px}
+    .display-mode .calendar-selected{font-size:15px}
+    .display-mode .shortcuts-inner{width:min(100%,850px)}
+    .display-mode .shortcut-grid{gap:15px}
+    .display-mode .shortcut-icon{width:clamp(60px,9vh,88px);height:clamp(60px,9vh,88px);font-size:clamp(24px,4vh,36px)}
+    .display-mode .shortcut-caption{font-size:clamp(12px,1.5vw,17px)}
+    .display-mode .shortcut-heading h2{font-size:clamp(27px,4vw,45px)}
+    @media(max-width:780px){
+      .preview-head{gap:8px;flex-wrap:wrap}.preview-nav{width:100%;justify-content:space-around}
+      .preview-icon{flex:1;padding:8px 4px}
+      .screen.is-shortcuts:not(:fullscreen){min-height:315px}
+      .shortcuts-view{padding:15px 11px 43px}
+      .shortcut-icon{width:48px;height:48px;border-radius:13px;font-size:24px}
+      .shortcut-grid{gap:4px}
+      .shortcut-heading{margin-bottom:10px}
+      .shortcut-heading h2{font-size:24px}
+      .foot-actions{width:100%;justify-content:flex-end}
+      .setting-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.setting-tab{font-size:10px;padding:9px 2px}
+      .display-mode .screen-view{padding:5vh 4vw}
+      .display-mode .shortcuts-view{padding:12vh 5vw}
+      .display-mode .calendar-view{padding:8vh 3vw}
+      .display-mode .calendar-grid,.display-mode .calendar-grid.compact{height:min(42vh,340px)}
+      .display-mode .calendar-day{font-size:clamp(15px,3vw,21px)}
+      .display-mode .calendar-arrow{width:43px;height:43px}
+      .display-mode .calendar-top{grid-template-columns:43px 1fr 43px}
+      .display-mode .calendar-inner{width:min(100%,620px)}
+      .display-mode .clock-canvas{height:min(30vh,260px)}
+      .display-mode .date-text{font-size:clamp(16px,calc(3vw * var(--date-size)),32px)}
+    }
+    @media(max-height:550px){
+      .display-mode .calendar-view{overflow:auto;justify-content:flex-start;padding-top:15px}
+      .display-mode .calendar-grid,.display-mode .calendar-grid.compact{height:260px}
+      .display-mode .shortcuts-view{overflow:auto;justify-content:flex-start;padding-top:18px}
+    }
+
+    /* v6.1: clean shortcuts, adjustable grid, and real page-direction transitions */
+    .screen-view{animation:none!important;will-change:transform,opacity}
+    .shortcuts-view{padding-bottom:62px}
+    .shortcut-grid{grid-template-columns:repeat(var(--shortcut-columns,4),minmax(0,1fr));gap:var(--shortcut-gap,12px)}
+    .shortcut-tile{gap:8px;padding:8px 2px}
+    .shortcut-icon{width:var(--shortcut-icon-size,55px);height:var(--shortcut-icon-size,55px);border-radius:var(--shortcut-radius,15px);font-size:calc(var(--shortcut-icon-size,55px) * .48);overflow:hidden;line-height:1}
+    .shortcut-icon img,.shortcut-item-icon img,.icon-live-preview img{width:76%;height:76%;object-fit:contain;display:block;border-radius:inherit}
+    .shortcut-icon.is-image img{width:100%;height:100%;object-fit:contain;border-radius:inherit}
+    .shortcut-icon.is-favicon img{width:64%;height:64%;object-fit:contain}
+    .shortcut-icon.is-image{padding:3px}
+    .shortcut-caption{font-size:clamp(10px,calc(var(--shortcut-icon-size,55px) * .21),18px)}
+    .shortcut-caption[hidden]{display:none!important}
+    .display-mode .shortcut-grid,.screen:fullscreen .shortcut-grid{gap:var(--shortcut-gap,12px)}
+    .shortcut-grid .shortcut-tile{min-width:0}
+    /* Never let a large user-selected icon push into the next grid column. */
+    .shortcut-tile .shortcut-icon{max-width:100%;height:auto;aspect-ratio:1}
+    .screen:fullscreen .shortcuts-inner,.display-mode .shortcuts-inner{width:min(100%,940px)}
+    .screen:fullscreen .shortcut-icon,.display-mode .shortcut-icon{width:var(--shortcut-icon-size-display,82px);height:var(--shortcut-icon-size-display,82px);font-size:calc(var(--shortcut-icon-size-display,82px) * .48)}
+    .screen:fullscreen .shortcut-caption,.display-mode .shortcut-caption{font-size:clamp(10px,calc(var(--shortcut-icon-size-display,82px) * .20),20px)}
+    .display-mode .view-tabs:not([hidden]){display:flex!important;bottom:max(16px,env(safe-area-inset-bottom));z-index:15}
+    .display-mode .view-tabs[hidden]{display:none!important}
+    .display-mode .shortcuts-view{padding-bottom:86px}
+    .screen:fullscreen .shortcuts-view{padding-bottom:86px}
+    .shortcut-form-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .icon-mode-row{display:grid;grid-template-columns:minmax(0,1fr) 54px;gap:10px;align-items:end}
+    .shortcut-form select{width:100%;border:1px solid #394655;border-radius:9px;background:#0e1720;color:var(--text);padding:10px 12px;font-size:13px}
+    .icon-live-preview{height:43px;width:50px;display:grid;place-items:center;border-radius:12px;background:#273d2e;color:#a2ff7c;font-size:25px;overflow:hidden}
+    .icon-mode-controls{display:flex;flex-direction:column;gap:9px}
+    .icon-choose-button{border:1px solid #465568;background:#162532;border-radius:10px;padding:9px;color:#e5f1fa;text-align:left;font-size:12px;font-weight:650}
+    .symbol-picker{padding:12px;background:#0b131b;border:1px solid #415065;border-radius:13px;display:flex;flex-direction:column;gap:9px;max-height:280px}
+    .symbol-picker[hidden],.icon-mode-controls[hidden]{display:none!important}
+    .symbol-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;overflow-y:auto;min-height:50px}
+    .symbol-choice{min-width:0;aspect-ratio:1;display:grid;place-items:center;border:1px solid #314153;border-radius:9px;background:#151f2c;font-size:22px;color:#e4edf8}
+    .symbol-choice:hover,.symbol-choice:focus-visible{background:#344b3e;border-color:#a2ff7c}
+    .shortcut-list .shortcut-item-icon{overflow:hidden;font-size:21px}
+    .shortcut-list .shortcut-item-icon img{width:85%;height:85%;object-fit:contain}
+    .icon-live-preview-content{display:grid;place-items:center;width:100%;height:100%;font-size:25px}
+    .icon-live-preview-content img{width:78%;height:78%;object-fit:contain}
+    .shortcut-scale-help{font-size:11px;color:var(--muted);line-height:1.5}
+    @media(max-width:780px){
+      .shortcut-grid{grid-template-columns:repeat(var(--shortcut-columns-mobile,4),minmax(0,1fr))}
+      .shortcut-icon{width:var(--shortcut-icon-size-mobile,48px);height:var(--shortcut-icon-size-mobile,48px);font-size:calc(var(--shortcut-icon-size-mobile,48px) * .48)}
+      .display-mode .shortcut-icon,.screen:fullscreen .shortcut-icon{width:var(--shortcut-icon-size-display,82px);height:var(--shortcut-icon-size-display,82px);font-size:calc(var(--shortcut-icon-size-display,82px) * .48)}
+      .shortcut-caption{font-size:11px}
+    }
+    .display-mode .shortcut-tile .shortcut-icon,.screen:fullscreen .shortcut-tile .shortcut-icon{height:auto;max-width:100%;aspect-ratio:1}
+    @media(prefers-reduced-motion:reduce){.shortcut-tile{transition:none!important}}
+
+    /* v6.2 — editing happens directly on the shortcuts page */
+    .shortcuts-view{isolation:isolate}
+    .shortcuts-edit-toggle{position:absolute;top:13px;right:15px;z-index:7;display:grid;place-items:center;width:36px;height:36px;border:1px solid color-mix(in srgb,var(--clock) 30%,transparent);background:color-mix(in srgb,var(--screen) 80%,#000);border-radius:11px;color:var(--clock);font-size:21px;line-height:1;opacity:.58;transition:opacity .14s,border-color .14s,background .14s}
+    .shortcuts-edit-toggle:hover,.shortcuts-edit-toggle:focus-visible,.shortcuts-edit-toggle[aria-pressed="true"]{opacity:1;border-color:var(--clock);background:color-mix(in srgb,var(--clock) 15%,var(--screen))}
+    .shortcuts-edit-toggle[aria-pressed="true"]{box-shadow:0 0 0 2px color-mix(in srgb,var(--clock) 18%,transparent)}
+    .screen:fullscreen .shortcuts-edit-toggle,.display-mode .shortcuts-edit-toggle{top:max(18px,env(safe-area-inset-top));right:20px;width:43px;height:43px;font-size:24px}
+    .shortcut-entry{position:relative;min-width:0;display:flex;flex-direction:column;align-items:stretch}
+    .shortcut-entry .shortcut-tile{width:100%;font-family:inherit}
+    button.shortcut-tile{background:transparent;cursor:pointer}
+    .shortcut-grid.is-editing .shortcut-entry:not(.is-add) .shortcut-tile{border:1px dashed color-mix(in srgb,var(--clock) 36%,transparent);background:color-mix(in srgb,var(--clock) 5%,transparent)}
+    .shortcut-grid.is-editing .shortcut-entry:not(.is-add) .shortcut-tile:after{content:'✎';position:absolute;top:4px;right:8px;font-size:13px;color:var(--clock);opacity:.85}
+    .shortcut-grid.is-editing .shortcut-entry.dragging{opacity:.38}
+    .shortcut-grid.is-editing .shortcut-entry.drop-target{outline:2px solid var(--clock);outline-offset:2px;border-radius:12px}
+    .shortcut-move-actions{display:flex;gap:5px;justify-content:center;margin-top:2px}
+    .shortcut-move-actions button{border:1px solid color-mix(in srgb,var(--clock) 26%,transparent);color:var(--clock);background:color-mix(in srgb,var(--clock) 7%,transparent);border-radius:7px;min-width:30px;min-height:26px;font-size:15px;line-height:1}
+    .shortcut-move-actions button:disabled{opacity:.22;cursor:default}
+    .shortcut-add .shortcut-icon{border-style:dashed;border-width:2px;font-size:34px;background:transparent}
+    .shortcut-add .shortcut-caption{color:var(--clock)}
+    .shortcut-empty[hidden]{display:none}
+    .shortcut-dialog{box-sizing:border-box;border:1px solid #3a4d61;background:#141e29;color:#e7edf5;border-radius:19px;width:min(95vw,490px);max-height:min(90dvh,820px);padding:0;overflow:auto;box-shadow:0 18px 85px #000a;overscroll-behavior:contain}
+    .shortcut-dialog::backdrop{background:rgba(2,6,11,.77);backdrop-filter:blur(4px)}
+    .shortcut-dialog-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:19px 23px 14px;border-bottom:1px solid #2c394a}
+    .shortcut-dialog-header h2{font-size:20px;letter-spacing:-.35px}
+    .dialog-kicker{font-size:10px;color:#9cff7b;letter-spacing:.16em;font-weight:800;margin:0 0 5px}
+    .dialog-close{width:33px;height:33px;background:#223040;color:#dce6ef;border:1px solid #3e5265;border-radius:9px;font-size:24px;line-height:1}
+    .shortcut-dialog .shortcut-form{padding:20px 23px 23px;gap:15px}
+    .shortcut-dialog .shortcut-form-row{display:grid;grid-template-columns:1fr;gap:12px}
+    .shortcut-dialog .text-field{width:100%;padding:11px 12px;background:#0b141e;color:#f5f7f8;border:1px solid #3b4c5e;border-radius:10px;font-size:14px}
+    .shortcut-dialog .shortcut-form select{background:#0b141e;padding:11px 12px}
+    .shortcut-dialog .shortcut-form label{font-size:12px;color:#b8cadd;gap:6px}
+    .shortcut-dialog .icon-mode-row{grid-template-columns:1fr 57px}
+    .shortcut-dialog .icon-live-preview{background:#263d32;color:#a2ff7c;height:49px;width:55px}
+    .shortcut-dialog .symbol-picker{max-height:220px}
+    .shortcut-dialog .form-actions{justify-content:flex-start;border-top:1px solid #2d3a4c;padding-top:16px;gap:8px}
+    .shortcut-dialog .danger-action{margin-left:auto;color:#ffa1a1;border-color:#7d4249}
+    .shortcuts-help-section{margin-top:0;border-top:0;padding-top:4px}
+    @media(max-width:600px){
+      .shortcut-dialog{width:calc(100vw - 22px);max-height:calc(100dvh - 24px)}
+      .shortcut-dialog-header{padding:16px}
+      .shortcut-dialog .shortcut-form{padding:16px}
+      .shortcut-dialog .symbol-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+      .shortcuts-edit-toggle{right:7px;top:7px}
+      .shortcut-move-actions button{min-height:30px}
+      .shortcut-dialog .form-actions .primary{font-size:13px}
+    }
+    @media(prefers-reduced-motion:reduce){.shortcuts-edit-toggle{transition:none}}
+
+    /* v6.3 — one app: full-size display with a slide-in settings drawer. */
+    html,body{width:100%;height:100%;overflow:hidden}
+    .display-mode .shell,.display-mode .main,.display-mode .preview-panel{height:100dvh;min-height:100dvh}
+    .display-mode .main{position:static}
+    .display-mode .preview-panel{overflow:visible}
+    .display-mode .screen{overflow:hidden}
+    .display-mode .view-tabs{display:flex!important;align-items:center;gap:5px;padding:5px 6px;bottom:max(16px,env(safe-area-inset-bottom));z-index:20;max-width:calc(100vw - 18px);background:color-mix(in srgb,var(--screen) 93%,#000);box-shadow:0 4px 28px #0005;backdrop-filter:blur(12px)}
+    .page-switch{display:flex;align-items:center;gap:3px;min-width:0}
+    .view-tabs .page-switch[hidden]{display:none!important}
+    .view-tabs .page-switch[hidden]+.dock-divider{display:none}
+    .dock-divider{width:1px;height:19px;background:color-mix(in srgb,var(--clock) 26%,transparent);margin:0 2px}
+    .view-tabs .view-tab{padding:9px 11px;font-size:11px;letter-spacing:0;min-height:36px}
+    .dock-icon{height:36px;min-width:37px;display:grid;place-items:center;border:0;background:transparent;color:var(--screen-ink);border-radius:100px;font-size:20px;line-height:1;transition:background .15s,color .15s}
+    .dock-icon:hover,.dock-icon:focus-visible,.dock-icon[aria-expanded="true"]{background:color-mix(in srgb,var(--clock) 18%,transparent);color:var(--clock)}
+    .dock-icon[aria-expanded="true"]{background:var(--clock);color:var(--screen)}
+    .display-mode .controls{display:none!important}
+    .display-mode.settings-open .controls{display:block!important;position:fixed;top:12px;bottom:12px;right:12px;z-index:51;width:min(430px,calc(100vw - 24px));height:auto;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;border-radius:18px;box-shadow:0 18px 70px #0009;scrollbar-width:thin;padding:0 20px 24px}
+    @media(min-width:851px){
+      .display-mode .screen-view{transition:right .2s ease}
+      .display-mode.settings-open .screen-view{right:454px}
+    }
+    .settings-head{position:sticky;top:0;z-index:3;background:var(--panel);padding:20px 0 13px;border-bottom:1px solid var(--edge);display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .settings-head h2{font-size:20px}
+    .settings-close{width:34px;height:34px;flex-shrink:0;display:grid;place-items:center;color:var(--text);background:#263341;border:1px solid #435468;border-radius:10px;font-size:23px;line-height:1}
+    .settings-backdrop[hidden]{display:none!important}
+    .settings-backdrop{position:fixed;inset:0;z-index:50;border:0;border-radius:0;padding:0;margin:0;background:#02050838;cursor:default}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .screen:fullscreen .view-tabs{position:absolute;bottom:max(16px,env(safe-area-inset-bottom))}
+    .screen:fullscreen .fs-exit{display:none!important}
+    @media(max-width:600px){
+      .display-mode.settings-open .controls{right:0;left:0;top:auto;bottom:0;border-radius:19px 19px 0 0;width:100%;max-height:min(87dvh,840px);padding:0 17px 24px}
+      .view-tabs .view-tab{padding:8px 7px;min-height:34px;font-size:10px}
+      .dock-icon{min-width:33px;height:34px;font-size:19px}
+      .display-mode .view-tabs{bottom:max(12px,env(safe-area-inset-bottom));gap:2px;padding:4px}
+      .screen:fullscreen .view-tabs{bottom:max(12px,env(safe-area-inset-bottom))}
+      .settings-head{padding:17px 0 12px}
+      .settings-backdrop{background:#02050888}
+    }
+    @media(max-width:360px){.view-tabs .view-tab{padding:7px 5px;font-size:9px}.dock-icon{min-width:31px}}
   </style>
 </head>
 <body>
 <div class="shell">
   <header class="headline">
-    <div class="brand"><div class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><h1>Little Pixel Clock</h1><div class="subtitle">A customizable clock & calendar for any screen</div></div></div>
+    <div class="brand"><div class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><h1>Little Pixel Clock</h1><div class="subtitle">Clock · Calendar · Shortcuts</div></div></div>
     <div class="tag">FREE · OFFLINE · NO ADS</div>
   </header>
   <main class="main">
     <section class="panel preview-panel" id="previewPanel">
-      <div class="preview-head"><div class="preview-heading"><h2>Live preview</h2><span class="muted">· Uses your device's time</span></div><label class="pin-switch"><input type="checkbox" id="pinPreview" checked> Keep visible</label></div>
-      <div class="screen" id="screen" data-theme="matrix" tabindex="0" aria-label="Clock and calendar. Swipe left to open the calendar, then swipe right to return to the clock.">
+      <div class="preview-head"><div class="preview-heading"><h2>Preview</h2><span class="muted">· Choose a screen</span></div>
+        <div class="preview-nav" role="group" aria-label="Preview screen">
+          <button type="button" class="preview-icon" id="previewShortcuts" title="Preview shortcuts" aria-label="Preview shortcuts" aria-pressed="false">▦<span>Links</span></button>
+          <button type="button" class="preview-icon" id="previewClock" title="Preview clock" aria-label="Preview clock" aria-pressed="true">◷<span>Clock</span></button>
+          <button type="button" class="preview-icon" id="previewCalendar" title="Preview calendar" aria-label="Preview calendar" aria-pressed="false">▤<span>Calendar</span></button>
+        </div>
+      </div>
+      <div class="screen" id="screen" data-theme="matrix" tabindex="0" aria-label="Three pages: shortcuts to the left, clock in the middle, calendar to the right. Swipe to change pages.">
         <button class="fs-exit" id="exitFs" type="button">Exit full screen</button>
+        <div class="screen-view shortcuts-view" id="shortcutsView" hidden>
+          <button type="button" id="shortcutsEditToggle" class="shortcuts-edit-toggle" title="Edit shortcuts" aria-label="Edit shortcuts" aria-pressed="false">✎</button>
+          <div class="shortcuts-inner">
+            <div class="shortcut-grid" id="shortcutGrid" aria-label="Saved shortcuts"></div>
+            <div class="shortcut-empty" id="shortcutEmpty" hidden>No shortcuts yet. Tap ✎ to add one.</div>
+          </div>
+        </div>
         <div class="screen-view clock-view" id="clockView">
           <span class="ampm" id="ampm" hidden></span>
           <canvas id="clock" class="clock-canvas" aria-label="Current time" role="img"></canvas>
@@ -323,20 +572,27 @@
             <div class="calendar-selected"><span>SELECTED DAY</span><strong id="calendarSelected" aria-live="polite"></strong></div>
           </div>
         </div>
-        <div class="view-tabs" role="group" aria-label="Select display">
-          <button class="view-tab" type="button" id="tabClock" aria-pressed="true">◷ Clock</button>
-          <button class="view-tab" type="button" id="tabCalendar" aria-pressed="false">▦ Calendar</button>
-        </div>
+        <nav class="view-tabs" aria-label="Pages and app controls">
+          <div class="page-switch" id="pageSwitch" role="group" aria-label="Choose a page">
+            <button class="view-tab" type="button" id="tabShortcuts" aria-pressed="false">▦ <span>Shortcuts</span></button>
+            <button class="view-tab" type="button" id="tabClock" aria-pressed="true">◷ <span>Clock</span></button>
+            <button class="view-tab" type="button" id="tabCalendar" aria-pressed="false">▤ <span>Calendar</span></button>
+          </div>
+          <span class="dock-divider" aria-hidden="true"></span>
+          <button class="dock-icon" id="toggleSettings" type="button" aria-label="Open settings" aria-controls="settingsPanel" aria-expanded="false" title="Settings">⚙</button>
+          <button class="dock-icon" id="fullscreen" type="button" aria-label="Enter full screen" title="Full screen">⛶</button>
+        </nav>
       </div>
-      <div class="foot"><span class="muted" id="status">Swipe left on the clock to open the calendar.</span><button type="button" class="primary" id="fullscreen">⛶ Full screen</button></div>
+      <span id="status" class="sr-only" role="status" aria-live="polite"></span>
     </section>
-    <section class="panel controls" aria-label="Clock settings">
-      <h2>Customize</h2><p class="muted" style="margin:6px 0 0">Choose a tab. Your changes save automatically on this device.</p>
+    <aside class="panel controls" id="settingsPanel" aria-label="Customize Little Pixel Clock" aria-hidden="true" inert>
+      <div class="settings-head"><div><h2>Settings</h2><p class="muted" style="margin:4px 0 0">Changes save automatically on this device.</p></div><button class="settings-close" type="button" id="closeSettings" aria-label="Close settings" title="Close settings">×</button></div>
       <div class="setting-tabs" role="tablist" aria-label="Customization categories">
-        <button type="button" role="tab" class="setting-tab" id="settingsTabAppearance" aria-controls="settingsAppearance" aria-selected="true" data-settings="appearance">Appearance</button>
-        <button type="button" role="tab" class="setting-tab" id="settingsTabTime" aria-controls="settingsTime" aria-selected="false" data-settings="time">Time &amp; Date</button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabAppearance" aria-controls="settingsAppearance" aria-selected="true" data-settings="appearance">Style</button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabTime" aria-controls="settingsTime" aria-selected="false" data-settings="time">Clock</button>
         <button type="button" role="tab" class="setting-tab" id="settingsTabCalendar" aria-controls="settingsCalendar" aria-selected="false" data-settings="calendar">Calendar</button>
-        <button type="button" role="tab" class="setting-tab" id="settingsTabDisplay" aria-controls="settingsDisplay" aria-selected="false" data-settings="display">Display</button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabShortcuts" aria-controls="settingsShortcuts" aria-selected="false" data-settings="shortcuts">Shortcuts</button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabDisplay" aria-controls="settingsDisplay" aria-selected="false" data-settings="display">General</button>
       </div>
       <div class="settings-pane" id="settingsAppearance" role="tabpanel" aria-labelledby="settingsTabAppearance"><section class="section"><h3>THEME</h3><div class="themes" id="themes">
         <button type="button" class="theme" data-value="matrix" aria-pressed="true"><span class="mini matrix">● 08:42</span><span class="name">LED Matrix</span></button>
@@ -356,6 +612,15 @@
         <div class="subsection-title">Date text & calendar secondary color</div>
         <label class="setting-row">Match digit color <span class="switch"><input type="checkbox" id="matchDateColor" checked><span></span></span></label>
         <div class="color-line"><label for="dateColor">Custom secondary color</label><div class="color-input-group"><input class="color-picker" id="dateColor" type="color" aria-label="Choose date color"><input class="color-hex-input" id="dateHex" type="text" spellcheck="false" maxlength="7" aria-label="Date hex color"></div></div>
+      </section><section class="section"><h3>SIZE & PIXELS</h3>
+        <label class="slider-row" for="clockScale">Clock size <output id="clockScaleValue">90%</output></label>
+        <input id="clockScale" class="range" type="range" min="50" max="100" step="5" value="90">
+        <label class="slider-row" for="pixelSize">Pixel size <output id="pixelSizeValue">78%</output></label>
+        <input id="pixelSize" class="range" type="range" min="40" max="100" step="2" value="78">
+        <label class="slider-row" for="pixelRound">Pixel rounding <output id="pixelRoundValue">100%</output></label>
+        <input id="pixelRound" class="range" type="range" min="0" max="100" step="5" value="100">
+        <p class="hint shape-help" id="shapeHint">0% = square · 100% = round. Pixel options apply to the LED Matrix and Pixel Arcade themes.</p>
+        <button type="button" id="resetShape" class="subtle-button">Reset pixel shape to theme default</button>
       </section></div>
       <div class="settings-pane" id="settingsTime" role="tabpanel" aria-labelledby="settingsTabTime" hidden><section class="section"><h3>TIME & DATE</h3>
         <label class="setting-row">Time format <select id="timeFormat"><option value="24">24-hour (14:30)</option><option value="12">12-hour (2:30 PM)</option></select></label>
@@ -376,27 +641,63 @@
         <p class="hint">Applies to the Minimal clock theme. LED Matrix, Pixel Arcade and Amber Glow use their own custom digit designs.</p>
       </section></div>
       <div class="settings-pane" id="settingsCalendar" role="tabpanel" aria-labelledby="settingsTabCalendar" hidden><section class="section"><h3>CALENDAR OPTIONS</h3>
-        <p class="calendar-hint">Monday is the first day of the week. Tap a day to select it. Swipe right to return to the clock; use the large arrows to change months.</p>
-        <label class="setting-row">Show Clock / Calendar buttons <span class="switch"><input type="checkbox" id="showSwitchButtons" checked><span></span></span></label>
+        <p class="calendar-hint">Weeks start Monday. Tap a day to select it. Use ‹ / › to change months, or swipe right to return to the clock.</p>
+        
         <label class="setting-row">Show other-month dates <span class="switch"><input type="checkbox" id="showOutsideDates" checked><span></span></span></label>
         <label class="setting-row">Day style <select id="calendarStyle"><option value="soft">Soft tiles</option><option value="outline">Outlined tiles</option><option value="simple">Minimal</option></select></label>
         <label class="setting-row">Calendar font <select id="calendarFont"><option value="system">Clean</option><option value="rounded">Rounded</option><option value="pixel">Pixel / Mono</option><option value="serif">Classic Serif</option><option value="tech">Tech / Narrow</option></select></label>
         <label class="setting-row">Calendar layout <select id="calendarDensity"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
-        <button type="button" class="ghost" id="openCalendar" style="margin-top:12px">Show calendar in preview</button>
+
       </section></div>
-      <div class="settings-pane" id="settingsDisplay" role="tabpanel" aria-labelledby="settingsTabDisplay" hidden><section class="section"><h3>SIZE & PIXELS</h3>
-        <label class="slider-row" for="clockScale">Clock size <output id="clockScaleValue">90%</output></label>
-        <input id="clockScale" class="range" type="range" min="50" max="100" step="5" value="90">
-        <label class="slider-row" for="pixelSize">Pixel size <output id="pixelSizeValue">78%</output></label>
-        <input id="pixelSize" class="range" type="range" min="40" max="100" step="2" value="78">
-        <label class="slider-row" for="pixelRound">Pixel rounding <output id="pixelRoundValue">100%</output></label>
-        <input id="pixelRound" class="range" type="range" min="0" max="100" step="5" value="100">
-        <p class="hint shape-help" id="shapeHint">0% = square · 100% = round. Pixel options apply to the LED Matrix and Pixel Arcade themes.</p>
-        <button type="button" id="resetShape" class="subtle-button">Reset pixel shape to theme default</button>
-      </section><section class="section"><label class="setting-row" style="margin:0">Keep screen awake <span class="switch"><input type="checkbox" id="awake"><span></span></span></label><p class="hint">Works when supported by the browser. On Android, you may need to run the clock from a secure installed website.</p></section></div>
-    </section>
+      <div class="settings-pane" id="settingsShortcuts" role="tabpanel" aria-labelledby="settingsTabShortcuts" hidden>
+        <section class="section shortcuts-help-section"><h3>SHORTCUTS</h3>
+          <p class="inline-help">Open the Shortcuts screen, then tap <strong>✎</strong> in its upper corner to add, edit, or rearrange links.</p>
+          <button type="button" class="ghost" id="editShortcutsFromSettings">Open shortcut editor ↗</button>
+        </section>
+        <section class="section"><h3>LAYOUT & SIZE</h3>
+          <label class="setting-row">Show link labels <span class="switch"><input type="checkbox" id="showShortcutLabels" checked><span></span></span></label>
+          <label class="slider-row" for="shortcutColumns">Columns <output id="shortcutColumnsValue">4</output></label><input class="range" id="shortcutColumns" type="range" min="2" max="7" step="1" value="4">
+          <label class="slider-row" for="shortcutSize">Icon size <output id="shortcutSizeValue">100%</output></label><input class="range" id="shortcutSize" type="range" min="60" max="160" step="5" value="100">
+          <label class="slider-row" for="shortcutGap">Spacing <output id="shortcutGapValue">12px</output></label><input class="range" id="shortcutGap" type="range" min="2" max="32" step="2" value="12">
+          <label class="slider-row" for="shortcutRounding">Corner rounding <output id="shortcutRoundingValue">28%</output></label><input class="range" id="shortcutRounding" type="range" min="0" max="50" step="2" value="28">
+          <p class="shortcut-scale-help">The grid updates instantly in both editor and display mode. On phones, columns are capped at four.</p>
+        </section>
+      </div>
+      <div class="settings-pane" id="settingsDisplay" role="tabpanel" aria-labelledby="settingsTabDisplay" hidden>
+        <section class="section"><h3>STARTUP & NAVIGATION</h3>
+          <label class="setting-row">Open app on <select id="startPage"><option value="clock">Clock (center)</option><option value="shortcuts">Shortcuts (left)</option><option value="calendar">Calendar (right)</option></select></label>
+          <label class="setting-row">Show page buttons <span class="switch"><input type="checkbox" id="showSwitchButtons" checked><span></span></span></label>
+          <p class="inline-help">Hide the page buttons for a minimal clock. Settings and fullscreen stay accessible, and you can still swipe between pages or use arrow keys.</p>
+          <button type="button" class="ghost" id="copyHomeLink">Copy app link</button>
+          <p class="inline-help">Use <code>?page=clock</code>, <code>?page=shortcuts</code>, or <code>?page=calendar</code> to open on a specific screen in a Firefox new tab.</p>
+        </section>
+        <section class="section"><h3>SCREEN</h3><label class="setting-row" style="margin:0">Keep screen awake <span class="switch"><input type="checkbox" id="awake"><span></span></span></label><p class="hint">Works when supported by the browser. On Android, you may need to run the clock from a secure installed website.</p></section></div>
+    </aside>
   </main>
 </div>
+<button type="button" id="settingsBackdrop" class="settings-backdrop" aria-label="Close settings" hidden></button>
+<dialog id="shortcutDialog" class="shortcut-dialog" aria-labelledby="shortcutFormHeading">
+  <div class="shortcut-dialog-header"><div><p class="dialog-kicker">SHORTCUTS</p><h2 id="shortcutFormHeading">Add shortcut</h2></div>
+    <button type="button" id="closeShortcutDialog" class="dialog-close" aria-label="Close editor">×</button></div>
+  <form id="shortcutForm" class="shortcut-form">
+            <div class="shortcut-form-row"><label>Label <input class="text-field" id="shortcutLabel" type="text" maxlength="45" required placeholder="My website"></label>
+              <label>Website URL <input class="text-field" id="shortcutUrl" type="text" inputmode="url" maxlength="500" required placeholder="https://example.com"></label></div>
+            <div class="icon-mode-row"><label>Icon source
+              <select id="shortcutIconMode"><option value="symbol">Symbol / emoji</option><option value="favicon">Website favicon</option><option value="upload">Custom image (from device)</option><option value="imageUrl">Image from URL</option></select></label>
+              <div class="icon-live-preview" id="shortcutIconPreview" aria-label="Selected icon preview">🌐</div>
+            </div>
+            <div class="icon-mode-controls" id="shortcutSymbolControls">
+              <label>Symbol <input class="text-field" id="shortcutIcon" type="text" maxlength="8" placeholder="🌐"></label>
+              <button class="icon-choose-button" id="openSymbolPicker" type="button" aria-expanded="false">▦ Search and choose a symbol…</button>
+              <div class="symbol-picker" id="symbolPicker" hidden><input class="text-field" id="symbolSearch" type="search" placeholder="Search e.g. music, star, code, mail" aria-label="Search icons"><div class="symbol-grid" id="symbolGrid" role="group" aria-label="Choose symbol"></div></div>
+            </div>
+            <div class="icon-mode-controls" id="shortcutFaviconControls" hidden><p class="inline-help">Uses the website's favicon automatically while online. When offline, a letter icon appears instead.</p></div>
+            <div class="icon-mode-controls" id="shortcutUploadControls" hidden><label>Choose image <input class="text-field" id="shortcutUpload" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></label><p class="inline-help">Resized and stored locally (up to 4 MB source). It works offline; small images work best.</p></div>
+            <div class="icon-mode-controls" id="shortcutImageUrlControls" hidden><label>Image URL <input class="text-field" id="shortcutImageUrl" type="url" placeholder="https://example.com/icon.png" maxlength="900"></label><p class="inline-help">HTTPS image address; requires internet unless already cached by your browser.</p></div>
+            <p class="field-error" id="shortcutError" role="alert" hidden>Please enter a valid website URL.</p>
+            <div class="form-actions"><button class="primary" id="saveShortcut" type="submit">Add shortcut</button><button type="button" class="ghost" id="cancelShortcut">Cancel</button><button type="button" class="ghost danger-action" id="removeShortcut" hidden>Delete link</button></div>
+          </form>
+</dialog>
 <script>
 (() => {
   'use strict';
@@ -406,7 +707,7 @@
     amber:{background:'#1c160b',color:'#ffa837',round:25},
     minimal:{background:'#f2f2ed',color:'#202c37',round:10}
   };
-  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,showOutsideDates:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable'};
+  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,showShortcutLabels:true,shortcutColumns:4,shortcutSize:100,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[{id:'chatgpt',icon:'✦',label:'ChatGPT',url:'https://chatgpt.com/'},{id:'youtube',icon:'▶',label:'YouTube',url:'https://www.youtube.com/'},{id:'github',icon:'⌘',label:'GitHub',url:'https://github.com/'},{id:'duolingo',icon:'◉',label:'Duolingo',url:'https://www.duolingo.com/'}]};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
@@ -415,6 +716,10 @@
     if(typeof saved.color==='string' && !state.themeColors[state.theme]) state.themeColors[state.theme]=saved.color;
   }catch{}
   if(!themePalettes[state.theme])state.theme='matrix';
+  if(!Array.isArray(state.shortcuts))state.shortcuts=defaults.shortcuts;
+  if(!['clock','calendar','shortcuts'].includes(state.startPage))state.startPage='clock';
+  // A single, full-viewport app. Old ?display=1 links remain compatible.
+  const displayPageOverride=new URLSearchParams(location.search).get('page');
   const currentColor=()=>state.themeColors[state.theme]||themePalettes[state.theme].color;
   const currentBackground=()=>state.themeBackgrounds[state.theme]||themePalettes[state.theme].background;
   const currentRound=()=>state.themeRounds[state.theme]??themePalettes[state.theme].round;
@@ -453,14 +758,12 @@
     });
   }
   function apply(){
-    $('pinPreview').checked=state.pinPreview;
-    $('previewPanel').classList.toggle('is-pinned',state.pinPreview);
     const color=currentColor(),background=currentBackground(),round=currentRound();
     screen.dataset.theme=state.theme;
     screen.dataset.calendarStyle=state.calendarStyle;
     screen.style.setProperty('--calendar-font',fontFamilies[state.calendarFont]||fontFamilies.system);
     $('calendarGrid').classList.toggle('compact',state.calendarDensity==='compact');
-    document.querySelector('.view-tabs').hidden=!state.showSwitchButtons;
+    $('pageSwitch').hidden=!state.showSwitchButtons;
     screen.style.setProperty('--clock',color);
     screen.style.setProperty('--screen',background);
     screen.style.setProperty('--screen-ink',state.matchDateColor?colorCss(color,.75):currentDateColor());
@@ -492,7 +795,9 @@
     $('pixelRound').value=round;$('pixelRoundValue').textContent=round+'%';
     $('pixelSize').disabled=!pixelTheme;$('pixelRound').disabled=!pixelTheme;$('resetShape').disabled=!pixelTheme;
     $('shapeHint').textContent=pixelTheme?'0% = square · 100% = round. Pixel size adjusts spacing between lit dots.':'Pixel shape controls are available with LED Matrix and Pixel Arcade.';
-    draw();renderCalendar();
+    $('startPage').value=state.startPage;
+    applyShortcutLayout();
+    draw();renderCalendar();renderShortcuts();
   }
   const settingsTabs=[...document.querySelectorAll('.setting-tab')];
   function showSettingsTab(name,focus=false){
@@ -512,10 +817,9 @@
     });
   });
   showSettingsTab('appearance');
-  $('pinPreview').addEventListener('change',e=>set('pinPreview',e.target.checked));
   $('themes').addEventListener('click',e=>{const b=e.target.closest('button[data-value]');if(b)set('theme',b.dataset.value);});
   for(const key of ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont','calendarStyle','calendarFont','calendarDensity']) $(key).addEventListener('change',e=>set(key,e.target.value));
-  for(const key of ['seconds','date','weekday','matchDateColor','showSwitchButtons','showOutsideDates']) $(key).addEventListener('change',e=>set(key,e.target.checked));
+  for(const key of ['seconds','date','weekday','matchDateColor','showSwitchButtons','showShortcutLabels','showOutsideDates']) $(key).addEventListener('change',e=>set(key,e.target.checked));
   $('pixelColor').addEventListener('input',e=>chooseColor(e.target.value));
   $('backgroundColor').addEventListener('input',e=>chooseBackground(e.target.value));
   $('dateColor').addEventListener('input',e=>chooseDateColor(e.target.value));
@@ -609,15 +913,37 @@
   }
   let displayMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
   let selectedDate=new Date();
-  let currentView='clock';
+  let currentView=null;
+  let viewAnimations=[];
   function showView(view){
-    currentView=view==='calendar'?'calendar':'clock';
-    screen.classList.toggle('is-calendar',currentView==='calendar');
-    $('clockView').hidden=currentView!=='clock';
-    $('calendarView').hidden=currentView!=='calendar';
-    $('tabClock').setAttribute('aria-pressed',String(currentView==='clock'));
-    $('tabCalendar').setAttribute('aria-pressed',String(currentView==='calendar'));
-    if(currentView==='clock')requestAnimationFrame(draw);else renderCalendar();
+    const next=['clock','calendar','shortcuts'].includes(view)?view:'clock';
+    if(next===currentView)return;
+    const old=currentView;
+    viewAnimations.forEach(a=>a.cancel());viewAnimations=[];
+    const order={shortcuts:0,clock:1,calendar:2};
+    const direction=old===null?0:Math.sign(order[next]-order[old]);
+    for(const name of ['clock','calendar','shortcuts']){
+      $(name+'View').hidden=name!==next&&name!==old;
+      const cap=name.charAt(0).toUpperCase()+name.slice(1);
+      $('tab'+cap).setAttribute('aria-pressed',String(next===name));
+      $('preview'+cap).setAttribute('aria-pressed',String(next===name));
+    }
+    currentView=next;
+    screen.classList.toggle('is-calendar',next==='calendar');
+    screen.classList.toggle('is-shortcuts',next==='shortcuts');
+    if(next==='clock')requestAnimationFrame(draw);
+    else if(next==='calendar')renderCalendar();
+    else renderShortcuts();
+    if(!old||!direction||matchMedia('(prefers-reduced-motion: reduce)').matches){
+      if(old)$(old+'View').hidden=true;
+      return;
+    }
+    const outgoing=$(old+'View'),incoming=$(next+'View');
+    const opts={duration:300,easing:'cubic-bezier(.22,1,.36,1)',fill:'none'};
+    const out=outgoing.animate([{transform:'translateX(0)',opacity:1},{transform:`translateX(${-direction*22}%)`,opacity:0}],opts);
+    const inc=incoming.animate([{transform:`translateX(${direction*28}%)`,opacity:.25},{transform:'translateX(0)',opacity:1}],opts);
+    viewAnimations=[out,inc];
+    out.finished.then(()=>{outgoing.hidden=true;}).catch(()=>{});
   }
   function renderCalendar(){
     const year=displayMonth.getFullYear(),month=displayMonth.getMonth();
@@ -646,38 +972,320 @@
     $('calendarSelected').textContent=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(selectedDate);
   }
   function shiftMonth(amount){displayMonth=new Date(displayMonth.getFullYear(),displayMonth.getMonth()+amount,1);renderCalendar();}
-  $('tabClock').addEventListener('click',()=>showView('clock'));
-  $('tabCalendar').addEventListener('click',()=>showView('calendar'));
-  $('openCalendar').addEventListener('click',()=>{showView('calendar');$('previewPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+  for(const name of ['Shortcuts','Clock','Calendar']){
+    const view=name.toLowerCase();
+    $('tab'+name).addEventListener('click',()=>showView(view));
+    $('preview'+name).addEventListener('click',()=>showView(view));
+  }
   $('previousMonth').addEventListener('click',()=>shiftMonth(-1));
   $('nextMonth').addEventListener('click',()=>shiftMonth(1));
   $('calendarToday').addEventListener('click',()=>{selectedDate=new Date();displayMonth=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1);renderCalendar();});
   let touchStart=null, suppressClickUntil=0;
-  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,.view-tab,#exitFs');
+  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,.view-tabs,#exitFs,a');
   screen.addEventListener('pointerdown',e=>{
-    if(e.pointerType==='touch' && !gestureIgnored(e.target)) touchStart={x:e.clientX,y:e.clientY,pointerId:e.pointerId};
+    if(e.pointerType==='touch' && !shortcutsEditMode && !gestureIgnored(e.target)) touchStart={x:e.clientX,y:e.clientY,pointerId:e.pointerId};
   });
   screen.addEventListener('pointerup',e=>{
-    if(!touchStart || e.pointerType!=='touch' || touchStart.pointerId!==e.pointerId)return;
+    if(!touchStart||e.pointerType!=='touch'||touchStart.pointerId!==e.pointerId)return;
     const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;
-    if(Math.abs(dx)<48 || Math.abs(dx)<Math.abs(dy)*1.4)return;
-    if(currentView==='calendar'){
-      // Gesture is for changing screens, never for navigating calendar months.
-      // Suppress the synthetic tap if the gesture started on a date cell.
-      suppressClickUntil=Date.now()+500;
-      if(dx>0)showView('clock');
-    } else if(dx<0) showView('calendar');
+    if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.4)return;
+    suppressClickUntil=Date.now()+550;
+    if(dx<0&&currentView==='shortcuts')showView('clock');
+    else if(dx<0&&currentView==='clock')showView('calendar');
+    else if(dx>0&&currentView==='calendar')showView('clock');
+    else if(dx>0&&currentView==='clock')showView('shortcuts');
   });
   screen.addEventListener('pointercancel',()=>{touchStart=null;});
   $('calendarGrid').addEventListener('click',e=>{
     if(Date.now()<suppressClickUntil){e.preventDefault();e.stopImmediatePropagation();}
   },true);
   screen.addEventListener('keydown',e=>{
-    if(e.target.closest('button,input,select'))return;
-    if(e.key==='ArrowLeft' && currentView==='clock'){showView('calendar');e.preventDefault();}
-    if(e.key==='ArrowRight' && currentView==='calendar'){showView('clock');e.preventDefault();}
-    if(e.key==='Escape' && currentView==='calendar'){showView('clock');e.preventDefault();}
+    if(e.target.closest('button,input,select,a'))return;
+    if(e.key==='ArrowLeft'){
+      if(currentView==='calendar')showView('clock');
+      else if(currentView==='clock')showView('shortcuts');
+      e.preventDefault();
+    }else if(e.key==='ArrowRight'){
+      if(currentView==='shortcuts')showView('clock');
+      else if(currentView==='clock')showView('calendar');
+      e.preventDefault();
+    }else if(e.key==='Escape'&&currentView!=='clock'){
+      showView('clock');e.preventDefault();
+    }
   });
+
+  // Shortcuts use DOM APIs (never inject user-supplied markup).
+  const symbols=[
+    ['🌐','globe web internet'],['⭐','star favorite'],['✨','sparkle shine'],['✦','spark star'],['✧','outline star'],['★','star solid'],['♥','heart love'],['♡','heart outline'],
+    ['🏠','house home'],['⌂','house home simple'],['🔎','search magnifier'],['🔗','link chain'],['↗','arrow open external'],['⚙','settings gear'],['☰','menu list'],['☷','list lines'],
+    ['📅','calendar dates'],['◷','clock time'],['⏰','alarm clock'],['☀','sun weather'],['☁','cloud weather'],['☂','umbrella rain'],['🌙','moon night'],['⚡','lightning electricity'],
+    ['🎵','music audio note'],['♫','music melody'],['🎧','headphones sound'],['🎮','game controller'],['🕹','joystick retro game'],['▶','play video youtube'],['🎬','cinema movie'],['📺','television tv'],
+    ['💻','computer laptop technology'],['⌘','command code developer'],['⌨','keyboard typing'],['🖥','monitor pc screen'],['🔧','tools wrench'],['🛠','work tools'],['💾','disk storage save'],['📁','folder files'],
+    ['📄','document file'],['✉','mail envelope email'],['📨','inbox message'],['💬','chat discussion'],['✍','write pencil'],['📝','notes memo'],['📚','books reading'],['📖','book reading'],
+    ['🌿','leaf plant nature'],['🍃','green leaves'],['☕','coffee cafe'],['🍕','pizza food'],['🍜','noodles food'],['🛒','cart shopping'],['💳','card bank money'],['📈','chart finance'],
+    ['📊','analytics chart data'],['🌍','earth travel globe'],['🗺','map travel'],['📍','pin location'],['🚗','car automobile'],['🚲','bicycle bike'],['✈','flight airplane'],['🚀','rocket launch'],
+    ['📷','camera photos'],['🖼','gallery pictures'],['🎨','art palette paint'],['🎓','education graduation'],['🇩🇪','german germany language'],['🇯🇵','japanese japan language'],['🧠','brain ai learning'],['🤖','robot ai'],
+    ['🔒','lock security'],['🔑','key password'],['🛡','shield security'],['💡','light bulb idea'],['🌈','rainbow color'],['🔴','red circle'],['🟢','green circle'],['🔵','blue circle'],
+    ['⬡','hexagon geometric'],['◆','diamond geometric'],['●','circle dot'],['▦','grid apps'],['▣','square tile'],['☯','yin yang'],['∞','infinity'],['✓','check done']
+  ];
+  const normalizedUrl=raw=>{
+    const value=String(raw||'').trim();if(!value)return null;
+    try{
+      const url=new URL(/^[a-z][a-z\d+.-]*:/i.test(value)?value:'https://'+value);
+      return ['https:','http:'].includes(url.protocol)?url.href:null;
+    }catch{return null;}
+  };
+  const imageUrl=raw=>{
+    try{const url=new URL(String(raw||'').trim());return url.protocol==='https:'?url.href:null;}catch{return null;}
+  };
+  const faviconSources=site=>{
+    const url=normalizedUrl(site);if(!url)return [];
+    const parsed=new URL(url),host=parsed.hostname;
+    return [
+      'https://www.google.com/s2/favicons?sz=128&domain_url='+encodeURIComponent(parsed.origin),
+      'https://icons.duckduckgo.com/ip3/'+encodeURIComponent(host)+'.ico',
+      parsed.origin+'/favicon.ico'
+    ];
+  };
+  function makeIcon(item,cls){
+    const holder=document.createElement('span');holder.className=cls;
+    const mode=item.iconMode||'symbol';
+    const sources=mode==='favicon'?faviconSources(item.url):
+      mode==='upload'&&String(item.iconImage||'').startsWith('data:image/')?[item.iconImage]:
+      mode==='imageUrl'&&imageUrl(item.iconUrl)?[imageUrl(item.iconUrl)]:[];
+    const fallbackText=item.icon||((normalizedUrl(item.url)&&new URL(normalizedUrl(item.url)).hostname[0].toUpperCase())||'↗');
+    const fallback=()=>{holder.classList.remove('is-image','is-favicon');holder.replaceChildren();holder.textContent=fallbackText;};
+    fallback();
+    function loadFrom(index){
+      if(index>=sources.length)return fallback();
+      const img=document.createElement('img');img.alt='';img.referrerPolicy='no-referrer';img.decoding='async';
+      // Some favicon endpoints are blocked by privacy add-ons or respond with an error.
+      img.addEventListener('load',()=>{
+        if(!img.naturalWidth||!img.naturalHeight){loadFrom(index+1);return;}
+        holder.replaceChildren(img);holder.classList.add(mode==='favicon'?'is-favicon':'is-image');
+      },{once:true});
+      img.addEventListener('error',()=>loadFrom(index+1),{once:true});
+      img.src=sources[index];
+    }
+    if(sources.length)loadFrom(0);
+    return holder;
+  }
+  function applyShortcutLayout(){
+    const cols=Math.max(2,Math.min(7,Number(state.shortcutColumns)||4));
+    const size=Math.max(60,Math.min(160,Number(state.shortcutSize)||100));
+    const gap=Math.max(2,Math.min(32,Number(state.shortcutGap)||12));
+    const round=Math.max(0,Math.min(50,Number(state.shortcutRounding)??28));
+    const radius=Math.round((round/100)*size*.55);
+    const view=$('shortcutsView');
+    view.style.setProperty('--shortcut-columns',cols);
+    view.style.setProperty('--shortcut-columns-mobile',Math.min(4,cols));
+    view.style.setProperty('--shortcut-icon-size',Math.round(55*size/100)+'px');
+    view.style.setProperty('--shortcut-icon-size-mobile',Math.round(48*size/100)+'px');
+    view.style.setProperty('--shortcut-icon-size-display',Math.round(82*size/100)+'px');
+    view.style.setProperty('--shortcut-radius',radius+'px');
+    view.style.setProperty('--shortcut-gap',gap+'px');
+    $('showShortcutLabels').checked=state.showShortcutLabels!==false;
+    for(const key of ['shortcutColumns','shortcutSize','shortcutGap','shortcutRounding']){
+      $(key).value=state[key];
+      $(key+'Value').textContent=state[key]+(key==='shortcutColumns'?'':key==='shortcutGap'?'px':'%');
+    }
+  }
+  let shortcutsEditMode=false, draggedShortcutId=null;
+  function toggleShortcutsEdit(force){
+    shortcutsEditMode=typeof force==='boolean'?force:!shortcutsEditMode;
+    $('shortcutsEditToggle').setAttribute('aria-pressed',String(shortcutsEditMode));
+    $('shortcutsEditToggle').textContent=shortcutsEditMode?'✓':'⚙';
+    $('shortcutsEditToggle').title=shortcutsEditMode?'Finish editing':'Edit shortcuts';
+    $('shortcutsEditToggle').setAttribute('aria-label',shortcutsEditMode?'Finish editing shortcuts':'Edit shortcuts');
+    renderShortcuts();
+  }
+  function persistShortcutOrder(){
+    try{localStorage.setItem('little-pixel-clock',JSON.stringify(state));return true;}
+    catch{return false;}
+  }
+  function reorderShortcuts(source,target){
+    const from=state.shortcuts.findIndex(x=>x.id===source),to=state.shortcuts.findIndex(x=>x.id===target);
+    if(from<0||to<0||from===to)return;
+    const prev=[...state.shortcuts];const [item]=state.shortcuts.splice(from,1);state.shortcuts.splice(to,0,item);
+    if(!persistShortcutOrder())state.shortcuts=prev;
+    renderShortcuts();
+  }
+  function moveShortcut(id,offset){
+    const index=state.shortcuts.findIndex(x=>x.id===id);
+    const target=state.shortcuts[index+offset];if(target)reorderShortcuts(id,target.id);
+  }
+  function renderShortcuts(){
+    const grid=$('shortcutGrid');grid.replaceChildren();grid.classList.toggle('is-editing',shortcutsEditMode);
+    const data=state.shortcuts.filter(item=>item&&normalizedUrl(item.url));
+    $('shortcutEmpty').hidden=data.length>0||shortcutsEditMode;
+    data.forEach((item,index)=>{
+      const entry=document.createElement('div');entry.className='shortcut-entry';entry.dataset.id=item.id;
+      const tile=document.createElement(shortcutsEditMode?'button':'a');tile.className='shortcut-tile';
+      tile.title=shortcutsEditMode?'Edit '+(item.label||'shortcut'):(item.label||item.url);
+      if(shortcutsEditMode){tile.type='button';tile.addEventListener('click',()=>openShortcutEditor(item));}
+      else{tile.href=normalizedUrl(item.url);tile.target='_blank';tile.rel='noopener noreferrer';}
+      const icon=makeIcon(item,'shortcut-icon');const label=document.createElement('span');
+      label.className='shortcut-caption';label.textContent=item.label||'Shortcut';label.hidden=state.showShortcutLabels===false;
+      tile.append(icon,label);entry.appendChild(tile);
+      if(shortcutsEditMode){
+        entry.draggable=true;entry.title='Drag to reorder or use the arrow buttons';
+        entry.addEventListener('dragstart',event=>{if(event.target.closest('.shortcut-move-actions'))return;
+          draggedShortcutId=item.id;entry.classList.add('dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',item.id);});
+        entry.addEventListener('dragover',event=>{event.preventDefault();event.dataTransfer.dropEffect='move';entry.classList.add('drop-target');});
+        entry.addEventListener('dragleave',()=>entry.classList.remove('drop-target'));
+        entry.addEventListener('drop',event=>{event.preventDefault();entry.classList.remove('drop-target');if(draggedShortcutId)reorderShortcuts(draggedShortcutId,item.id);draggedShortcutId=null;});
+        entry.addEventListener('dragend',()=>{draggedShortcutId=null;document.querySelectorAll('.shortcut-entry').forEach(n=>n.classList.remove('dragging','drop-target'));});
+        const moves=document.createElement('div');moves.className='shortcut-move-actions';
+        for(const [glyph,delta,word] of [['←',-1,'earlier'],['→',1,'later']]){
+          const b=document.createElement('button');b.type='button';b.textContent=glyph;b.disabled=delta<0?index===0:index===data.length-1;
+          b.setAttribute('aria-label','Move '+(item.label||'shortcut')+' '+word);b.addEventListener('click',()=>moveShortcut(item.id,delta));moves.appendChild(b);
+        }
+        entry.appendChild(moves);
+      }
+      grid.appendChild(entry);
+    });
+    if(shortcutsEditMode){
+      const entry=document.createElement('div');entry.className='shortcut-entry is-add';
+      const btn=document.createElement('button');btn.type='button';btn.className='shortcut-tile shortcut-add';btn.setAttribute('aria-label','Add shortcut');
+      const plus=document.createElement('span');plus.className='shortcut-icon';plus.textContent='+';
+      const title=document.createElement('span');title.className='shortcut-caption';title.textContent='Add new';
+      btn.append(plus,title);btn.addEventListener('click',()=>openShortcutEditor());entry.appendChild(btn);grid.appendChild(entry);
+    }
+  }
+  $('shortcutsEditToggle').addEventListener('click',()=>toggleShortcutsEdit());
+  $('editShortcutsFromSettings').addEventListener('click',()=>{showView('shortcuts');toggleShortcutsEdit(true);$('shortcutsEditToggle').focus();});
+  let editingShortcutId=null, pendingShortcutImage='';
+  function currentFormItem(){return {icon:$('shortcutIcon').value.trim().slice(0,8)||'↗',iconMode:$('shortcutIconMode').value,
+    iconImage:pendingShortcutImage,iconUrl:$('shortcutImageUrl').value.trim(),url:$('shortcutUrl').value};}
+  function updateIconPreview(){ $('shortcutIconPreview').replaceChildren(makeIcon(currentFormItem(),'icon-live-preview-content')); }
+  function showIconControls(){
+    const mode=$('shortcutIconMode').value;
+    for(const [name,id] of Object.entries({symbol:'shortcutSymbolControls',favicon:'shortcutFaviconControls',upload:'shortcutUploadControls',imageUrl:'shortcutImageUrlControls'}))$(id).hidden=name!==mode;
+    $('symbolPicker').hidden=true;$('openSymbolPicker').setAttribute('aria-expanded','false');
+    updateIconPreview();
+  }
+  const renderSymbols=()=>{
+    const query=$('symbolSearch').value.trim().toLowerCase();
+    const grid=$('symbolGrid');grid.replaceChildren();
+    const items=symbols.filter(([symbol,keywords])=>!query||keywords.includes(query)||symbol.includes(query));
+    for(const [symbol,keywords] of items){
+      const btn=document.createElement('button');btn.type='button';btn.className='symbol-choice';btn.textContent=symbol;
+      btn.title=keywords;btn.setAttribute('aria-label',keywords);
+      btn.addEventListener('click',()=>{$('shortcutIcon').value=symbol;updateIconPreview();$('symbolPicker').hidden=true;$('openSymbolPicker').setAttribute('aria-expanded','false');});
+      grid.appendChild(btn);
+    }
+    if(!items.length){const message=document.createElement('p');message.className='inline-help';message.textContent='No symbols found. Try another word or enter your own emoji.';grid.appendChild(message);}
+  };
+  $('openSymbolPicker').addEventListener('click',()=>{
+    const opened=$('symbolPicker').hidden;$('symbolPicker').hidden=!opened;$('openSymbolPicker').setAttribute('aria-expanded',String(opened));
+    if(opened){renderSymbols();$('symbolSearch').focus();}
+  });
+  $('symbolSearch').addEventListener('input',renderSymbols);
+  $('shortcutIconMode').addEventListener('change',showIconControls);
+  for(const field of ['shortcutIcon','shortcutUrl','shortcutImageUrl'])$(field).addEventListener('input',updateIconPreview);
+  $('shortcutUpload').addEventListener('change',async event=>{
+    const file=event.target.files?.[0];if(!file)return;
+    if(!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type)||file.size>4*1024*1024){
+      $('shortcutError').hidden=false;$('shortcutError').textContent='Use a PNG, JPG, WebP or GIF under 4 MB.';return;
+    }
+    try{
+      const objectURL=URL.createObjectURL(file);const img=new Image();
+      try{
+        await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=objectURL;});
+        const can=document.createElement('canvas');can.width=144;can.height=144;
+        const context=can.getContext('2d');const ratio=Math.min(144/img.naturalWidth,144/img.naturalHeight);
+        const w=img.naturalWidth*ratio,h=img.naturalHeight*ratio;
+        context.drawImage(img,(144-w)/2,(144-h)/2,w,h);
+        pendingShortcutImage=can.toDataURL('image/webp',.85);
+        if(pendingShortcutImage.length>160000)pendingShortcutImage=can.toDataURL('image/jpeg',.78);
+        $('shortcutError').hidden=true;updateIconPreview();
+      }finally{URL.revokeObjectURL(objectURL);}
+    }catch{$('shortcutError').textContent='Could not load this image. Try a PNG or JPG.';$('shortcutError').hidden=false;}
+  });
+  function openShortcutEditor(item=null){
+    resetShortcutForm();
+    if(item){
+      editingShortcutId=item.id;pendingShortcutImage=item.iconImage||'';
+      $('shortcutIcon').value=item.icon||'';$('shortcutLabel').value=item.label||'';$('shortcutUrl').value=item.url||'';
+      $('shortcutIconMode').value=['symbol','favicon','upload','imageUrl'].includes(item.iconMode)?item.iconMode:'symbol';
+      $('shortcutImageUrl').value=item.iconUrl||'';
+      $('shortcutFormHeading').textContent='Edit shortcut';$('saveShortcut').textContent='Save changes';
+      $('removeShortcut').hidden=false;showIconControls();
+    }
+    $('shortcutDialog').showModal();$('shortcutLabel').focus();
+  }
+  function resetShortcutForm(){
+    editingShortcutId=null;pendingShortcutImage='';$('shortcutForm').reset();$('shortcutIconMode').value='symbol';
+    $('shortcutFormHeading').textContent='Add shortcut';$('saveShortcut').textContent='Add shortcut';
+    $('removeShortcut').hidden=true;$('shortcutError').hidden=true;showIconControls();
+  }
+  function closeShortcutEditor(){
+    $('shortcutDialog').close();resetShortcutForm();
+  }
+  $('closeShortcutDialog').addEventListener('click',closeShortcutEditor);
+  $('shortcutDialog').addEventListener('click',event=>{if(event.target===$('shortcutDialog'))closeShortcutEditor();});
+  $('shortcutDialog').addEventListener('close',resetShortcutForm);
+  $('removeShortcut').addEventListener('click',()=>{
+    if(!editingShortcutId)return;
+    if(!confirm('Remove this shortcut?'))return;
+    const before=[...state.shortcuts];state.shortcuts=state.shortcuts.filter(item=>item.id!==editingShortcutId);
+    if(!persistShortcutOrder()){state.shortcuts=before;$('shortcutError').hidden=false;$('shortcutError').textContent='Unable to save changes.';return;}
+    closeShortcutEditor();renderShortcuts();
+  });
+  $('shortcutForm').addEventListener('submit',event=>{
+    event.preventDefault();
+    const url=normalizedUrl($('shortcutUrl').value);const mode=$('shortcutIconMode').value;
+    const invalid=message=>{$('shortcutError').hidden=false;$('shortcutError').textContent=message;};
+    if(!url){invalid('Enter a valid http:// or https:// website address.');$('shortcutUrl').focus();return;}
+    if(mode==='upload'&&!pendingShortcutImage){invalid('Choose a custom image first.');return;}
+    if(mode==='imageUrl'&&!imageUrl($('shortcutImageUrl').value)){invalid('Enter an HTTPS image address.');return;}
+    const item={id:editingShortcutId||('link-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),
+      icon:$('shortcutIcon').value.trim().slice(0,8)||'↗',label:$('shortcutLabel').value.trim().slice(0,45)||new URL(url).hostname,url,iconMode:mode,
+      ...(mode==='upload'?{iconImage:pendingShortcutImage}:{}),...(mode==='imageUrl'?{iconUrl:imageUrl($('shortcutImageUrl').value)}:{})};
+    const before=state.shortcuts;
+    state.shortcuts=editingShortcutId?before.map(x=>x.id===editingShortcutId?item:x):[...before,item];
+    try{localStorage.setItem('little-pixel-clock',JSON.stringify(state));}
+    catch{state.shortcuts=before;invalid('Browser storage is full. Try a smaller image or fewer shortcuts.');return;}
+    closeShortcutEditor();renderShortcuts();
+  });
+  $('cancelShortcut').addEventListener('click',closeShortcutEditor);
+  $('showShortcutLabels').addEventListener('change',event=>set('showShortcutLabels',event.target.checked));
+  for(const id of ['shortcutColumns','shortcutSize','shortcutGap','shortcutRounding'])$(id).addEventListener('input',event=>set(id,Number(event.target.value)));
+  showIconControls();
+  $('startPage').addEventListener('change',e=>set('startPage',e.target.value));
+  // Settings drawer is opened from the same dock used for page navigation.
+  const settingsPanel=$('settingsPanel'),settingsToggle=$('toggleSettings'),backdrop=$('settingsBackdrop');
+  let settingsReturnFocus=null;
+  function toggleSettings(open){
+    if(open===document.documentElement.classList.contains('settings-open'))return;
+    if(open){
+      if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+      settingsReturnFocus=document.activeElement;
+    }
+    document.documentElement.classList.toggle('settings-open',open);
+    settingsToggle.setAttribute('aria-expanded',String(open));
+    settingsToggle.setAttribute('aria-label',open?'Close settings':'Open settings');
+    settingsPanel.inert=!open;
+    settingsPanel.setAttribute('aria-hidden',String(!open));
+    backdrop.hidden=!open;
+    if(open)$('closeSettings').focus();
+    else if(settingsReturnFocus?.isConnected)settingsReturnFocus.focus();
+  }
+  settingsToggle.addEventListener('click',()=>toggleSettings(!document.documentElement.classList.contains('settings-open')));
+  $('closeSettings').addEventListener('click',()=>toggleSettings(false));
+  backdrop.addEventListener('click',()=>toggleSettings(false));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&document.documentElement.classList.contains('settings-open')){
+      e.stopPropagation();toggleSettings(false);
+    }
+  },true);
+  $('copyHomeLink').addEventListener('click',async()=>{
+    const url=new URL(location.href);url.search='';url.hash='';
+    try{await navigator.clipboard.writeText(url.href);$('copyHomeLink').textContent='Copied!';}
+    catch{$('copyHomeLink').textContent='Copy URL from browser address bar';}
+    setTimeout(()=>$('copyHomeLink').textContent='Copy app link',1800);
+  });
+  showView(['clock','shortcuts','calendar'].includes(displayPageOverride)?displayPageOverride:state.startPage);
   let lastTick=-1;let lastDay='';
   function draw(){
     const now=new Date();const time=timeString(now);
@@ -691,7 +1299,12 @@
   }
   setInterval(()=>{const n=new Date();if(n.getSeconds()!==lastTick)draw();const day=n.toDateString();if(day!==lastDay){lastDay=day;renderCalendar();}},250);
   const ro=new ResizeObserver(draw);ro.observe(canvas);
-  $('fullscreen').addEventListener('click',async()=>{try{await screen.requestFullscreen();}catch{$('status').textContent='Full screen is not supported in this browser.';}});
+  $('fullscreen').addEventListener('click',async()=>{
+    try{
+      if(document.fullscreenElement)await document.exitFullscreen();
+      else await screen.requestFullscreen();
+    }catch{$('status').textContent='Full screen is unavailable in this browser.';}
+  });
   $('exitFs').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen();});
   let wakeLock=null;
   async function manageWake(){
@@ -703,7 +1316,14 @@
   }
   $('awake').addEventListener('change',e=>{set('awake',e.target.checked);manageWake();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){draw();if(state.awake)manageWake();}});
-  document.addEventListener('fullscreenchange',draw);
+  document.addEventListener('fullscreenchange',()=>{
+    const active=!!document.fullscreenElement;
+    $('fullscreen').setAttribute('aria-label',active?'Exit full screen':'Enter full screen');
+    $('fullscreen').title=active?'Exit full screen':'Full screen';
+    $('fullscreen').textContent=active?'⤢':'⛶';
+    if(active&&document.documentElement.classList.contains('settings-open'))toggleSettings(false);
+    draw();
+  });
   if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
   apply();if(state.awake)manageWake();
 })();

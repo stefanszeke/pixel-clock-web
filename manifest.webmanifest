@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Little Pixel Clock",
   "short_name": "Pixel Clock",
-  "description": "Custom pixel clock and Monday-first swipeable calendar with offline support.",
+  "description": "A pixel clock, calendar, and customizable shortcuts in one fullscreen-friendly app.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
