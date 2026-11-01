@@ -1,16 +1,21 @@
-# Little Pixel Clock v6.3 — unified app
+# Little Pixel Clock v6.6 — GitHub Pages
 
-Upload the **contents** of this folder to the root of your GitHub Pages repository, including `favicon.svg`, `favicon.ico`, and `sw.js`.
+A unified three-page clock, calendar, and shortcuts web app. No backend required.
 
-## How to use
-- The site opens directly on the full-size Clock / Shortcuts / Calendar screen; no separate editor or `?display=1` needed.
-- The small bottom dock contains page navigation, **⚙ Settings**, and **⛶ Full screen**.
-- Hide page buttons from Settings → General if you want a minimal dock. Gear and fullscreen remain available.
-- Settings opens as a right-hand drawer on desktop or bottom sheet on phone; close using ×, outside tap, or Escape.
-- On the Shortcuts page, **✎** enables adding, editing and rearranging links. Shortcut icon options from v6.2 are preserved.
-- The Firefox new-tab URL can be just `/`, or `/?page=clock` if you want to force a page for each new tab. Old `?display=1` bookmarks still work.
-- The app now has a custom pixel-style browser favicon (`favicon.svg` and `favicon.ico`).
-- Offline web assets and the PWA manifest are included. GitHub Pages needs HTTPS for service worker caching.
-- Prior settings and shortcuts are kept in the existing `little-pixel-clock` browser localStorage key.
+## New in 6.6
 
-**Note:** Browser fullscreen still needs a user gesture, and Firefox's address bar remains present in ordinary tab view. Settings are per browser and device, not cloud-synced.
+- Shortcut columns can be set from **2 to 16** on desktop (phone widths cap to 4–6 columns to keep icons usable).
+- Shortcut group popups expand from the **folder tile itself**, then shift to fit the available screen space.
+- Group popups contain **only their small icons and labels**, without a header, help text, or close button. Dismiss with an outside click or Escape.
+- Folder icons are automatically arranged in **2×2, 3×3, 4×4, etc.** based on the number of links; you can instead select **2–6 columns per folder** in its edit dialog.
+- Existing configurations and shortcuts are preserved; exports/imports include the new folder column preference.
+
+## Usage
+
+Upload these files to the root of your GitHub Pages repository. Refresh the page once the deployment completes. If the installed PWA shows an old version, close and reopen it while online to update cached assets.
+
+Use ⚙ on the Shortcuts page for editing, and Settings → Shortcuts to change grid columns. Group editing includes an Icons per row selector.
+
+## Notes
+
+Browser storage is per browser/profile. Back up settings in Settings → General. Middle-click to open all group tabs remains subject to browser popup restrictions; this is the **web version**, not a Firefox add-on.

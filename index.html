@@ -503,15 +503,11 @@
     .dock-icon[aria-expanded="true"]{background:var(--clock);color:var(--screen)}
     .display-mode .controls{display:none!important}
     .display-mode.settings-open .controls{display:block!important;position:fixed;top:12px;bottom:12px;right:12px;z-index:51;width:min(430px,calc(100vw - 24px));height:auto;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;border-radius:18px;box-shadow:0 18px 70px #0009;scrollbar-width:thin;padding:0 20px 24px}
-    @media(min-width:851px){
-      .display-mode .screen-view{transition:right .2s ease}
-      .display-mode.settings-open .screen-view{right:454px}
-    }
     .settings-head{position:sticky;top:0;z-index:3;background:var(--panel);padding:20px 0 13px;border-bottom:1px solid var(--edge);display:flex;justify-content:space-between;align-items:center;gap:12px}
     .settings-head h2{font-size:20px}
     .settings-close{width:34px;height:34px;flex-shrink:0;display:grid;place-items:center;color:var(--text);background:#263341;border:1px solid #435468;border-radius:10px;font-size:23px;line-height:1}
     .settings-backdrop[hidden]{display:none!important}
-    .settings-backdrop{position:fixed;inset:0;z-index:50;border:0;border-radius:0;padding:0;margin:0;background:#02050838;cursor:default}
+    .settings-backdrop{position:fixed;inset:0;z-index:50;border:0;border-radius:0;padding:0;margin:0;background:#02050872;cursor:default}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     .screen:fullscreen .view-tabs{position:absolute;bottom:max(16px,env(safe-area-inset-bottom))}
     .screen:fullscreen .fs-exit{display:none!important}
@@ -522,9 +518,117 @@
       .display-mode .view-tabs{bottom:max(12px,env(safe-area-inset-bottom));gap:2px;padding:4px}
       .screen:fullscreen .view-tabs{bottom:max(12px,env(safe-area-inset-bottom))}
       .settings-head{padding:17px 0 12px}
-      .settings-backdrop{background:#02050888}
     }
     @media(max-width:360px){.view-tabs .view-tab{padding:7px 5px;font-size:9px}.dock-icon{min-width:31px}}
+
+    /* v6.4 collapsible navigation; settings are nonmodal, so page switching remains available */
+    .display-mode .view-tabs{z-index:65;transition:padding .2s ease,background .2s ease,box-shadow .2s ease}
+    .dock-items{display:flex;align-items:center;gap:5px}
+    .dock-items[aria-hidden="true"]{display:none!important}
+    .dock-handle{height:26px;min-width:36px;display:grid;place-items:center;padding:0 8px;border:0;border-radius:100px;background:transparent;color:var(--clock);font-size:22px;line-height:1}
+    .dock-handle[hidden]{display:none!important}
+    .dock-handle:hover,.dock-handle:focus-visible{background:color-mix(in srgb,var(--clock) 15%,transparent)}
+    .view-tabs.is-collapsed{padding:2px 5px!important;border-radius:100px;background:color-mix(in srgb,var(--screen) 92%,#000)}
+    .view-tabs.is-collapsed .dock-handle{height:24px;min-width:42px}
+    .display-mode.settings-open .view-tabs{z-index:65!important}
+    .display-mode.settings-open .controls{z-index:55!important}
+    .settings-backdrop{display:none!important}
+    .backup-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+    .backup-actions button{font-size:12px;padding:10px 6px;min-width:0}
+    .backup-feedback{font-size:12px;line-height:1.45;color:#a3ff85;min-height:16px}
+    .backup-feedback[data-error="true"]{color:#ff9d9d}
+    .display-mode.settings-open .screen-view{right:min(454px,33vw)}
+    @media(max-width:800px){
+      .display-mode.settings-open .screen-view{right:0}
+      .display-mode.settings-open .controls{bottom:62px;max-height:min(63dvh,680px);border-radius:18px 18px 0 0;padding-bottom:20px}
+      .display-mode.settings-open .view-tabs{bottom:max(11px,env(safe-area-inset-bottom))!important}
+    }
+    @media(max-width:430px){.backup-actions{grid-template-columns:1fr 1fr}}
+
+
+    /* v6.5 — arrow-only autohide dock; no extra control when expanded */
+    .view-tabs.is-collapsed,.display-mode .view-tabs.is-collapsed{
+      padding:0!important;border:0!important;box-shadow:none!important;
+      backdrop-filter:none!important;background:transparent!important;
+    }
+    .dock-handle,.view-tabs.is-collapsed .dock-handle{
+      background:transparent!important;border:0!important;border-radius:0!important;
+      box-shadow:none!important;padding:0 9px!important;min-width:32px;height:29px;
+      font-size:27px;color:var(--clock);text-shadow:0 2px 10px #000b;
+    }
+    .dock-handle:hover,.dock-handle:focus-visible{background:transparent!important;opacity:.75;outline-offset:3px}
+    .dock-handle:not([hidden]){display:grid}
+    .dock-handle[hidden]{display:none!important}
+    /* v6.5 — Auto arrange / free-place grid */
+    .shortcut-layout-control{display:flex;gap:8px;align-items:center;margin:10px 0 14px}
+    .shortcut-layout-control button{flex:1;border:1px solid #3b4c60;background:#111e29;color:var(--text);border-radius:10px;padding:10px 7px;font-size:12px;font-weight:700}
+    .shortcut-layout-control button[aria-pressed=true]{background:var(--accent);color:#0c1713;border-color:var(--accent)}
+    .shortcut-grid.free-grid{align-items:start;grid-auto-rows:minmax(102px,auto);gap:var(--shortcut-gap,12px)}
+    .free-grid .shortcut-slot{min-width:0;min-height:95px;display:flex;align-items:flex-start;justify-content:center;position:relative}
+    .free-grid .shortcut-slot .shortcut-entry{width:100%}
+    .free-grid .shortcut-slot.is-empty{border:1px dashed transparent;border-radius:12px}
+    .free-grid.is-editing .shortcut-slot.is-empty{border-color:color-mix(in srgb,var(--clock) 23%,transparent);background:color-mix(in srgb,var(--clock) 3%,transparent)}
+    .free-grid.is-editing .shortcut-slot.is-empty:hover,.free-grid.is-editing .shortcut-slot.is-drop-target{outline:2px solid color-mix(in srgb,var(--clock) 65%,transparent);outline-offset:-1px;border-radius:12px}
+    .shortcut-place{width:100%;height:100%;min-height:90px;border:0;background:transparent;color:var(--clock);cursor:pointer;font-size:22px}
+    .free-grid .shortcut-entry.is-moving .shortcut-icon{outline:3px solid var(--clock);outline-offset:3px}
+    .shortcut-grid .shortcut-move-actions button{font-size:13px}
+    .shortcut-move-actions .choose-slot{font-size:11px;min-width:50px;padding:2px 6px}
+    .free-grid .shortcut-slot .shortcut-entry{touch-action:manipulation}
+    .shortcut-entry.is-group .shortcut-icon{padding:5px}
+    .folder-icon{display:grid;width:100%;height:100%;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px;padding:5px;border-radius:inherit;overflow:hidden}
+    .folder-icon .folder-mini{display:grid;place-items:center;min-width:0;min-height:0;border-radius:5px;background:color-mix(in srgb,var(--clock) 15%,transparent);font-size:clamp(10px,1.4vw,19px);line-height:1;overflow:hidden}
+    .folder-icon .folder-mini img{width:85%;height:85%;object-fit:contain}
+    .folder-icon .folder-mini.empty{opacity:.25}
+    .shortcut-add.group-add .shortcut-icon{border-style:dashed;font-size:24px}
+    .shortcut-grid.is-editing .shortcut-entry.is-group .shortcut-tile:after{content:'✎'}
+    .grid-help{font-size:11px;color:var(--muted);line-height:1.45}
+    .group-popover[hidden]{display:none!important}
+    .group-popover{position:fixed;z-index:90;width:min(360px,calc(100vw - 24px));max-height:min(70dvh,490px);overflow:auto;border:1px solid color-mix(in srgb,var(--clock) 36%,transparent);border-radius:20px;padding:17px;background:var(--screen);color:var(--clock);box-shadow:0 22px 80px #000b}
+    .group-popover-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+    .group-popover-title{font-family:var(--date-font);font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .group-popover-close{width:28px;height:28px;background:transparent;border:0;color:var(--clock);font-size:22px}
+    .group-mini-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+    .group-mini-grid a{display:flex;align-items:center;flex-direction:column;gap:6px;min-width:0;padding:7px 2px;border-radius:12px;color:var(--clock);text-decoration:none}
+    .group-mini-grid a:hover,.group-mini-grid a:focus-visible{background:color-mix(in srgb,var(--clock) 12%,transparent)}
+    .group-mini-grid .shortcut-icon{width:43px!important;height:43px!important;font-size:21px!important;background:color-mix(in srgb,var(--clock) 11%,var(--screen));border:1px solid color-mix(in srgb,var(--clock) 24%,transparent);border-radius:12px;display:grid;place-items:center}
+    .group-mini-grid .shortcut-caption{font-size:10px!important;max-width:100%}
+    .group-popover-help{color:var(--screen-ink);font-size:11px;margin-top:10px}
+    .group-choose-list{display:flex;flex-direction:column;max-height:250px;overflow-y:auto;gap:4px;border:1px solid #344455;border-radius:11px;padding:7px;margin-top:4px}
+    .group-choose-list label{display:flex!important;flex-direction:row!important;align-items:center;gap:11px!important;padding:8px;border-radius:8px;cursor:pointer;font-size:13px!important}
+    .group-choose-list label:hover{background:#273848}
+    .group-choose-list input{width:18px;height:18px;accent-color:var(--accent)}
+    .group-choose-list .shortcut-item-icon{width:27px;height:27px;font-size:16px}
+    #groupDialog .shortcut-form{gap:12px}
+    @media(max-width:600px){
+      .shortcut-grid.free-grid{grid-auto-rows:minmax(82px,auto)}
+      .free-grid .shortcut-slot{min-height:78px}
+      .shortcut-place{min-height:75px}
+      .group-popover{width:min(330px,calc(100vw - 20px));}
+    }
+    @media(prefers-reduced-motion:reduce){.shortcut-entry,.group-popover{transition:none!important}}
+
+    .shortcut-grid-add-actions{position:absolute;top:16px;left:18px;z-index:8;display:flex;gap:9px;align-items:center}
+    .shortcut-grid-add-actions button{border:1px solid color-mix(in srgb,var(--clock) 37%,transparent);background:color-mix(in srgb,var(--clock) 11%,var(--screen));color:var(--clock);font-size:12px;font-weight:700;border-radius:10px;padding:8px 10px;cursor:pointer}
+    .shortcut-grid-add-actions button:hover{background:color-mix(in srgb,var(--clock) 20%,var(--screen))}
+    .shortcuts-view:has(.free-grid.is-editing) .shortcuts-inner{padding-top:55px}
+    @media(max-width:600px){.shortcut-grid-add-actions{top:7px;left:8px}.shortcut-grid-add-actions button{padding:6px 8px;font-size:11px}}
+    .folder-mini .mini-icon-content{display:grid;place-items:center;width:100%;height:100%;font-size:inherit;color:var(--clock)}
+    .folder-mini .mini-icon-content img{width:100%;height:100%;object-fit:contain}
+    .shortcut-grid.free-grid .shortcut-slot .shortcut-tile{margin:0;padding:8px 1px}
+    /* v6.6 — more desktop grid columns, compact anchored folders */
+    .display-mode .shortcuts-inner,.screen:fullscreen .shortcuts-inner{width:min(100%,1200px)}
+    .shortcut-grid .shortcut-tile{overflow:hidden}
+    .shortcut-grid .shortcut-caption{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+    .shortcut-grid .shortcut-tile .shortcut-icon{flex:0 1 auto;min-width:0}
+    .group-popover{width:var(--group-width,180px);max-width:calc(100vw - 20px);max-height:min(76dvh,540px);overflow:auto;overscroll-behavior:contain;padding:10px;border-radius:17px;box-shadow:0 16px 55px #000b;animation:group-expand .17s cubic-bezier(.16,.85,.25,1) both;transform-origin:var(--group-origin-x,24px) var(--group-origin-y,24px)}
+    .group-mini-grid{grid-template-columns:repeat(var(--group-cols,2),minmax(0,1fr));gap:5px;align-content:start}
+    .group-mini-grid a{gap:5px;padding:6px 2px 5px;border-radius:10px;overflow:hidden;min-width:0}
+    .group-mini-grid .shortcut-icon{width:43px!important;height:43px!important;max-width:100%;min-width:0;font-size:21px!important}
+    .group-mini-grid .shortcut-caption{font-size:10px!important;line-height:1.15;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+    .group-mini-grid .group-empty-note{font-size:11px;text-align:center;line-height:1.4;padding:12px 4px;grid-column:1/-1}
+    @keyframes group-expand{from{opacity:.3;transform:scale(.84)}to{opacity:1;transform:scale(1)}}
+    @media(max-width:390px){.shortcut-grid{grid-template-columns:repeat(var(--shortcut-columns-small,4),minmax(0,1fr))}}
+    @media(prefers-reduced-motion:reduce){.group-popover{animation:none!important}}
   </style>
 </head>
 <body>
@@ -572,15 +676,16 @@
             <div class="calendar-selected"><span>SELECTED DAY</span><strong id="calendarSelected" aria-live="polite"></strong></div>
           </div>
         </div>
-        <nav class="view-tabs" aria-label="Pages and app controls">
-          <div class="page-switch" id="pageSwitch" role="group" aria-label="Choose a page">
+        <nav class="view-tabs" id="bottomDock" aria-label="Pages and app controls">
+          <button id="dockHandle" class="dock-handle" type="button" aria-controls="dockItems" aria-label="Expand navigation" aria-expanded="true" title="Show navigation" hidden>⌃</button>
+          <div id="dockItems" class="dock-items"><div class="page-switch" id="pageSwitch" role="group" aria-label="Choose a page">
             <button class="view-tab" type="button" id="tabShortcuts" aria-pressed="false">▦ <span>Shortcuts</span></button>
             <button class="view-tab" type="button" id="tabClock" aria-pressed="true">◷ <span>Clock</span></button>
             <button class="view-tab" type="button" id="tabCalendar" aria-pressed="false">▤ <span>Calendar</span></button>
           </div>
           <span class="dock-divider" aria-hidden="true"></span>
           <button class="dock-icon" id="toggleSettings" type="button" aria-label="Open settings" aria-controls="settingsPanel" aria-expanded="false" title="Settings">⚙</button>
-          <button class="dock-icon" id="fullscreen" type="button" aria-label="Enter full screen" title="Full screen">⛶</button>
+          <button class="dock-icon" id="fullscreen" type="button" aria-label="Enter full screen" title="Full screen">⛶</button></div>
         </nav>
       </div>
       <span id="status" class="sr-only" role="status" aria-live="polite"></span>
@@ -655,21 +760,44 @@
           <button type="button" class="ghost" id="editShortcutsFromSettings">Open shortcut editor ↗</button>
         </section>
         <section class="section"><h3>LAYOUT & SIZE</h3>
+          <div class="shortcut-layout-control" role="group" aria-label="Shortcuts arrangement">
+            <button id="shortcutLayoutAuto" type="button" aria-pressed="true">▦ Auto-arrange</button>
+            <button id="shortcutLayoutGrid" type="button" aria-pressed="false">⊞ Free grid</button>
+          </div>
+          <p class="grid-help" id="shortcutLayoutHelp">Auto-arrange keeps your links together. Free grid lets you move them into empty cells, like desktop icons.</p>
+          <label class="slider-row" id="shortcutRowsLabel" for="shortcutGridRows" hidden>Grid rows <output id="shortcutGridRowsValue">6</output></label><input class="range" id="shortcutGridRows" type="range" min="3" max="12" step="1" value="6" hidden>
           <label class="setting-row">Show link labels <span class="switch"><input type="checkbox" id="showShortcutLabels" checked><span></span></span></label>
-          <label class="slider-row" for="shortcutColumns">Columns <output id="shortcutColumnsValue">4</output></label><input class="range" id="shortcutColumns" type="range" min="2" max="7" step="1" value="4">
+          <label class="slider-row" for="shortcutColumns">Columns <output id="shortcutColumnsValue">4</output></label><input class="range" id="shortcutColumns" type="range" min="2" max="16" step="1" value="4">
           <label class="slider-row" for="shortcutSize">Icon size <output id="shortcutSizeValue">100%</output></label><input class="range" id="shortcutSize" type="range" min="60" max="160" step="5" value="100">
           <label class="slider-row" for="shortcutGap">Spacing <output id="shortcutGapValue">12px</output></label><input class="range" id="shortcutGap" type="range" min="2" max="32" step="2" value="12">
           <label class="slider-row" for="shortcutRounding">Corner rounding <output id="shortcutRoundingValue">28%</output></label><input class="range" id="shortcutRounding" type="range" min="0" max="50" step="2" value="28">
-          <p class="shortcut-scale-help">The grid updates instantly in both editor and display mode. On phones, columns are capped at four.</p>
+          <p class="shortcut-scale-help">Changes apply immediately. Free-grid positions save locally; on phones the grid reflows to fit the narrower screen.</p>
         </section>
       </div>
       <div class="settings-pane" id="settingsDisplay" role="tabpanel" aria-labelledby="settingsTabDisplay" hidden>
         <section class="section"><h3>STARTUP & NAVIGATION</h3>
           <label class="setting-row">Open app on <select id="startPage"><option value="clock">Clock (center)</option><option value="shortcuts">Shortcuts (left)</option><option value="calendar">Calendar (right)</option></select></label>
           <label class="setting-row">Show page buttons <span class="switch"><input type="checkbox" id="showSwitchButtons" checked><span></span></span></label>
+          <label class="setting-row">Auto-hide bottom menu <span class="switch"><input type="checkbox" id="autoHideDock"><span></span></span></label>
+          <p class="inline-help">When enabled, the menu folds into a small chevron. Hover on desktop, or tap on mobile, to reveal it. The menu stays open while Settings is visible.</p>
           <p class="inline-help">Hide the page buttons for a minimal clock. Settings and fullscreen stay accessible, and you can still swipe between pages or use arrow keys.</p>
           <button type="button" class="ghost" id="copyHomeLink">Copy app link</button>
           <p class="inline-help">Use <code>?page=clock</code>, <code>?page=shortcuts</code>, or <code>?page=calendar</code> to open on a specific screen in a Firefox new tab.</p>
+        </section>
+        <section class="section" id="backupSection"><h3>DATA &amp; BACKUPS</h3>
+          <p class="inline-help">Back up your colors, clock settings and shortcuts. Import files on another device; nothing is uploaded to a server.</p>
+          <div class="backup-actions">
+            <button type="button" class="ghost" id="exportEverything">↓ Export everything</button>
+            <button type="button" class="ghost" id="importEverything">↑ Import everything</button>
+            <button type="button" class="ghost" id="exportLinks">↓ Export shortcuts</button>
+            <button type="button" class="ghost" id="importLinks">↑ Import shortcuts</button>
+          </div>
+          <input type="file" id="backupFile" accept=".json,application/json" hidden aria-label="Choose configuration JSON file">
+          <p id="backupFeedback" class="backup-feedback" role="status" aria-live="polite"></p>
+        </section>
+        <section class="section" id="firefoxImportSection"><h3>FIREFOX SHORTCUTS</h3>
+          <p class="inline-help" id="firefoxImportHelp">Firefox's built-in New Tab shortcuts can't be read by an ordinary website. Our Firefox extension can import them with the browser's permission.</p>
+          <button type="button" class="ghost" id="importFirefoxSites" hidden>Import Firefox New Tab shortcuts</button>
         </section>
         <section class="section"><h3>SCREEN</h3><label class="setting-row" style="margin:0">Keep screen awake <span class="switch"><input type="checkbox" id="awake"><span></span></span></label><p class="hint">Works when supported by the browser. On Android, you may need to run the clock from a secure installed website.</p></section></div>
     </aside>
@@ -698,6 +826,22 @@
             <div class="form-actions"><button class="primary" id="saveShortcut" type="submit">Add shortcut</button><button type="button" class="ghost" id="cancelShortcut">Cancel</button><button type="button" class="ghost danger-action" id="removeShortcut" hidden>Delete link</button></div>
           </form>
 </dialog>
+<dialog id="groupDialog" class="shortcut-dialog" aria-labelledby="groupFormHeading">
+  <div class="shortcut-dialog-header"><div><p class="dialog-kicker">SHORTCUT FOLDERS</p><h2 id="groupFormHeading">New group</h2></div>
+    <button id="closeGroupDialog" class="dialog-close" type="button" aria-label="Close group editor">×</button></div>
+  <form id="groupForm" class="shortcut-form">
+    <label>Group name <input class="text-field" id="groupLabel" type="text" required maxlength="40" placeholder="My favorites"></label>
+    <label>Icons per row <select id="groupColumns"><option value="auto">Automatic (2×2, 3×3, etc.)</option><option value="2">2 columns</option><option value="3">3 columns</option><option value="4">4 columns</option><option value="5">5 columns</option><option value="6">6 columns</option></select></label>
+    <div><label>Choose shortcuts for this group</label>
+      <p class="inline-help">Select existing links below. Unchecked links stay on the main shortcuts page. You can dissolve a group later without deleting its links.</p>
+      <div id="groupChooseList" class="group-choose-list" role="group" aria-label="Choose group members"></div></div>
+    <p class="field-error" id="groupError" hidden></p>
+    <div class="form-actions"><button type="submit" class="primary" id="saveGroup">Create group</button><button type="button" class="ghost" id="cancelGroup">Cancel</button><button type="button" class="ghost danger-action" id="dissolveGroup" hidden>Dissolve (keep links)</button></div>
+  </form>
+</dialog>
+<div id="groupPopover" class="group-popover" role="dialog" aria-label="Shortcut group" hidden>
+  <div id="groupMiniGrid" class="group-mini-grid"></div>
+</div>
 <script>
 (() => {
   'use strict';
@@ -707,7 +851,7 @@
     amber:{background:'#1c160b',color:'#ffa837',round:25},
     minimal:{background:'#f2f2ed',color:'#202c37',round:10}
   };
-  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,showShortcutLabels:true,shortcutColumns:4,shortcutSize:100,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[{id:'chatgpt',icon:'✦',label:'ChatGPT',url:'https://chatgpt.com/'},{id:'youtube',icon:'▶',label:'YouTube',url:'https://www.youtube.com/'},{id:'github',icon:'⌘',label:'GitHub',url:'https://github.com/'},{id:'duolingo',icon:'◉',label:'Duolingo',url:'https://www.duolingo.com/'}]};
+  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'auto',shortcutGridRows:6,shortcutPositions:{},shortcutColumns:4,shortcutSize:100,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[{id:'chatgpt',icon:'✦',label:'ChatGPT',url:'https://chatgpt.com/'},{id:'youtube',icon:'▶',label:'YouTube',url:'https://www.youtube.com/'},{id:'github',icon:'⌘',label:'GitHub',url:'https://github.com/'},{id:'duolingo',icon:'◉',label:'Duolingo',url:'https://www.duolingo.com/'}]};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
@@ -717,6 +861,8 @@
   }catch{}
   if(!themePalettes[state.theme])state.theme='matrix';
   if(!Array.isArray(state.shortcuts))state.shortcuts=defaults.shortcuts;
+  if(!['auto','grid'].includes(state.shortcutLayout))state.shortcutLayout='auto';
+  if(!state.shortcutPositions||typeof state.shortcutPositions!=='object'||Array.isArray(state.shortcutPositions))state.shortcutPositions={};
   if(!['clock','calendar','shortcuts'].includes(state.startPage))state.startPage='clock';
   // A single, full-viewport app. Old ?display=1 links remain compatible.
   const displayPageOverride=new URLSearchParams(location.search).get('page');
@@ -764,6 +910,8 @@
     screen.style.setProperty('--calendar-font',fontFamilies[state.calendarFont]||fontFamilies.system);
     $('calendarGrid').classList.toggle('compact',state.calendarDensity==='compact');
     $('pageSwitch').hidden=!state.showSwitchButtons;
+    $('autoHideDock').checked=!!state.autoHideDock;
+    updateDockMode();
     screen.style.setProperty('--clock',color);
     screen.style.setProperty('--screen',background);
     screen.style.setProperty('--screen-ink',state.matchDateColor?colorCss(color,.75):currentDateColor());
@@ -1071,28 +1219,46 @@
     return holder;
   }
   function applyShortcutLayout(){
-    const cols=Math.max(2,Math.min(7,Number(state.shortcutColumns)||4));
+    const cols=Math.max(2,Math.min(16,Number(state.shortcutColumns)||4));
     const size=Math.max(60,Math.min(160,Number(state.shortcutSize)||100));
     const gap=Math.max(2,Math.min(32,Number(state.shortcutGap)||12));
     const round=Math.max(0,Math.min(50,Number(state.shortcutRounding)??28));
     const radius=Math.round((round/100)*size*.55);
     const view=$('shortcutsView');
     view.style.setProperty('--shortcut-columns',cols);
-    view.style.setProperty('--shortcut-columns-mobile',Math.min(4,cols));
+    view.style.setProperty('--shortcut-columns-mobile',Math.min(6,cols));
+    view.style.setProperty('--shortcut-columns-small',Math.min(4,cols));
     view.style.setProperty('--shortcut-icon-size',Math.round(55*size/100)+'px');
     view.style.setProperty('--shortcut-icon-size-mobile',Math.round(48*size/100)+'px');
     view.style.setProperty('--shortcut-icon-size-display',Math.round(82*size/100)+'px');
     view.style.setProperty('--shortcut-radius',radius+'px');
     view.style.setProperty('--shortcut-gap',gap+'px');
     $('showShortcutLabels').checked=state.showShortcutLabels!==false;
+    const gridMode=state.shortcutLayout==='grid';
+    $('shortcutLayoutAuto').setAttribute('aria-pressed',String(!gridMode));
+    $('shortcutLayoutGrid').setAttribute('aria-pressed',String(gridMode));
+    $('shortcutGridRows').hidden=!gridMode;$('shortcutRowsLabel').hidden=!gridMode;
+    $('shortcutGridRows').value=state.shortcutGridRows;
+    $('shortcutGridRowsValue').textContent=state.shortcutGridRows;
+    $('shortcutLayoutHelp').textContent=gridMode?'Drag icons into an empty cell or tap Move then a destination. Use + Shortcut or + Group beneath the grid.':'Auto-arrange keeps links and groups together in order.';
     for(const key of ['shortcutColumns','shortcutSize','shortcutGap','shortcutRounding']){
       $(key).value=state[key];
       $(key+'Value').textContent=state[key]+(key==='shortcutColumns'?'':key==='shortcutGap'?'px':'%');
     }
   }
-  let shortcutsEditMode=false, draggedShortcutId=null;
+  /* Shortcut entries are links or one-level folders. Links inside a folder are never duplicated on the grid. */
+  const isGroup=item=>item?.type==='group'&&Array.isArray(item.items);
+  const topEntry=id=>state.shortcuts.find(item=>item.id===id);
+  const allLinks=items=>items.flatMap(item=>isGroup(item)?item.items:[item]).filter(item=>item&&normalizedUrl(item.url));
+  const maxGridCols=()=>Math.max(2,Math.min(16,Number(state.shortcutColumns)||4));
+  const maxGridRows=()=>Math.max(3,Math.min(12,Number(state.shortcutGridRows)||6));
+  const maxSlots=()=>maxGridCols()*Math.max(maxGridRows(),Math.ceil((state.shortcuts.length+2)/maxGridCols()));
+  let shortcutsEditMode=false,draggedShortcutId=null,movingShortcutId=null,activeGroupId=null,editingGroupId=null;
+  let groupAnchor=null;
   function toggleShortcutsEdit(force){
     shortcutsEditMode=typeof force==='boolean'?force:!shortcutsEditMode;
+    if(shortcutsEditMode)closeGroupPopover();
+    movingShortcutId=null;
     $('shortcutsEditToggle').setAttribute('aria-pressed',String(shortcutsEditMode));
     $('shortcutsEditToggle').textContent=shortcutsEditMode?'✓':'⚙';
     $('shortcutsEditToggle').title=shortcutsEditMode?'Finish editing':'Edit shortcuts';
@@ -1106,54 +1272,207 @@
   function reorderShortcuts(source,target){
     const from=state.shortcuts.findIndex(x=>x.id===source),to=state.shortcuts.findIndex(x=>x.id===target);
     if(from<0||to<0||from===to)return;
-    const prev=[...state.shortcuts];const [item]=state.shortcuts.splice(from,1);state.shortcuts.splice(to,0,item);
-    if(!persistShortcutOrder())state.shortcuts=prev;
+    const before=[...state.shortcuts];const [item]=state.shortcuts.splice(from,1);state.shortcuts.splice(to,0,item);
+    if(!persistShortcutOrder())state.shortcuts=before;
     renderShortcuts();
   }
   function moveShortcut(id,offset){
     const index=state.shortcuts.findIndex(x=>x.id===id);
     const target=state.shortcuts[index+offset];if(target)reorderShortcuts(id,target.id);
   }
-  function renderShortcuts(){
-    const grid=$('shortcutGrid');grid.replaceChildren();grid.classList.toggle('is-editing',shortcutsEditMode);
-    const data=state.shortcuts.filter(item=>item&&normalizedUrl(item.url));
-    $('shortcutEmpty').hidden=data.length>0||shortcutsEditMode;
-    data.forEach((item,index)=>{
-      const entry=document.createElement('div');entry.className='shortcut-entry';entry.dataset.id=item.id;
-      const tile=document.createElement(shortcutsEditMode?'button':'a');tile.className='shortcut-tile';
-      tile.title=shortcutsEditMode?'Edit '+(item.label||'shortcut'):(item.label||item.url);
-      if(shortcutsEditMode){tile.type='button';tile.addEventListener('click',()=>openShortcutEditor(item));}
-      else{tile.href=normalizedUrl(item.url);tile.target='_blank';tile.rel='noopener noreferrer';}
-      const icon=makeIcon(item,'shortcut-icon');const label=document.createElement('span');
-      label.className='shortcut-caption';label.textContent=item.label||'Shortcut';label.hidden=state.showShortcutLabels===false;
-      tile.append(icon,label);entry.appendChild(tile);
-      if(shortcutsEditMode){
-        entry.draggable=true;entry.title='Drag to reorder or use the arrow buttons';
-        entry.addEventListener('dragstart',event=>{if(event.target.closest('.shortcut-move-actions'))return;
-          draggedShortcutId=item.id;entry.classList.add('dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',item.id);});
-        entry.addEventListener('dragover',event=>{event.preventDefault();event.dataTransfer.dropEffect='move';entry.classList.add('drop-target');});
-        entry.addEventListener('dragleave',()=>entry.classList.remove('drop-target'));
-        entry.addEventListener('drop',event=>{event.preventDefault();entry.classList.remove('drop-target');if(draggedShortcutId)reorderShortcuts(draggedShortcutId,item.id);draggedShortcutId=null;});
-        entry.addEventListener('dragend',()=>{draggedShortcutId=null;document.querySelectorAll('.shortcut-entry').forEach(n=>n.classList.remove('dragging','drop-target'));});
-        const moves=document.createElement('div');moves.className='shortcut-move-actions';
-        for(const [glyph,delta,word] of [['←',-1,'earlier'],['→',1,'later']]){
-          const b=document.createElement('button');b.type='button';b.textContent=glyph;b.disabled=delta<0?index===0:index===data.length-1;
-          b.setAttribute('aria-label','Move '+(item.label||'shortcut')+' '+word);b.addEventListener('click',()=>moveShortcut(item.id,delta));moves.appendChild(b);
-        }
-        entry.appendChild(moves);
+  function gridPositions(){
+    const max=maxSlots(),positions=state.shortcutPositions,used=new Set(),mapped=new Map();
+    // Existing saved locations have priority, but invalid or duplicate positions are repaired.
+    for(const item of state.shortcuts){
+      const spot=positions[item.id];
+      if(Number.isInteger(spot)&&spot>=0&&spot<max&&!used.has(spot)){
+        mapped.set(item.id,spot);used.add(spot);
       }
-      grid.appendChild(entry);
-    });
+    }
+    for(const item of state.shortcuts){
+      if(mapped.has(item.id))continue;
+      const first=Array.from({length:max},(_,i)=>i).find(i=>!used.has(i));
+      if(first===undefined)break;
+      mapped.set(item.id,first);used.add(first);
+    }
+    state.shortcutPositions=Object.fromEntries(mapped);
+    return mapped;
+  }
+  function putInSlot(id,targetSlot){
+    const max=maxSlots();if(!Number.isInteger(targetSlot)||targetSlot<0||targetSlot>=max)return;
+    const positions=gridPositions(),current=positions.get(id);if(current===undefined||current===targetSlot)return;
+    const other=[...positions.entries()].find(([,slot])=>slot===targetSlot)?.[0];
+    positions.set(id,targetSlot);if(other)positions.set(other,current);
+    state.shortcutPositions=Object.fromEntries(positions);
+    save();movingShortcutId=null;renderShortcuts();
+  }
+  function folderIcon(group){
+    const holder=document.createElement('span');holder.className='shortcut-icon';
+    const face=document.createElement('span');face.className='folder-icon';
+    for(let i=0;i<4;i++){
+      const mini=document.createElement('span');mini.className='folder-mini'+(group.items[i]?'':' empty');
+      if(group.items[i])mini.appendChild(makeIcon(group.items[i],'mini-icon-content'));
+      face.appendChild(mini);
+    }
+    holder.appendChild(face);return holder;
+  }
+  function closeGroupPopover({restoreFocus=false}={}){
+    const anchor=groupAnchor;
+    activeGroupId=null;groupAnchor=null;
+    $('groupPopover').hidden=true;
+    if(restoreFocus&&anchor?.isConnected)anchor.focus({preventScroll:true});
+  }
+  function positionGroupPopover(){
+    const pop=$('groupPopover');
+    if(pop.hidden||!groupAnchor?.isConnected)return;
+    const anchorBox=groupAnchor.querySelector('.shortcut-icon')?.getBoundingClientRect()||groupAnchor.getBoundingClientRect();
+    const width=pop.offsetWidth,height=pop.offsetHeight,edge=10;
+    // Open over the actual folder icon, expanding from the icon's top-left corner.
+    // Near screen edges, slide the popup inside the viewport instead.
+    const idealX=anchorBox.left-9,idealY=anchorBox.top-9;
+    const x=Math.max(edge,Math.min(innerWidth-width-edge,idealX));
+    const y=Math.max(edge,Math.min(innerHeight-height-edge,idealY));
+    pop.style.left=Math.round(x)+'px';pop.style.top=Math.round(y)+'px';
+    pop.style.setProperty('--group-origin-x',Math.round(Math.max(10,Math.min(width-10,anchorBox.left+anchorBox.width/2-x)))+'px');
+    pop.style.setProperty('--group-origin-y',Math.round(Math.max(10,Math.min(height-10,anchorBox.top+anchorBox.height/2-y)))+'px');
+  }
+  function openGroupPopover(group,anchor){
+    activeGroupId=group.id;groupAnchor=anchor;
+    const pop=$('groupPopover'),grid=$('groupMiniGrid');grid.replaceChildren();
+    pop.style.setProperty('--clock',currentColor());pop.style.setProperty('--screen',currentBackground());
+    pop.style.setProperty('--date-font',fontFamilies[state.dateFont]||fontFamilies.system);
+    pop.setAttribute('aria-label',group.label||'Shortcut group');
+    const links=group.items.filter(link=>normalizedUrl(link.url));
+    const preferred=Number(group.columns)||0;
+    const cols=Math.max(2,Math.min(6,preferred||Math.ceil(Math.sqrt(Math.max(1,links.length)))));
+    const available=innerWidth-20;
+    const targetWidth=cols*76+20;
+    const width=Math.min(targetWidth,available);
+    const actualCols=Math.max(1,Math.min(cols,Math.floor((width-20)/55)));
+    pop.style.setProperty('--group-cols',String(actualCols));
+    pop.style.setProperty('--group-width',Math.round(width)+'px');
+    for(const link of links){
+      const a=document.createElement('a');a.href=normalizedUrl(link.url);a.target='_blank';a.rel='noopener noreferrer';a.title=link.label;
+      a.appendChild(makeIcon(link,'shortcut-icon'));
+      const label=document.createElement('span');label.className='shortcut-caption';label.textContent=link.label;a.appendChild(label);grid.appendChild(a);
+    }
+    if(!links.length){const p=document.createElement('p');p.className='group-empty-note';p.textContent='Empty group';grid.appendChild(p);}
+    pop.hidden=false;
+    positionGroupPopover();
+    const first=grid.querySelector('a');if(first)first.focus({preventScroll:true});
+  }
+  document.addEventListener('pointerdown',e=>{
+    if(!$('groupPopover').hidden&&!e.target.closest('#groupPopover')&&!e.target.closest('.shortcut-entry.is-group'))closeGroupPopover();
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('groupPopover').hidden){e.stopPropagation();closeGroupPopover({restoreFocus:true});}});
+  window.addEventListener('resize',positionGroupPopover);
+  window.addEventListener('scroll',positionGroupPopover,{passive:true,capture:true});
+  function openGroupTabs(group){
+    // Must be synchronous inside the user's middle-click. Browsers may limit multiple popups.
+    for(const link of group.items){const url=normalizedUrl(link.url);if(url)window.open(url,'_blank','noopener,noreferrer');}
+  }
+  function makeEntry(item,index,total){
+    const entry=document.createElement('div');entry.className='shortcut-entry'+(isGroup(item)?' is-group':'');entry.dataset.id=item.id;
+    const tile=document.createElement(shortcutsEditMode?'button':isGroup(item)?'button':'a');tile.className='shortcut-tile';
+    tile.title=shortcutsEditMode?'Edit '+(item.label||'shortcut'):(item.label||item.url||'Group');
+    if(shortcutsEditMode){tile.type='button';tile.addEventListener('click',()=>{
+      if(state.shortcutLayout==='grid'&&movingShortcutId&&movingShortcutId!==item.id){putInSlot(movingShortcutId,state.shortcutPositions[item.id]);return;}
+      isGroup(item)?openGroupEditor(item):openShortcutEditor(item);
+    });}
+    else if(isGroup(item)){
+      tile.type='button';tile.setAttribute('aria-haspopup','dialog');tile.setAttribute('aria-label','Open '+item.label+' folder');
+      tile.addEventListener('click',()=>{if(activeGroupId===item.id)closeGroupPopover();else openGroupPopover(item,tile);});
+      tile.addEventListener('auxclick',event=>{if(event.button===1){event.preventDefault();openGroupTabs(item);}});
+      tile.addEventListener('mousedown',event=>{if(event.button===1)event.preventDefault();});
+    }else{tile.href=normalizedUrl(item.url);tile.target='_blank';tile.rel='noopener noreferrer';}
+    const icon=isGroup(item)?folderIcon(item):makeIcon(item,'shortcut-icon');
+    const label=document.createElement('span');label.className='shortcut-caption';label.textContent=item.label||'Shortcut';label.hidden=state.showShortcutLabels===false;
+    tile.append(icon,label);entry.appendChild(tile);
     if(shortcutsEditMode){
-      const entry=document.createElement('div');entry.className='shortcut-entry is-add';
-      const btn=document.createElement('button');btn.type='button';btn.className='shortcut-tile shortcut-add';btn.setAttribute('aria-label','Add shortcut');
-      const plus=document.createElement('span');plus.className='shortcut-icon';plus.textContent='+';
-      const title=document.createElement('span');title.className='shortcut-caption';title.textContent='Add new';
-      btn.append(plus,title);btn.addEventListener('click',()=>openShortcutEditor());entry.appendChild(btn);grid.appendChild(entry);
+      entry.draggable=true;entry.title='Drag to rearrange, or use the move control';
+      entry.classList.toggle('is-moving',movingShortcutId===item.id);
+      entry.addEventListener('dragstart',event=>{
+        if(event.target.closest('.shortcut-move-actions')){event.preventDefault();return;}
+        draggedShortcutId=item.id;entry.classList.add('dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',item.id);
+      });
+      entry.addEventListener('dragover',event=>{event.preventDefault();event.dataTransfer.dropEffect='move';entry.classList.add('drop-target');});
+      entry.addEventListener('dragleave',()=>entry.classList.remove('drop-target'));
+      entry.addEventListener('drop',event=>{
+        event.preventDefault();event.stopPropagation();entry.classList.remove('drop-target');
+        const from=draggedShortcutId||event.dataTransfer.getData('text/plain');
+        if(from){if(state.shortcutLayout==='grid')putInSlot(from,state.shortcutPositions[item.id]);else reorderShortcuts(from,item.id);}
+        draggedShortcutId=null;
+      });
+      entry.addEventListener('dragend',()=>{draggedShortcutId=null;document.querySelectorAll('.shortcut-entry').forEach(n=>n.classList.remove('dragging','drop-target'));});
+      const moves=document.createElement('div');moves.className='shortcut-move-actions';
+      if(state.shortcutLayout==='grid'){
+        const b=document.createElement('button');b.type='button';b.className='choose-slot';b.textContent=movingShortcutId===item.id?'Cancel':'Move';
+        b.setAttribute('aria-label','Choose a grid position for '+item.label);
+        b.addEventListener('click',()=>{movingShortcutId=movingShortcutId===item.id?null:item.id;renderShortcuts();});moves.appendChild(b);
+      }else{
+        for(const [glyph,delta,word] of [['←',-1,'earlier'],['→',1,'later']]){
+          const b=document.createElement('button');b.type='button';b.textContent=glyph;b.disabled=delta<0?index===0:index===total-1;
+          b.setAttribute('aria-label','Move '+item.label+' '+word);b.addEventListener('click',()=>moveShortcut(item.id,delta));moves.appendChild(b);
+        }
+      }
+      entry.appendChild(moves);
+    }
+    return entry;
+  }
+  function addTile(action,kind,label){
+    const entry=document.createElement('div');entry.className='shortcut-entry is-add'+(kind==='group'?' group-add':'');
+    const btn=document.createElement('button');btn.type='button';btn.className='shortcut-tile shortcut-add'+(kind==='group'?' group-add':'');
+    btn.setAttribute('aria-label',label);
+    const plus=document.createElement('span');plus.className='shortcut-icon';plus.textContent=kind==='group'?'⊞':'+';
+    const title=document.createElement('span');title.className='shortcut-caption';title.textContent=label;
+    btn.append(plus,title);btn.addEventListener('click',action);entry.appendChild(btn);return entry;
+  }
+  function renderShortcuts(){
+    closeGroupPopover();const grid=$('shortcutGrid');grid.replaceChildren();grid.classList.toggle('is-editing',shortcutsEditMode);
+    const free=state.shortcutLayout==='grid';grid.classList.toggle('free-grid',free);
+    const data=state.shortcuts.filter(item=>item&&(isGroup(item)||normalizedUrl(item.url)));
+    $('shortcutEmpty').hidden=data.length>0||shortcutsEditMode;
+    if(!free){
+      data.forEach((item,index)=>grid.appendChild(makeEntry(item,index,data.length)));
+      if(shortcutsEditMode){grid.append(addTile(()=>openShortcutEditor(),'link','+ Shortcut'),addTile(()=>openGroupEditor(),'group','+ Group'));}
+    }else{
+      const positions=gridPositions();const count=maxSlots();
+      for(let slot=0;slot<count;slot++){
+        const wrapper=document.createElement('div');wrapper.className='shortcut-slot';wrapper.dataset.slot=String(slot);
+        const match=data.find(item=>positions.get(item.id)===slot);
+        if(match){wrapper.appendChild(makeEntry(match,data.indexOf(match),data.length));}
+        else{
+          wrapper.classList.add('is-empty');
+          if(shortcutsEditMode){
+            const btn=document.createElement('button');btn.className='shortcut-place';btn.type='button';btn.textContent=movingShortcutId?'＋':'';
+            btn.setAttribute('aria-label','Place shortcut in cell '+(slot+1));btn.addEventListener('click',()=>{if(movingShortcutId)putInSlot(movingShortcutId,slot);});wrapper.appendChild(btn);
+          }
+        }
+        if(shortcutsEditMode){
+          wrapper.addEventListener('dragover',event=>{event.preventDefault();wrapper.classList.add('is-drop-target');});
+          wrapper.addEventListener('dragleave',()=>wrapper.classList.remove('is-drop-target'));
+          wrapper.addEventListener('drop',event=>{event.preventDefault();wrapper.classList.remove('is-drop-target');const from=draggedShortcutId||event.dataTransfer.getData('text/plain');if(from)putInSlot(from,slot);draggedShortcutId=null;});
+          if(match&&movingShortcutId&&movingShortcutId!==match.id){
+            wrapper.addEventListener('click',event=>{if(event.target.closest('.shortcut-tile,.shortcut-move-actions'))return;putInSlot(movingShortcutId,slot);});
+          }
+        }
+        grid.appendChild(wrapper);
+      }
+      if(shortcutsEditMode){
+        const buttons=document.createElement('div');buttons.className='shortcut-grid-add-actions';
+        for(const [title,action] of [['+ Shortcut',()=>openShortcutEditor()],['+ Group',()=>openGroupEditor()]]){
+          const b=document.createElement('button');b.type='button';b.textContent=title;b.addEventListener('click',action);buttons.appendChild(b);
+        }
+        // Buttons are located beneath the free grid, so empty cells remain usable.
+        grid.appendChild(buttons);
+      }
     }
   }
   $('shortcutsEditToggle').addEventListener('click',()=>toggleShortcutsEdit());
   $('editShortcutsFromSettings').addEventListener('click',()=>{showView('shortcuts');toggleShortcutsEdit(true);$('shortcutsEditToggle').focus();});
+  $('shortcutLayoutAuto').addEventListener('click',()=>set('shortcutLayout','auto'));
+  $('shortcutLayoutGrid').addEventListener('click',()=>set('shortcutLayout','grid'));
+  $('shortcutGridRows').addEventListener('input',e=>set('shortcutGridRows',Number(e.target.value)));
   let editingShortcutId=null, pendingShortcutImage='';
   function currentFormItem(){return {icon:$('shortcutIcon').value.trim().slice(0,8)||'↗',iconMode:$('shortcutIconMode').value,
     iconImage:pendingShortcutImage,iconUrl:$('shortcutImageUrl').value.trim(),url:$('shortcutUrl').value};}
@@ -1251,15 +1570,114 @@
   $('cancelShortcut').addEventListener('click',closeShortcutEditor);
   $('showShortcutLabels').addEventListener('change',event=>set('showShortcutLabels',event.target.checked));
   for(const id of ['shortcutColumns','shortcutSize','shortcutGap','shortcutRounding'])$(id).addEventListener('input',event=>set(id,Number(event.target.value)));
+
+  /* Create or edit Android-style folder groups, with explicit non-destructive dissolve. */
+  function openGroupEditor(group=null){
+    editingGroupId=group?.id||null;
+    $('groupFormHeading').textContent=group?'Edit group':'New group';
+    $('saveGroup').textContent=group?'Save group':'Create group';
+    $('dissolveGroup').hidden=!group;
+    $('groupLabel').value=group?.label||'';
+    $('groupColumns').value=group?.columns||'auto';
+    $('groupError').hidden=true;
+    const list=$('groupChooseList');list.replaceChildren();
+    const choices=[...(group?.items||[]),...state.shortcuts.filter(item=>!isGroup(item))];
+    if(!choices.length){const p=document.createElement('p');p.className='inline-help';p.textContent='Add a shortcut first, then return here to put it into a group.';list.appendChild(p);}
+    for(const link of choices){
+      if(!normalizedUrl(link.url))continue;
+      const label=document.createElement('label');
+      const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=link.id;checkbox.checked=!!group?.items.some(it=>it.id===link.id);
+      const icon=makeIcon(link,'shortcut-item-icon');
+      const txt=document.createElement('span');txt.textContent=link.label||link.url;
+      label.append(checkbox,icon,txt);list.appendChild(label);
+    }
+    $('groupDialog').showModal();$('groupLabel').focus();
+  }
+  function closeGroupEditor(){if($('groupDialog').open)$('groupDialog').close();editingGroupId=null;}
+  $('closeGroupDialog').addEventListener('click',closeGroupEditor);
+  $('cancelGroup').addEventListener('click',closeGroupEditor);
+  $('groupDialog').addEventListener('click',e=>{if(e.target===$('groupDialog'))closeGroupEditor();});
+  $('groupForm').addEventListener('submit',event=>{
+    event.preventDefault();const label=$('groupLabel').value.trim().slice(0,40);
+    if(!label){$('groupError').hidden=false;$('groupError').textContent='Enter a group name.';return;}
+    const selected=new Set([...$('groupChooseList').querySelectorAll('input:checked')].map(input=>input.value));
+    const group=editingGroupId?topEntry(editingGroupId):null;
+    const available=[...(group?.items||[]),...state.shortcuts.filter(item=>!isGroup(item))];
+    const members=available.filter(link=>selected.has(link.id));
+    const leftovers=(group?.items||[]).filter(link=>!selected.has(link.id));
+    const columns=$('groupColumns').value;
+    const newGroup=group?{...group,label,columns,items:members}:{id:'group-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),type:'group',label,columns,items:members};
+    const old=state.shortcuts,oldPositions={...state.shortcutPositions};
+    const without=old.filter(item=>isGroup(item)||!selected.has(item.id));
+    if(group){
+      const pos=without.findIndex(item=>item.id===group.id);without.splice(pos,1,newGroup,...leftovers);
+    }else without.push(newGroup);
+    state.shortcuts=without;
+    if(!persistShortcutOrder()){
+      state.shortcuts=old;state.shortcutPositions=oldPositions;$('groupError').hidden=false;$('groupError').textContent='Unable to save group.';return;
+    }
+    closeGroupEditor();renderShortcuts();
+  });
+  $('dissolveGroup').addEventListener('click',()=>{
+    const group=topEntry(editingGroupId);if(!isGroup(group))return;
+    if(!confirm('Dissolve '+group.label+'? Every shortcut will return to the main grid; none will be deleted.'))return;
+    const before=state.shortcuts,idx=before.findIndex(item=>item.id===group.id);
+    state.shortcuts=[...before.slice(0,idx),...group.items,...before.slice(idx+1)];
+    if(!persistShortcutOrder()){state.shortcuts=before;$('groupError').hidden=false;$('groupError').textContent='Could not save changes.';return;}
+    closeGroupEditor();renderShortcuts();
+  });
   showIconControls();
   $('startPage').addEventListener('change',e=>set('startPage',e.target.value));
+  const dock=$('bottomDock'),handle=$('dockHandle'),dockItems=$('dockItems');
+  let dockExpanded=false;
+  let dockLeaveTimeout;
+  function setDockExpanded(expanded){
+    dockExpanded=!!expanded;
+    const compact=!!state.autoHideDock && !dockExpanded;
+    dock.classList.toggle('is-collapsed',compact);
+    handle.hidden=!compact;
+    handle.textContent='⌃';
+    handle.setAttribute('aria-expanded',String(!compact));
+    handle.setAttribute('aria-label','Show navigation');
+    handle.title='Show navigation';
+    dockItems.setAttribute('aria-hidden',String(compact));
+    dockItems.inert=compact;
+  }
+  function updateDockMode(){
+    if(!document.getElementById('bottomDock'))return;
+    if(!state.autoHideDock)setDockExpanded(true);
+    else if(document.documentElement.classList.contains('settings-open'))setDockExpanded(true);
+    else setDockExpanded(false);
+  }
+  $('autoHideDock').addEventListener('change',e=>set('autoHideDock',e.target.checked));
+  handle.addEventListener('click',()=>{
+    clearTimeout(dockLeaveTimeout);
+    if(document.documentElement.classList.contains('settings-open'))return;
+    setDockExpanded(true);
+  });
+  document.addEventListener('pointerdown',event=>{
+    if(!state.autoHideDock||!dockExpanded||document.documentElement.classList.contains('settings-open'))return;
+    if(!dock.contains(event.target))setDockExpanded(false);
+  });
+  dock.addEventListener('pointerenter',e=>{
+    if(e.pointerType==='mouse' && state.autoHideDock){clearTimeout(dockLeaveTimeout);setDockExpanded(true);}
+  });
+  dock.addEventListener('pointerleave',e=>{
+    if(e.pointerType!=='mouse'||!state.autoHideDock)return;
+    clearTimeout(dockLeaveTimeout);
+    dockLeaveTimeout=setTimeout(()=>{if(!document.documentElement.classList.contains('settings-open')&&!dock.matches(':focus-within'))setDockExpanded(false);},300);
+  });
+  dock.addEventListener('focusin',()=>{if(state.autoHideDock)setDockExpanded(true);});
+  dock.addEventListener('focusout',()=>{if(!state.autoHideDock)return;setTimeout(()=>{if(!dock.matches(':focus-within')&&!dock.matches(':hover')&&!document.documentElement.classList.contains('settings-open'))setDockExpanded(false)},120);});
+  for(const id of ['tabShortcuts','tabClock','tabCalendar'])$(id).addEventListener('click',()=>{
+    if(state.autoHideDock&&!document.documentElement.classList.contains('settings-open')&&matchMedia('(pointer:coarse)').matches)setDockExpanded(false);
+  });
   // Settings drawer is opened from the same dock used for page navigation.
   const settingsPanel=$('settingsPanel'),settingsToggle=$('toggleSettings'),backdrop=$('settingsBackdrop');
   let settingsReturnFocus=null;
   function toggleSettings(open){
     if(open===document.documentElement.classList.contains('settings-open'))return;
     if(open){
-      if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
       settingsReturnFocus=document.activeElement;
     }
     document.documentElement.classList.toggle('settings-open',open);
@@ -1267,9 +1685,10 @@
     settingsToggle.setAttribute('aria-label',open?'Close settings':'Open settings');
     settingsPanel.inert=!open;
     settingsPanel.setAttribute('aria-hidden',String(!open));
-    backdrop.hidden=!open;
+    backdrop.hidden=true; // non-modal drawer: allow changing pages without dismissing settings
+    if(state.autoHideDock)setDockExpanded(true);
     if(open)$('closeSettings').focus();
-    else if(settingsReturnFocus?.isConnected)settingsReturnFocus.focus();
+    else { if(state.autoHideDock)setDockExpanded(false); if(settingsReturnFocus?.isConnected)settingsReturnFocus.focus(); }
   }
   settingsToggle.addEventListener('click',()=>toggleSettings(!document.documentElement.classList.contains('settings-open')));
   $('closeSettings').addEventListener('click',()=>toggleSettings(false));
@@ -1285,6 +1704,135 @@
     catch{$('copyHomeLink').textContent='Copy URL from browser address bar';}
     setTimeout(()=>$('copyHomeLink').textContent='Copy app link',1800);
   });
+  // Portable backups. Only simple known settings are imported, not executable content.
+  const backupFeedback=$('backupFeedback');
+  const showBackupStatus=(message,error=false)=>{backupFeedback.textContent=message;backupFeedback.dataset.error=String(error);};
+  const normalUrl=value=>{
+    if(typeof value!=='string')return '';
+    try{const u=new URL(value);return (u.protocol==='https:'||u.protocol==='http:')?u.href:'';}catch{return '';}
+  };
+  function sanitizedShortcuts(value){
+    if(!Array.isArray(value))throw Error('The shortcuts list must be an array.');
+    if(value.length>250)throw Error('Too many shortcuts (limit 250).');
+    const ids=new Set();let total=0;
+    const sanitizeLink=(s,i)=>{
+      if(!s||typeof s!=='object')return null;
+      const url=normalUrl(s.url);if(!url)return null;
+      if(++total>250)throw Error('Too many links in backup (limit 250).');
+      const iconMode=['symbol','favicon','upload','imageUrl'].includes(s.iconMode)?s.iconMode:'symbol';
+      let id=typeof s.id==='string'&&s.id.length<=80?s.id:'import-'+i+'-'+Date.now();
+      if(ids.has(id))id='import-'+i+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,5);
+      ids.add(id);
+      const result={id,label:typeof s.label==='string'?s.label.slice(0,45):new URL(url).hostname,url,icon:typeof s.icon==='string'?s.icon.slice(0,8):'↗',iconMode};
+      if(iconMode==='upload'&&typeof s.iconImage==='string'&&/^data:image\/(?:png|jpeg|gif|webp|x-icon|vnd\.microsoft\.icon);base64,/i.test(s.iconImage)&&s.iconImage.length<500000)result.iconImage=s.iconImage;
+      if(iconMode==='imageUrl'&&typeof s.iconUrl==='string'&&normalUrl(s.iconUrl))result.iconUrl=normalUrl(s.iconUrl);
+      return result;
+    };
+    return value.map((s,i)=>{
+      if(s?.type==='group'&&Array.isArray(s.items)){
+        let id=typeof s.id==='string'&&s.id.length<=80?s.id:'group-import-'+i+'-'+Date.now();
+        if(ids.has(id))id+='-'+Math.random().toString(36).slice(2,6);ids.add(id);
+        return {id,type:'group',label:typeof s.label==='string'?s.label.slice(0,40):'Group',columns:['2','3','4','5','6'].includes(String(s.columns))?String(s.columns):'auto',items:s.items.slice(0,250).map((link,j)=>sanitizeLink(link,i+'-'+j)).filter(Boolean)};
+      }
+      return sanitizeLink(s,i);
+    }).filter(Boolean);
+  }
+  function mergeShortcuts(list){
+    const seen=new Set(allLinks(state.shortcuts).map(s=>normalUrl(s.url).replace(/\/$/,'').toLowerCase()));
+    const existingIds=new Set(state.shortcuts.map(s=>s.id));
+    const newItems=[];
+    const dedupe=link=>{
+      const key=normalUrl(link.url).replace(/\/$/,'').toLowerCase();if(!key||seen.has(key))return null;
+      seen.add(key);return link;
+    };
+    for(const item of list){
+      if(isGroup(item)){
+        const links=item.items.map(dedupe).filter(Boolean);if(!links.length)continue;
+        const id=existingIds.has(item.id)?'group-import-'+Date.now()+'-'+Math.random().toString(36).slice(2,6):item.id;
+        existingIds.add(id);newItems.push({...item,id,items:links});
+      }else{
+        const link=dedupe(item);if(!link)continue;
+        if(existingIds.has(link.id))link.id='import-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+        existingIds.add(link.id);newItems.push(link);
+      }
+    }
+    const before=state.shortcuts;state.shortcuts=[...before,...newItems];
+    try{localStorage.setItem('little-pixel-clock',JSON.stringify(state));}
+    catch{state.shortcuts=before;throw Error('Storage is full. Try removing large uploaded icons.');}
+    renderShortcuts();return newItems.length;
+  }
+  function downloadBackup(type){
+    const payload={app:'little-pixel-clock',version:1,type,exportedAt:new Date().toISOString(),...(type==='shortcuts'?{shortcuts:state.shortcuts}:{config:state})};
+    const data=JSON.stringify(payload,null,2);const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=`little-pixel-clock-${type}-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);showBackupStatus(`Exported ${type==='shortcuts'?'shortcuts':'full configuration'} as JSON.`);
+  }
+  $('exportEverything').addEventListener('click',()=>downloadBackup('full'));
+  $('exportLinks').addEventListener('click',()=>downloadBackup('shortcuts'));
+  let requestedBackupType='full';
+  for(const [id,kind] of [['importEverything','full'],['importLinks','shortcuts']])$(id).addEventListener('click',()=>{
+    requestedBackupType=kind;$('backupFile').value='';$('backupFile').click();
+  });
+  $('backupFile').addEventListener('change',async event=>{
+    const file=event.target.files?.[0];if(!file)return;
+    try{
+      if(file.size>8_000_000)throw Error('JSON file is too large (maximum 8 MB).');
+      const backup=JSON.parse(await file.text());
+      if(!backup||typeof backup!=='object')throw Error('Not a configuration file.');
+      if(requestedBackupType==='shortcuts'){
+        const shortcuts=sanitizedShortcuts(Array.isArray(backup)?backup:(backup.shortcuts??backup.config?.shortcuts));
+        const count=mergeShortcuts(shortcuts);showBackupStatus(`${count} new shortcuts imported. Duplicates were skipped.`);
+      }else{
+        const raw=backup.config??(backup.app==='little-pixel-clock'?backup:null);
+        if(!raw||typeof raw!=='object'||Array.isArray(raw))throw Error('This file does not contain an app configuration.');
+        if(!confirm('Import all settings? This replaces the current colors, settings, and shortcuts. Export your current configuration first if you want a backup.'))return;
+        const clean={...defaults};
+        for(const [key,defaultValue] of Object.entries(defaults)){
+          if(key==='shortcuts'){if(raw.shortcuts!==undefined)clean.shortcuts=sanitizedShortcuts(raw.shortcuts);continue;}
+          if(key==='pinPreview')continue;
+          if(key==='shortcutPositions'){
+            if(raw.shortcutPositions&&typeof raw.shortcutPositions==='object'&&!Array.isArray(raw.shortcutPositions)){
+              clean.shortcutPositions=Object.fromEntries(Object.entries(raw.shortcutPositions).filter(([k,n])=>k.length<=80&&Number.isInteger(n)&&n>=0&&n<150));
+            }
+            continue;
+          }
+          const v=raw[key];
+          if(typeof v===typeof defaultValue){
+            if(typeof v==='string'&&v.length<=150)clean[key]=v;
+            else if(typeof v==='number'&&Number.isFinite(v)&&Math.abs(v)<10000)clean[key]=v;
+            else if(typeof v==='boolean')clean[key]=v;
+            else if(v&&typeof v==='object'&&!Array.isArray(v)){
+              const filtered={};for(const [k,c] of Object.entries(v))if(k.length<60&&typeof c==='string'&&/^#[0-9A-Fa-f]{6}$/.test(c))filtered[k]=c;
+              if(['themeColors','themeBackgrounds','themeDateColors'].includes(key))clean[key]=filtered;
+              else if(key==='themeRounds')clean[key]=Object.fromEntries(Object.entries(v).filter(([k,n])=>k.length<60&&typeof n==='number'&&n>=0&&n<=100));
+            }
+          }
+        }
+        if(!themePalettes[clean.theme])clean.theme='matrix';
+        if(!['auto','grid'].includes(clean.shortcutLayout))clean.shortcutLayout='auto';
+        if(!['clock','calendar','shortcuts'].includes(clean.startPage))clean.startPage='clock';
+        const prior=state;state=clean;
+        try{localStorage.setItem('little-pixel-clock',JSON.stringify(state));}
+        catch{state=prior;throw Error('Storage is full. Try importing fewer uploaded images.');}
+        apply();updateDockMode();showView(state.startPage);showBackupStatus('Full configuration imported successfully.');
+      }
+    }catch(err){showBackupStatus('Import failed: '+err.message,true);}
+  });
+  // Firefox WebExtension-only import. Ordinary websites cannot access the browser's topSites API.
+  const firefoxButton=$('importFirefoxSites');
+  if(typeof browser!=='undefined' && browser.topSites && typeof browser.topSites.get==='function'){
+    firefoxButton.hidden=false;
+    $('firefoxImportHelp').textContent='Import sites shown on Firefox’s built-in New Tab page, including pinned shortcuts when available. Existing links are kept.';
+    firefoxButton.addEventListener('click',async()=>{
+      try{
+        const sites=await browser.topSites.get({newtab:true,includeFavicon:true,limit:60});
+        const list=sites.map((s,i)=>({id:'firefox-'+i+'-'+Date.now(),label:s.title||'Shortcut',url:s.url,icon:'↗',...(typeof s.favicon==='string'&&/^data:image\/(?:png|jpeg|gif|webp|x-icon|vnd\.microsoft\.icon);base64,/i.test(s.favicon)&&s.favicon.length<500000?{iconMode:'upload',iconImage:s.favicon}:{iconMode:'favicon'})}));
+        const count=mergeShortcuts(sanitizedShortcuts(list));
+        showBackupStatus(`Imported ${count} Firefox shortcuts. Existing links were kept.`);
+      }catch(err){showBackupStatus('Firefox import failed: '+err.message,true);}
+    });
+  }
+
   showView(['clock','shortcuts','calendar'].includes(displayPageOverride)?displayPageOverride:state.startPage);
   let lastTick=-1;let lastDay='';
   function draw(){
@@ -1321,7 +1869,7 @@
     $('fullscreen').setAttribute('aria-label',active?'Exit full screen':'Enter full screen');
     $('fullscreen').title=active?'Exit full screen':'Full screen';
     $('fullscreen').textContent=active?'⤢':'⛶';
-    if(active&&document.documentElement.classList.contains('settings-open'))toggleSettings(false);
+    // Settings stays available in fullscreen, too.
     draw();
   });
   if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
