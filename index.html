@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0c1511">
-  <meta name="description" content="A customizable pixel clock and calendar with large day buttons for Android and the browser.">
+  <meta name="description" content="Little Pixel: a customizable clock, calendar and shortcuts home screen.">
   <link rel="manifest" href="manifest.webmanifest">
-  <title>Little Pixel Clock</title>
+  <title>Little Pixel</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -43,9 +43,13 @@
     .screen[data-theme="arcade"] {--screen:#121632;--clock:#7cc9ff;--screen-ink:#b7c9ed}
     .screen[data-theme="amber"] {--screen:#1c160b;--clock:#ffa837;--screen-ink:#a38a67}
     .screen[data-theme="minimal"] {--screen:#f2f2ed;--clock:#202c37;--screen-ink:#73808a}
+    .screen[data-theme="ocean"] {--screen:#091d29;--clock:#70e5f5;--screen-ink:#8fbac8}
+    .screen[data-theme="rose"] {--screen:#251423;--clock:#ff94c4;--screen-ink:#d5a3bd}
     .clock-canvas {display:block;width:var(--clock-size,90%);height:175px;max-width:780px;filter:none;flex-shrink:0}
     .screen[data-theme="matrix"] .clock-canvas {filter:drop-shadow(0 0 12px color-mix(in srgb,var(--clock) 20%,transparent))}
     .screen[data-theme="amber"] .clock-canvas {filter:drop-shadow(0 0 14px color-mix(in srgb,var(--clock) 27%,transparent))}
+    .screen[data-theme="ocean"] .clock-canvas {filter:drop-shadow(0 0 15px color-mix(in srgb,var(--clock) 32%,transparent))}
+    .screen[data-theme="rose"] .clock-canvas {filter:drop-shadow(0 0 10px color-mix(in srgb,var(--clock) 20%,transparent))}
     .date-text {color:var(--screen-ink);text-align:center;font-size:clamp(14px,1.7vw,20px);letter-spacing:.09em;font-weight:570;margin-top:3px;line-height:1.55}
     .ampm {font-size:13px;letter-spacing:2px;font-weight:750;color:var(--screen-ink);position:absolute;right:27px;top:23px}
     .foot {display:flex;justify-content:space-between;align-items:center;gap:10px;padding:17px 20px;flex-wrap:wrap}
@@ -62,6 +66,8 @@
     .theme .mini.arcade {background:#121632;color:#7cc9ff;font-family:monospace;text-shadow:3px 3px #244577}
     .theme .mini.amber {background:#1c160b;color:#ffa837;text-shadow:0 0 9px #f8872877}
     .theme .mini.minimal {background:#f2f2ed;color:#202c37;font-family:system-ui;font-weight:650}
+    .theme .mini.ocean {background:#091d29;color:#70e5f5;text-shadow:0 0 10px #48bce777}
+    .theme .mini.rose {background:#251423;color:#ff94c4;font-family:monospace;text-shadow:2px 2px #65364c}
     .theme .name {display:block;font-size:12px;padding:9px 11px;font-weight:650}
     .setting-row {display:flex;align-items:center;justify-content:space-between;gap:14px;margin:13px 0;font-size:14px}
     .setting-row select {max-width:165px;min-width:115px;background:#0e1720;border:1px solid #394655;border-radius:9px;padding:8px 10px;color:var(--text)}
@@ -615,6 +621,38 @@
     .folder-mini .mini-icon-content{display:grid;place-items:center;width:100%;height:100%;font-size:inherit;color:var(--clock)}
     .folder-mini .mini-icon-content img{width:100%;height:100%;object-fit:contain}
     .shortcut-grid.free-grid .shortcut-slot .shortcut-tile{margin:0;padding:8px 1px}
+    /* v6.7 — user-sized grid, clean tiles, and theme profiles */
+    .display-mode .shortcuts-inner,.screen:fullscreen .shortcuts-inner,.shortcuts-inner{width:min(100%,var(--shortcut-grid-width,92vw))!important;max-width:1700px}
+    .display-mode .shortcuts-view,.screen:fullscreen .shortcuts-view{padding-left:clamp(8px,1.6vw,25px);padding-right:clamp(8px,1.6vw,25px)}
+    .shortcut-grid.free-grid{grid-auto-rows:var(--shortcut-cell-height,104px);align-content:start}
+    .free-grid .shortcut-slot{min-height:0;height:var(--shortcut-cell-height,104px)}
+    .free-grid .shortcut-slot .shortcut-entry{min-height:0}
+    .free-grid .shortcut-slot .shortcut-tile{padding:5px 1px}
+    .shortcut-grid .shortcut-move-actions{display:none!important}
+    /* Touch editing: press-and-hold to pick up a shortcut, then drag it to a cell. */
+    .shortcut-grid.is-editing .shortcut-tile{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    .shortcut-grid.is-editing .shortcut-entry.is-touch-grabbed{opacity:.3}
+    .touch-drag-ghost{position:fixed!important;z-index:250!important;pointer-events:none!important;opacity:.93;filter:drop-shadow(0 12px 18px #0009);transform:translate(-50%,-50%) scale(1.08);margin:0!important;transition:none!important;will-change:left,top}
+    .shortcut-slot.touch-drop-hover,.shortcut-entry.touch-drop-hover,.group-member-row.touch-drop-hover{outline:2px solid var(--clock,#9bf57b)!important;outline-offset:2px;border-radius:10px}
+    .group-member-row.is-touch-grabbed{opacity:.4}
+    .group-member-row{touch-action:none;-webkit-user-select:none;user-select:none}
+
+    .shortcut-entry.is-selected-for-move{outline:2px dashed var(--clock);border-radius:12px}
+    .group-member-order{margin:11px 0 3px;padding:9px;border:1px solid #344455;border-radius:12px;background:#101a24}
+    .group-member-order h3{font-size:12px;margin:0 0 5px}
+    .group-member-row{display:flex;gap:8px;align-items:center;padding:7px;border:1px solid #334453;border-radius:9px;margin-top:5px;background:#17222e;cursor:grab;touch-action:none}
+    .group-member-row.dragging{opacity:.4}.group-member-row.drop-target{outline:2px solid var(--accent)}
+    .group-member-row .shortcut-item-icon{width:28px;height:28px;flex:0 0 auto}
+    .group-member-row .group-member-label{font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .group-member-row .mini-action{font-size:13px;padding:5px 7px}
+    .theme-manager{display:flex;flex-direction:column;gap:9px;margin-top:16px;padding:13px;border-radius:13px;border:1px solid #334455;background:#101a24}
+    .theme-manager .theme-manager-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:800}
+    .theme-manager .theme-manager-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+    .theme-manager select{min-width:0;background:#0e1720;border:1px solid #394655;color:var(--text);border-radius:8px;padding:8px;font-size:12px}
+    .theme-manager .theme-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .theme-manager .theme-actions button{font-size:11px;padding:7px 9px}
+    .theme-manager .theme-actions button:disabled{opacity:.35;cursor:not-allowed}
+    .theme-manager small{line-height:1.45;color:var(--muted)}
     /* v6.6 — more desktop grid columns, compact anchored folders */
     .display-mode .shortcuts-inner,.screen:fullscreen .shortcuts-inner{width:min(100%,1200px)}
     .shortcut-grid .shortcut-tile{overflow:hidden}
@@ -629,6 +667,7 @@
     @keyframes group-expand{from{opacity:.3;transform:scale(.84)}to{opacity:1;transform:scale(1)}}
     @media(max-width:390px){.shortcut-grid{grid-template-columns:repeat(var(--shortcut-columns-small,4),minmax(0,1fr))}}
     @media(prefers-reduced-motion:reduce){.group-popover{animation:none!important}}
+    @media(max-width:600px){.shortcut-grid.free-grid{grid-auto-rows:var(--shortcut-cell-height,104px)}.free-grid .shortcut-slot{height:var(--shortcut-cell-height,104px);min-height:0}.shortcuts-inner{width:min(100%,var(--shortcut-grid-width,92vw))!important}}
   </style>
 </head>
 <body>
@@ -704,6 +743,14 @@
         <button type="button" class="theme" data-value="arcade" aria-pressed="false"><span class="mini arcade">▣ 08:42</span><span class="name">Pixel Arcade</span></button>
         <button type="button" class="theme" data-value="amber" aria-pressed="false"><span class="mini amber">08:42</span><span class="name">Amber Glow</span></button>
         <button type="button" class="theme" data-value="minimal" aria-pressed="false"><span class="mini minimal">08:42</span><span class="name">Minimal</span></button>
+        <button type="button" class="theme" data-value="ocean" aria-pressed="false"><span class="mini ocean">● 08:42</span><span class="name">Ocean Glass</span></button>
+        <button type="button" class="theme" data-value="rose" aria-pressed="false"><span class="mini rose">▣ 08:42</span><span class="name">Rose Night</span></button>
+      </div>
+      <div class="theme-manager" aria-label="My saved themes">
+        <div class="theme-manager-title"><span>MY THEMES</span><small id="themeCount">0 saved</small></div>
+        <div class="theme-manager-row"><select id="savedThemePicker" aria-label="Saved theme"><option value="">Choose a saved theme…</option></select><button type="button" id="applySavedTheme" class="ghost">Load</button></div>
+        <div class="theme-actions"><button type="button" id="saveThemeAs" class="ghost">＋ Save current</button><button type="button" id="updateSavedTheme" class="ghost">Update saved</button><button type="button" id="deleteSavedTheme" class="ghost danger-action">Delete</button></div>
+        <small>Save a combination of colors, clock style, fonts and sizes. Changing a color afterward will not overwrite your saved theme until you select Update.</small>
       </div></section><section class="section"><h3>COLORS</h3>
         <div class="subsection-title">Digits / pixels</div>
         <div class="colors" id="colors"></div>
@@ -756,7 +803,7 @@
       </section></div>
       <div class="settings-pane" id="settingsShortcuts" role="tabpanel" aria-labelledby="settingsTabShortcuts" hidden>
         <section class="section shortcuts-help-section"><h3>SHORTCUTS</h3>
-          <p class="inline-help">Open the Shortcuts screen, then tap <strong>✎</strong> in its upper corner to add, edit, or rearrange links.</p>
+          <p class="inline-help">Use the ⚙ on Shortcuts to edit links and folders. Drag tiles to move them or long-press a tile on touchscreens.</p>
           <button type="button" class="ghost" id="editShortcutsFromSettings">Open shortcut editor ↗</button>
         </section>
         <section class="section"><h3>LAYOUT & SIZE</h3>
@@ -768,10 +815,12 @@
           <label class="slider-row" id="shortcutRowsLabel" for="shortcutGridRows" hidden>Grid rows <output id="shortcutGridRowsValue">6</output></label><input class="range" id="shortcutGridRows" type="range" min="3" max="12" step="1" value="6" hidden>
           <label class="setting-row">Show link labels <span class="switch"><input type="checkbox" id="showShortcutLabels" checked><span></span></span></label>
           <label class="slider-row" for="shortcutColumns">Columns <output id="shortcutColumnsValue">4</output></label><input class="range" id="shortcutColumns" type="range" min="2" max="16" step="1" value="4">
+          <label class="slider-row" for="shortcutGridWidth">Grid width <output id="shortcutGridWidthValue">92%</output></label><input class="range" id="shortcutGridWidth" type="range" min="40" max="100" step="2" value="92">
+          <label class="slider-row" id="shortcutCellHeightLabel" for="shortcutCellHeight">Cell height <output id="shortcutCellHeightValue">104px</output></label><input class="range" id="shortcutCellHeight" type="range" min="72" max="160" step="4" value="104">
           <label class="slider-row" for="shortcutSize">Icon size <output id="shortcutSizeValue">100%</output></label><input class="range" id="shortcutSize" type="range" min="60" max="160" step="5" value="100">
           <label class="slider-row" for="shortcutGap">Spacing <output id="shortcutGapValue">12px</output></label><input class="range" id="shortcutGap" type="range" min="2" max="32" step="2" value="12">
           <label class="slider-row" for="shortcutRounding">Corner rounding <output id="shortcutRoundingValue">28%</output></label><input class="range" id="shortcutRounding" type="range" min="0" max="50" step="2" value="28">
-          <p class="shortcut-scale-help">Changes apply immediately. Free-grid positions save locally; on phones the grid reflows to fit the narrower screen.</p>
+          <p class="shortcut-scale-help">Grid width controls the space used across the screen. Cell height controls the vertical spacing in Free grid; the icon-size and gap sliders control individual tiles. Drag icons directly in edit mode.</p>
         </section>
       </div>
       <div class="settings-pane" id="settingsDisplay" role="tabpanel" aria-labelledby="settingsTabDisplay" hidden>
@@ -806,7 +855,7 @@
 <button type="button" id="settingsBackdrop" class="settings-backdrop" aria-label="Close settings" hidden></button>
 <dialog id="shortcutDialog" class="shortcut-dialog" aria-labelledby="shortcutFormHeading">
   <div class="shortcut-dialog-header"><div><p class="dialog-kicker">SHORTCUTS</p><h2 id="shortcutFormHeading">Add shortcut</h2></div>
-    <button type="button" id="closeShortcutDialog" class="dialog-close" aria-label="Close editor">×</button></div>
+    <button type="button" id="closeShortcutDialog" class="dialog-close" aria-label="Close editor" autofocus>×</button></div>
   <form id="shortcutForm" class="shortcut-form">
             <div class="shortcut-form-row"><label>Label <input class="text-field" id="shortcutLabel" type="text" maxlength="45" required placeholder="My website"></label>
               <label>Website URL <input class="text-field" id="shortcutUrl" type="text" inputmode="url" maxlength="500" required placeholder="https://example.com"></label></div>
@@ -828,13 +877,14 @@
 </dialog>
 <dialog id="groupDialog" class="shortcut-dialog" aria-labelledby="groupFormHeading">
   <div class="shortcut-dialog-header"><div><p class="dialog-kicker">SHORTCUT FOLDERS</p><h2 id="groupFormHeading">New group</h2></div>
-    <button id="closeGroupDialog" class="dialog-close" type="button" aria-label="Close group editor">×</button></div>
+    <button id="closeGroupDialog" class="dialog-close" type="button" aria-label="Close group editor" autofocus>×</button></div>
   <form id="groupForm" class="shortcut-form">
     <label>Group name <input class="text-field" id="groupLabel" type="text" required maxlength="40" placeholder="My favorites"></label>
     <label>Icons per row <select id="groupColumns"><option value="auto">Automatic (2×2, 3×3, etc.)</option><option value="2">2 columns</option><option value="3">3 columns</option><option value="4">4 columns</option><option value="5">5 columns</option><option value="6">6 columns</option></select></label>
     <div><label>Choose shortcuts for this group</label>
       <p class="inline-help">Select existing links below. Unchecked links stay on the main shortcuts page. You can dissolve a group later without deleting its links.</p>
-      <div id="groupChooseList" class="group-choose-list" role="group" aria-label="Choose group members"></div></div>
+      <div id="groupChooseList" class="group-choose-list" role="group" aria-label="Choose group members"></div>
+      <div id="groupMemberOrder" class="group-member-order" hidden><h3>ICON ORDER</h3><p class="inline-help">Drag these to rearrange group icons. Use the arrows on touchscreens.</p><div id="groupOrderList"></div></div></div>
     <p class="field-error" id="groupError" hidden></p>
     <div class="form-actions"><button type="submit" class="primary" id="saveGroup">Create group</button><button type="button" class="ghost" id="cancelGroup">Cancel</button><button type="button" class="ghost danger-action" id="dissolveGroup" hidden>Dissolve (keep links)</button></div>
   </form>
@@ -849,9 +899,11 @@
     matrix:{background:'#101d15',color:'#a2ff7c',round:100},
     arcade:{background:'#121632',color:'#7cc9ff',round:10},
     amber:{background:'#1c160b',color:'#ffa837',round:25},
-    minimal:{background:'#f2f2ed',color:'#202c37',round:10}
+    minimal:{background:'#f2f2ed',color:'#202c37',round:10},
+    ocean:{background:'#091d29',color:'#70e5f5',round:100},
+    rose:{background:'#251423',color:'#ff94c4',round:16}
   };
-  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'auto',shortcutGridRows:6,shortcutPositions:{},shortcutColumns:4,shortcutSize:100,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[{id:'chatgpt',icon:'✦',label:'ChatGPT',url:'https://chatgpt.com/'},{id:'youtube',icon:'▶',label:'YouTube',url:'https://www.youtube.com/'},{id:'github',icon:'⌘',label:'GitHub',url:'https://github.com/'},{id:'duolingo',icon:'◉',label:'Duolingo',url:'https://www.duolingo.com/'}]};
+  const defaults = {pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'auto',shortcutGridRows:6,shortcutPositions:{},shortcutColumns:4,shortcutGridWidth:92,shortcutCellHeight:104,customThemes:[],shortcutSize:100,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[{id:'chatgpt',icon:'✦',label:'ChatGPT',url:'https://chatgpt.com/'},{id:'youtube',icon:'▶',label:'YouTube',url:'https://www.youtube.com/'},{id:'github',icon:'⌘',label:'GitHub',url:'https://github.com/'},{id:'duolingo',icon:'◉',label:'Duolingo',url:'https://www.duolingo.com/'}]};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
@@ -861,6 +913,8 @@
   }catch{}
   if(!themePalettes[state.theme])state.theme='matrix';
   if(!Array.isArray(state.shortcuts))state.shortcuts=defaults.shortcuts;
+  if(!Array.isArray(state.customThemes))state.customThemes=[];
+  state.customThemes=state.customThemes.filter(x=>x&&typeof x==='object'&&typeof x.id==='string'&&typeof x.name==='string'&&themePalettes[x.base]).slice(0,30);
   if(!['auto','grid'].includes(state.shortcutLayout))state.shortcutLayout='auto';
   if(!state.shortcutPositions||typeof state.shortcutPositions!=='object'||Array.isArray(state.shortcutPositions))state.shortcutPositions={};
   if(!['clock','calendar','shortcuts'].includes(state.startPage))state.startPage='clock';
@@ -966,6 +1020,53 @@
   });
   showSettingsTab('appearance');
   $('themes').addEventListener('click',e=>{const b=e.target.closest('button[data-value]');if(b)set('theme',b.dataset.value);});
+  const themeKeys=['theme','clockScale','pixelSize','dateFont','calendarFont','calendarStyle','dateSize','clockFont','matchDateColor'];
+  const colorKeys=['themeColors','themeBackgrounds','themeRounds','themeDateColors'];
+  function currentThemeSnapshot(){
+    const preset=Object.fromEntries(themeKeys.map(k=>[k,state[k]]));
+    preset.color=currentColor();preset.background=currentBackground();preset.round=currentRound();preset.dateColor=currentDateColor();
+    return preset;
+  }
+  function renderThemeManager(selected=''){
+    const picker=$('savedThemePicker');const choice=selected||picker.value;
+    picker.replaceChildren(new Option('Choose a saved theme…',''));
+    for(const theme of state.customThemes)picker.add(new Option(theme.name,theme.id));
+    picker.value=state.customThemes.some(t=>t.id===choice)?choice:'';
+    $('themeCount').textContent=state.customThemes.length+' saved';
+    $('updateSavedTheme').disabled=$('deleteSavedTheme').disabled=!picker.value;
+    $('applySavedTheme').disabled=!picker.value;
+  }
+  function loadSavedTheme(item){
+    if(!item)return;
+    const snap=item.snapshot||{};
+    if(!themePalettes[snap.theme])return;
+    for(const key of themeKeys){if(snap[key]!==undefined&&typeof snap[key]===typeof defaults[key])state[key]=snap[key];}
+    const base=state.theme;
+    for(const [key,part] of [['themeColors','color'],['themeBackgrounds','background'],['themeDateColors','dateColor']]){
+      if(typeof snap[part]==='string'&&/^#[0-9a-f]{6}$/i.test(snap[part]))state[key]={...state[key],[base]:snap[part]};
+    }
+    if(Number.isFinite(snap.round))state.themeRounds={...state.themeRounds,[base]:Math.max(0,Math.min(100,snap.round))};
+    save();apply();
+  }
+  $('savedThemePicker').addEventListener('change',()=>renderThemeManager());
+  $('applySavedTheme').addEventListener('click',()=>loadSavedTheme(state.customThemes.find(x=>x.id===$('savedThemePicker').value)));
+  $('saveThemeAs').addEventListener('click',()=>{
+    if(state.customThemes.length>=30){alert('You can save up to 30 themes.');return;}
+    const name=prompt('Name this theme:', 'My theme '+(state.customThemes.length+1));
+    if(name===null)return;const trimmed=name.trim().slice(0,40);if(!trimmed)return;
+    const id='theme-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+    state.customThemes.push({id,name:trimmed,base:state.theme,snapshot:currentThemeSnapshot()});
+    save();renderThemeManager(id);
+  });
+  $('updateSavedTheme').addEventListener('click',()=>{
+    const item=state.customThemes.find(x=>x.id===$('savedThemePicker').value);if(!item)return;
+    item.base=state.theme;item.snapshot=currentThemeSnapshot();save();renderThemeManager(item.id);
+  });
+  $('deleteSavedTheme').addEventListener('click',()=>{
+    const item=state.customThemes.find(x=>x.id===$('savedThemePicker').value);if(!item||!confirm('Delete saved theme “'+item.name+'”?'))return;
+    state.customThemes=state.customThemes.filter(x=>x!==item);save();renderThemeManager();
+  });
+  renderThemeManager();
   for(const key of ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont','calendarStyle','calendarFont','calendarDensity']) $(key).addEventListener('change',e=>set(key,e.target.value));
   for(const key of ['seconds','date','weekday','matchDateColor','showSwitchButtons','showShortcutLabels','showOutsideDates']) $(key).addEventListener('change',e=>set(key,e.target.checked));
   $('pixelColor').addEventListener('input',e=>chooseColor(e.target.value));
@@ -1226,6 +1327,8 @@
     const radius=Math.round((round/100)*size*.55);
     const view=$('shortcutsView');
     view.style.setProperty('--shortcut-columns',cols);
+    view.style.setProperty('--shortcut-grid-width',Math.max(40,Math.min(100,Number(state.shortcutGridWidth)||92))+'vw');
+    view.style.setProperty('--shortcut-cell-height',Math.max(72,Math.min(160,Number(state.shortcutCellHeight)||104))+'px');
     view.style.setProperty('--shortcut-columns-mobile',Math.min(6,cols));
     view.style.setProperty('--shortcut-columns-small',Math.min(4,cols));
     view.style.setProperty('--shortcut-icon-size',Math.round(55*size/100)+'px');
@@ -1240,10 +1343,11 @@
     $('shortcutGridRows').hidden=!gridMode;$('shortcutRowsLabel').hidden=!gridMode;
     $('shortcutGridRows').value=state.shortcutGridRows;
     $('shortcutGridRowsValue').textContent=state.shortcutGridRows;
-    $('shortcutLayoutHelp').textContent=gridMode?'Drag icons into an empty cell or tap Move then a destination. Use + Shortcut or + Group beneath the grid.':'Auto-arrange keeps links and groups together in order.';
-    for(const key of ['shortcutColumns','shortcutSize','shortcutGap','shortcutRounding']){
+    $('shortcutLayoutHelp').textContent=gridMode?'Drag an icon onto another cell. On touchscreens, hold an icon, drag it, and release; or hold and tap a destination. Use + Shortcut or + Group above the grid.':'Auto-arrange keeps links and groups together in order.';
+    $('shortcutCellHeightLabel').hidden=!gridMode;$('shortcutCellHeight').hidden=!gridMode;
+    for(const key of ['shortcutColumns','shortcutGridWidth','shortcutCellHeight','shortcutSize','shortcutGap','shortcutRounding']){
       $(key).value=state[key];
-      $(key+'Value').textContent=state[key]+(key==='shortcutColumns'?'':key==='shortcutGap'?'px':'%');
+      $(key+'Value').textContent=state[key]+(key==='shortcutColumns'?'':['shortcutGap','shortcutCellHeight'].includes(key)?'px':'%');
     }
   }
   /* Shortcut entries are links or one-level folders. Links inside a folder are never duplicated on the grid. */
@@ -1256,6 +1360,8 @@
   let shortcutsEditMode=false,draggedShortcutId=null,movingShortcutId=null,activeGroupId=null,editingGroupId=null;
   let groupAnchor=null;
   function toggleShortcutsEdit(force){
+    const active=document.activeElement;
+    if(active?.matches?.('input:not([type="checkbox"]):not([type="range"]),textarea,[contenteditable="true"]'))active.blur();
     shortcutsEditMode=typeof force==='boolean'?force:!shortcutsEditMode;
     if(shortcutsEditMode)closeGroupPopover();
     movingShortcutId=null;
@@ -1371,12 +1477,67 @@
     // Must be synchronous inside the user's middle-click. Browsers may limit multiple popups.
     for(const link of group.items){const url=normalizedUrl(link.url);if(url)window.open(url,'_blank','noopener,noreferrer');}
   }
+  /* Pointer-based touch dragging works in Android Chrome/Firefox, unlike HTML5 native drag/drop. */
+  function bindHoldToMove(handle,options){
+    let gesture=null,blockClicksUntil=0;
+    handle.addEventListener('click',event=>{
+      if(Date.now()<blockClicksUntil){event.preventDefault();event.stopImmediatePropagation();}
+    },true);
+    function clearGesture(){
+      if(!gesture)return;
+      clearTimeout(gesture.timer);
+      gesture.ghost?.remove();gesture.source?.classList.remove('is-touch-grabbed');
+      gesture.hover?.classList.remove('touch-drop-hover');
+      gesture=null;
+    }
+    const locate=(x,y)=>document.elementFromPoint(x,y)?.closest(options.targetSelector)||null;
+    const moveGhost=(g,x,y)=>{
+      if(!g.ghost)return;
+      g.ghost.style.left=x+'px';g.ghost.style.top=y+'px';
+      const hit=locate(x,y);
+      if(hit!==g.hover){g.hover?.classList.remove('touch-drop-hover');g.hover=hit;hit?.classList.add('touch-drop-hover');}
+    };
+    handle.addEventListener('pointerdown',event=>{
+      if(!options.enabled()||event.pointerType==='mouse'||event.button!==0||gesture||event.target.closest(options.exclude||'__never__'))return;
+      const g={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,x:event.clientX,y:event.clientY,
+        active:false,source:options.source(),hover:null,ghost:null,timer:null};
+      gesture=g;
+      try{handle.setPointerCapture(event.pointerId);}catch{}
+      g.timer=setTimeout(()=>{
+        if(gesture!==g||!options.enabled())return;
+        g.active=true;
+        g.source?.classList.add('is-touch-grabbed');
+        g.ghost=(options.preview()||handle).cloneNode(true);
+        g.ghost.classList.add('touch-drag-ghost');
+        g.ghost.style.width=Math.min(110,Math.max(54,handle.getBoundingClientRect().width))+'px';
+        document.body.appendChild(g.ghost);
+        moveGhost(g,g.x,g.y);
+        try{navigator.vibrate?.(15);}catch{}
+      },480);
+    });
+    handle.addEventListener('pointermove',event=>{
+      const g=gesture;if(!g||event.pointerId!==g.pointerId)return;
+      g.x=event.clientX;g.y=event.clientY;
+      if(!g.active){if(Math.hypot(g.x-g.startX,g.y-g.startY)>13)clearGesture();return;}
+      event.preventDefault();moveGhost(g,g.x,g.y);
+    });
+    handle.addEventListener('pointerup',event=>{
+      const g=gesture;if(!g||event.pointerId!==g.pointerId)return;
+      const wasActive=g.active,target=wasActive?locate(event.clientX,event.clientY):null;
+      if(wasActive){event.preventDefault();blockClicksUntil=Date.now()+650;}
+      clearGesture();
+      // Run after the browser's synthetic click, which the capture handler suppresses.
+      if(wasActive)setTimeout(()=>{if(options.enabled())options.drop(target);},0);
+    });
+    handle.addEventListener('pointercancel',clearGesture);
+    handle.addEventListener('lostpointercapture',()=>{if(gesture&&!gesture.active)clearGesture();});
+  }
   function makeEntry(item,index,total){
     const entry=document.createElement('div');entry.className='shortcut-entry'+(isGroup(item)?' is-group':'');entry.dataset.id=item.id;
     const tile=document.createElement(shortcutsEditMode?'button':isGroup(item)?'button':'a');tile.className='shortcut-tile';
     tile.title=shortcutsEditMode?'Edit '+(item.label||'shortcut'):(item.label||item.url||'Group');
     if(shortcutsEditMode){tile.type='button';tile.addEventListener('click',()=>{
-      if(state.shortcutLayout==='grid'&&movingShortcutId&&movingShortcutId!==item.id){putInSlot(movingShortcutId,state.shortcutPositions[item.id]);return;}
+      if(movingShortcutId){if(movingShortcutId!==item.id){if(state.shortcutLayout==='grid')putInSlot(movingShortcutId,state.shortcutPositions[item.id]);else{const from=movingShortcutId;movingShortcutId=null;reorderShortcuts(from,item.id);}}else{movingShortcutId=null;renderShortcuts();}return;}
       isGroup(item)?openGroupEditor(item):openShortcutEditor(item);
     });}
     else if(isGroup(item)){
@@ -1389,8 +1550,24 @@
     const label=document.createElement('span');label.className='shortcut-caption';label.textContent=item.label||'Shortcut';label.hidden=state.showShortcutLabels===false;
     tile.append(icon,label);entry.appendChild(tile);
     if(shortcutsEditMode){
-      entry.draggable=true;entry.title='Drag to rearrange, or use the move control';
-      entry.classList.toggle('is-moving',movingShortcutId===item.id);
+      entry.draggable=true;entry.title='Drag to rearrange; hold to move on touchscreens';
+      bindHoldToMove(tile,{
+        enabled:()=>shortcutsEditMode,
+        source:()=>entry,preview:()=>tile,
+        targetSelector:state.shortcutLayout==='grid'?'.shortcut-slot':'.shortcut-entry[data-id]',
+        drop:target=>{
+          if(state.shortcutLayout==='grid'){
+            const dest=target?Number(target.dataset.slot):NaN;
+            if(Number.isInteger(dest)&&dest!==state.shortcutPositions[item.id])putInSlot(item.id,dest);
+            else{movingShortcutId=item.id;renderShortcuts();}
+          }else{
+            const dest=target?.dataset.id;
+            if(dest&&dest!==item.id){movingShortcutId=null;reorderShortcuts(item.id,dest);}
+            else{movingShortcutId=item.id;renderShortcuts();}
+          }
+        }
+      });
+      entry.classList.toggle('is-moving',movingShortcutId===item.id);entry.classList.toggle('is-selected-for-move',movingShortcutId===item.id);
       entry.addEventListener('dragstart',event=>{
         if(event.target.closest('.shortcut-move-actions')){event.preventDefault();return;}
         draggedShortcutId=item.id;entry.classList.add('dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',item.id);
@@ -1404,18 +1581,8 @@
         draggedShortcutId=null;
       });
       entry.addEventListener('dragend',()=>{draggedShortcutId=null;document.querySelectorAll('.shortcut-entry').forEach(n=>n.classList.remove('dragging','drop-target'));});
-      const moves=document.createElement('div');moves.className='shortcut-move-actions';
-      if(state.shortcutLayout==='grid'){
-        const b=document.createElement('button');b.type='button';b.className='choose-slot';b.textContent=movingShortcutId===item.id?'Cancel':'Move';
-        b.setAttribute('aria-label','Choose a grid position for '+item.label);
-        b.addEventListener('click',()=>{movingShortcutId=movingShortcutId===item.id?null:item.id;renderShortcuts();});moves.appendChild(b);
-      }else{
-        for(const [glyph,delta,word] of [['←',-1,'earlier'],['→',1,'later']]){
-          const b=document.createElement('button');b.type='button';b.textContent=glyph;b.disabled=delta<0?index===0:index===total-1;
-          b.setAttribute('aria-label','Move '+item.label+' '+word);b.addEventListener('click',()=>moveShortcut(item.id,delta));moves.appendChild(b);
-        }
-      }
-      entry.appendChild(moves);
+      // The icon itself is the drag handle; no separate Move buttons under tiles.
+
     }
     return entry;
   }
@@ -1497,7 +1664,7 @@
   };
   $('openSymbolPicker').addEventListener('click',()=>{
     const opened=$('symbolPicker').hidden;$('symbolPicker').hidden=!opened;$('openSymbolPicker').setAttribute('aria-expanded',String(opened));
-    if(opened){renderSymbols();$('symbolSearch').focus();}
+    if(opened){renderSymbols();$('openSymbolPicker').focus({preventScroll:true});}
   });
   $('symbolSearch').addEventListener('input',renderSymbols);
   $('shortcutIconMode').addEventListener('change',showIconControls);
@@ -1521,6 +1688,14 @@
       }finally{URL.revokeObjectURL(objectURL);}
     }catch{$('shortcutError').textContent='Could not load this image. Try a PNG or JPG.';$('shortcutError').hidden=false;}
   });
+  // Android: tapping outside an edit field dismisses the keyboard without closing editors.
+  document.addEventListener('pointerdown',event=>{
+    if(event.pointerType==='mouse')return;
+    const active=document.activeElement;
+    if(!active?.matches?.('input[type="text"],input[type="url"],input[type="search"],textarea,[contenteditable="true"]'))return;
+    if(event.target.closest('input[type="text"],input[type="url"],input[type="search"],textarea,[contenteditable="true"]'))return;
+    active.blur();
+  },true);
   function openShortcutEditor(item=null){
     resetShortcutForm();
     if(item){
@@ -1531,7 +1706,7 @@
       $('shortcutFormHeading').textContent='Edit shortcut';$('saveShortcut').textContent='Save changes';
       $('removeShortcut').hidden=false;showIconControls();
     }
-    $('shortcutDialog').showModal();$('shortcutLabel').focus();
+    $('shortcutDialog').showModal();$('closeShortcutDialog').focus({preventScroll:true});
   }
   function resetShortcutForm(){
     editingShortcutId=null;pendingShortcutImage='';$('shortcutForm').reset();$('shortcutIconMode').value='symbol';
@@ -1569,9 +1744,50 @@
   });
   $('cancelShortcut').addEventListener('click',closeShortcutEditor);
   $('showShortcutLabels').addEventListener('change',event=>set('showShortcutLabels',event.target.checked));
-  for(const id of ['shortcutColumns','shortcutSize','shortcutGap','shortcutRounding'])$(id).addEventListener('input',event=>set(id,Number(event.target.value)));
+  for(const id of ['shortcutColumns','shortcutGridWidth','shortcutCellHeight','shortcutSize','shortcutGap','shortcutRounding'])$(id).addEventListener('input',event=>set(id,Number(event.target.value)));
 
   /* Create or edit Android-style folder groups, with explicit non-destructive dissolve. */
+  let groupEditorOrder=[];
+  function renderGroupOrder(){
+    const list=$('groupOrderList'),selected=new Set([...$('groupChooseList').querySelectorAll('input:checked')].map(x=>x.value));
+    const all=[...(editingGroupId?topEntry(editingGroupId)?.items||[]:[]),...state.shortcuts.filter(x=>!isGroup(x))];
+    const byId=new Map(all.map(x=>[x.id,x]));
+    groupEditorOrder=groupEditorOrder.filter(id=>selected.has(id));
+    for(const id of selected)if(!groupEditorOrder.includes(id))groupEditorOrder.push(id);
+    list.replaceChildren();$('groupMemberOrder').hidden=!groupEditorOrder.length;
+    for(const [i,id] of groupEditorOrder.entries()){
+      const item=byId.get(id);if(!item)continue;
+      const row=document.createElement('div');row.className='group-member-row';row.draggable=true;row.dataset.id=id;
+      const grip=document.createElement('span');grip.textContent='⠿';grip.title='Drag to reorder';
+      const title=document.createElement('span');title.className='group-member-label';title.textContent=item.label||item.url;
+      row.append(grip,makeIcon(item,'shortcut-item-icon'),title);
+      for(const [sym,delta] of [['↑',-1],['↓',1]]){
+        const btn=document.createElement('button');btn.className='mini-action';btn.type='button';btn.textContent=sym;btn.disabled=i+delta<0||i+delta>=groupEditorOrder.length;
+        btn.setAttribute('aria-label',(delta<0?'Move ':'Move ')+item.label+(delta<0?' earlier':' later'));
+        btn.addEventListener('click',()=>{const newIndex=i+delta;[groupEditorOrder[i],groupEditorOrder[newIndex]]=[groupEditorOrder[newIndex],groupEditorOrder[i]];renderGroupOrder();});row.appendChild(btn);
+      }
+      bindHoldToMove(row,{
+        enabled:()=>!!$('groupDialog').open,source:()=>row,preview:()=>row,
+        exclude:'button',targetSelector:'.group-member-row',
+        drop:target=>{
+          const from=groupEditorOrder.indexOf(id),to=groupEditorOrder.indexOf(target?.dataset.id);
+          if(from<0||to<0||from===to)return;
+          const [moved]=groupEditorOrder.splice(from,1);groupEditorOrder.splice(to,0,moved);renderGroupOrder();
+        }
+      });
+      row.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',id);e.dataTransfer.effectAllowed='move';row.classList.add('dragging');});
+      row.addEventListener('dragend',()=>row.classList.remove('dragging'));
+      row.addEventListener('dragover',e=>{e.preventDefault();row.classList.add('drop-target');});
+      row.addEventListener('dragleave',()=>row.classList.remove('drop-target'));
+      row.addEventListener('drop',e=>{
+        e.preventDefault();row.classList.remove('drop-target');const dragged=e.dataTransfer.getData('text/plain');
+        const source=groupEditorOrder.indexOf(dragged),target=groupEditorOrder.indexOf(id);
+        if(source<0||target<0||source===target)return;
+        const [moved]=groupEditorOrder.splice(source,1);groupEditorOrder.splice(target,0,moved);renderGroupOrder();
+      });
+      list.appendChild(row);
+    }
+  }
   function openGroupEditor(group=null){
     editingGroupId=group?.id||null;
     $('groupFormHeading').textContent=group?'Edit group':'New group';
@@ -1580,6 +1796,7 @@
     $('groupLabel').value=group?.label||'';
     $('groupColumns').value=group?.columns||'auto';
     $('groupError').hidden=true;
+    groupEditorOrder=(group?.items||[]).map(x=>x.id);
     const list=$('groupChooseList');list.replaceChildren();
     const choices=[...(group?.items||[]),...state.shortcuts.filter(item=>!isGroup(item))];
     if(!choices.length){const p=document.createElement('p');p.className='inline-help';p.textContent='Add a shortcut first, then return here to put it into a group.';list.appendChild(p);}
@@ -1589,9 +1806,9 @@
       const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=link.id;checkbox.checked=!!group?.items.some(it=>it.id===link.id);
       const icon=makeIcon(link,'shortcut-item-icon');
       const txt=document.createElement('span');txt.textContent=link.label||link.url;
-      label.append(checkbox,icon,txt);list.appendChild(label);
+      label.append(checkbox,icon,txt);list.appendChild(label);checkbox.addEventListener('change',renderGroupOrder);
     }
-    $('groupDialog').showModal();$('groupLabel').focus();
+    renderGroupOrder();$('groupDialog').showModal();$('closeGroupDialog').focus({preventScroll:true});
   }
   function closeGroupEditor(){if($('groupDialog').open)$('groupDialog').close();editingGroupId=null;}
   $('closeGroupDialog').addEventListener('click',closeGroupEditor);
@@ -1603,7 +1820,8 @@
     const selected=new Set([...$('groupChooseList').querySelectorAll('input:checked')].map(input=>input.value));
     const group=editingGroupId?topEntry(editingGroupId):null;
     const available=[...(group?.items||[]),...state.shortcuts.filter(item=>!isGroup(item))];
-    const members=available.filter(link=>selected.has(link.id));
+    const byId=new Map(available.map(link=>[link.id,link]));
+    const members=groupEditorOrder.filter(id=>selected.has(id)).map(id=>byId.get(id)).filter(Boolean);
     const leftovers=(group?.items||[]).filter(link=>!selected.has(link.id));
     const columns=$('groupColumns').value;
     const newGroup=group?{...group,label,columns,items:members}:{id:'group-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),type:'group',label,columns,items:members};
@@ -1790,6 +2008,10 @@
         for(const [key,defaultValue] of Object.entries(defaults)){
           if(key==='shortcuts'){if(raw.shortcuts!==undefined)clean.shortcuts=sanitizedShortcuts(raw.shortcuts);continue;}
           if(key==='pinPreview')continue;
+          if(key==='customThemes'){
+            if(Array.isArray(raw.customThemes))clean.customThemes=raw.customThemes.filter(t=>t&&typeof t==='object'&&typeof t.id==='string'&&t.id.length<80&&typeof t.name==='string'&&t.name.length<=40&&t.snapshot&&typeof t.snapshot==='object'&&themePalettes[t.snapshot.theme]).slice(0,30).map(t=>({id:t.id,name:t.name,base:t.snapshot.theme,snapshot:t.snapshot}));
+            continue;
+          }
           if(key==='shortcutPositions'){
             if(raw.shortcutPositions&&typeof raw.shortcutPositions==='object'&&!Array.isArray(raw.shortcutPositions)){
               clean.shortcutPositions=Object.fromEntries(Object.entries(raw.shortcutPositions).filter(([k,n])=>k.length<=80&&Number.isInteger(n)&&n>=0&&n<150));
@@ -1814,7 +2036,7 @@
         const prior=state;state=clean;
         try{localStorage.setItem('little-pixel-clock',JSON.stringify(state));}
         catch{state=prior;throw Error('Storage is full. Try importing fewer uploaded images.');}
-        apply();updateDockMode();showView(state.startPage);showBackupStatus('Full configuration imported successfully.');
+        apply();renderThemeManager();updateDockMode();showView(state.startPage);showBackupStatus('Full configuration imported successfully.');
       }
     }catch(err){showBackupStatus('Import failed: '+err.message,true);}
   });
@@ -1842,7 +2064,7 @@
     const r=resizeCanvas();if(!r)return;
     if(state.theme==='minimal')drawMinimal(time,r);
     else if(state.theme==='amber')drawAmber(time,r);
-    else drawMatrix(time,r,state.theme==='arcade');
+    else drawMatrix(time,r,state.theme==='arcade'||state.theme==='rose');
     lastTick=now.getSeconds();
   }
   setInterval(()=>{const n=new Date();if(n.getSeconds()!==lastTick)draw();const day=n.toDateString();if(day!==lastDay){lastDay=day;renderCalendar();}},250);

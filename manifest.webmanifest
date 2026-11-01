@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Little Pixel Clock",
-  "short_name": "Pixel Clock",
-  "description": "A pixel clock, calendar, and customizable shortcuts in one fullscreen-friendly app.",
+  "name": "Little Pixel",
+  "short_name": "Little Pixel",
+  "description": "A customizable shortcuts, clock, and calendar home screen.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
