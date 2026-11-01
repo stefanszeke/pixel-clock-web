@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Little Pixel \u2013 New Tab",
+  "version": "6.19.1",
+  "description": "Customizable New Tab with clock, calendar, shortcut folders, notes, reminders, Firefox shortcut import and desktop-profile sync.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "topSites"
+  ],
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "icons": {
+    "48": "icon-192.png",
+    "96": "icon-192.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "little-pixel@addons.local",
+      "strict_min_version": "121.0"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

@@ -1,13 +1,11 @@
-# Little Pixel v6.18 — GitHub Pages
+# Little Pixel — Firefox Add-on v6.19.0
 
-Unzip and publish these files at the root of your GitHub Pages repository.
+**Unsigned release candidate** — intended for testing and for submission to Mozilla for signing.
 
-## Changes from v6.17
-- Completed **pinned** notes remain visible on the clock, with a checked button and struck-through text. The × dismisses them without deleting the saved item.
-- Notes & Reminders list now displays a single truncated line (full note is available in Edit).
-- Shortcut tiles have a small × in edit mode; individual shortcut deletion requires confirmation. For groups, × dissolves the folder **without removing its links**.
-- Default dot overlay enabled: size 1 px, gap 14 px, scale 110%, rounding 40%, opacity 11%, white.
-- Existing locally saved background settings are preserved; choose “Reset dots on this screen” to apply new defaults to an already-customized view.
+1. Extract the package and open `about:debugging#/runtime/this-firefox`.
+2. Select **Load Temporary Add-on** and choose `manifest.json`.
+3. Open a new tab. Little Pixel appears under the tab title **New Tab**.
+4. For settings use the bottom menu's gear icon; in **General** you can find JSON backup, Firefox integration and Factory Reset.
+5. Read `README-FIREFOX.md`, `CHANGELOG.md` and `RELEASE-CHECKLIST.md` before publishing.
 
-## Notes
-Data lives in the browser's localStorage, not a remote server; regularly export configuration backups. Timed notifications are best-effort only while the website is running.
+**Important:** Temporary add-ons unload when Firefox restarts. Normal permanent installation requires Mozilla-signed XPI. The GitHub Pages build is separate.

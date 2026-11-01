@@ -1,0 +1,28 @@
+# 6.19.1 — Firefox import and usability fixes
+
+- Added empty shortcut prompt and manual native import with real error/zero-site feedback.
+- Import now checks both native New Tab sites and pinned site retrieval paths.
+- Removed custom New Tab favicon declarations; keeps the normal Firefox/default page icon.
+- Redesigned settings category navigation into a compact two-row icon grid.
+- Added Firefox-compatible bookmarks HTML export (distinct from Firefox pinned sites).
+- Preserved existing profile state, reminders, sync and factory reset controls.
+
+# Little Pixel for Firefox — v6.19.0
+
+Release candidate · 1 November 2026
+
+## Changes from the v6.18.1 preview
+
+- **New Tab** is the tab title, rather than a development-version label.
+- **First-run shortcuts** start empty and automatically import Firefox's available native New Tab sites. No example ChatGPT, YouTube, GitHub or Duolingo tiles.
+- **Refined defaults** for the 12-column Free grid, clock lighting and date display, Monday-first calendar, weekend outlines and tiny note/reminder icons.
+- **Factory reset…** in Settings → General → Data & Backups: removes Little Pixel profile data and Firefox-synced configuration, restores defaults and re-imports Firefox shortcuts. Confirmation required. The native Firefox shortcut list itself is untouched.
+- **Help on hover / keyboard focus** for Firefox shortcut following and Firefox Sync, plus explanatory tooltips for Sync now, manual import, notification testing and several layout options.
+- Includes the existing v6.18 clock, calendar, notes, reminders, shortcut folders, drag/reorder, themes, backgrounds, native shortcut import, desktop sync, and background notification checks.
+
+## Known limitations
+
+- Firefox native shortcuts can be **read into** Little Pixel, but cannot be modified from Little Pixel.
+- Firefox profile sync is best-effort and applies to desktop Firefox. Uploaded wallpapers and shortcut image files remain local.
+- Timed reminder notifications require Firefox to remain running and may be suppressed by OS settings. Notifications after browser shutdown are not guaranteed.
+- This package is **unsigned**. A permanently installed add-on for standard Firefox requires Mozilla signing.
