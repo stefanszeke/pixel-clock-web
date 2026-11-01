@@ -1,20 +1,15 @@
-# Little Pixel v6.7
+# Little Pixel v6.12
 
-Single-page, offline-friendly app for GitHub Pages.
+Single-page offline-ready PWA for GitHub Pages.
 
-## New in this release
-- Rename to Little Pixel (keeps previous `little-pixel-clock` localStorage key and existing shortcut settings).
-- Grid width 40–100% and Free grid cell-height 72–160px.
-- Drag shortcuts directly in edit mode; no Move button under every shortcut. On Android, hold a tile for half a second, drag it, and release over a new cell or icon. Holding and releasing without dragging selects it for tap-to-place.
-- Edit a group to rearrange its members by dragging on desktop, hold-and-drag on touchscreens, or up/down buttons; their order appears in the folder popup.
-- Edit dialogs do not auto-focus text inputs on Android; the keyboard appears only when a field is tapped, and closes after tapping non-text controls.
-- Ocean Glass and Rose Night built-in styles.
-- Theme Manager: Save current theme (style, colors, font/size options), load, update, delete. Up to 30 profiles.
-- Custom themes are included in Export everything and Import everything backups.
+## Backgrounds
+- Style: solid colors and the shared wallpaper.
+- Background: choose Shortcuts, Clock, or Calendar at the top, which also navigates to that view.
+- Per screen: shared/own/none wallpaper, image fit, darkening, dots (enable, color, size, gap, scale, rounding and opacity).
+- Reset this screen, reset dots, and reset all wallpapers.
+- Compatible with v6.10/v6.11 browser storage and JSON backups.
 
-## Usage
-Upload all files from this folder to the root of your GitHub Pages repository. The app works fully offline once the service worker has cached the files. Previous on-device preferences should remain under the same origin.
+## Clock
+The v6.11 features are included: extended Amber size, Minimal-only font setting, independent pixel/segment and backlight glow, unlit-pixel opacity, and blinking/pulsing colon.
 
-Settings -> Shortcuts -> Layout & Size has the grid controls. Settings -> Style has My Themes below the six presets.
-
-Some browsers require a refresh after updating the service worker.
+Extract all files to a GitHub Pages repository root. Do not upload the ZIP as a single file.
