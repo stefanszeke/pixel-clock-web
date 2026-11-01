@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0c1511">
   <meta name="description" content="Little Pixel: a customizable clock, calendar and shortcuts home screen.">
   <link rel="manifest" href="manifest.webmanifest">
-  <title>Little Pixel</title>
+  <title>Little Pixel · v6.18</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -684,7 +684,7 @@
     .background-settings .control-divider{margin-top:19px}
     .background-settings .slider-row{margin-top:12px}
 
-    /* v6.12 background editor: separate tab, clear per-screen wallpaper cards */
+    /* v6.13 background editor: separate tab, clear per-screen wallpaper cards */
     .setting-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
     .setting-tab{min-width:0;padding:9px 3px;font-size:11px}
     .wallpaper-view-list{display:grid;gap:9px;margin-top:10px}
@@ -712,7 +712,7 @@
     .background-settings .subtle-button{margin-top:10px}
     @media(max-width:430px){.setting-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.wallpaper-card-main{gap:8px}.wallpaper-thumb{width:86px;min-width:86px;height:62px}}
 
-    /* v6.12: responsive clock scaling, separate dot glow and soft ambient backlight. */
+    /* v6.13: responsive clock scaling, separate dot glow and soft ambient backlight. */
     .clock-canvas{width:min(calc(90% * var(--clock-zoom,1)),100%);height:calc(175px * var(--clock-zoom,1));max-width:100%;max-height:58dvh;filter:none!important;position:relative;z-index:1}
     .clock-view::before{content:"";position:absolute;pointer-events:none;left:50%;top:50%;width:min(83vw,950px);height:min(47vh,450px);transform:translate(-50%,-52%);background:radial-gradient(ellipse,color-mix(in srgb,var(--clock) 62%,transparent) 0%,color-mix(in srgb,var(--clock) 23%,transparent) 29%,transparent 73%);opacity:var(--backlight-opacity,0);filter:blur(30px);z-index:0;transition:opacity .17s ease}
     .clock-view>.date-text{position:relative;z-index:1}
@@ -724,7 +724,11 @@
     }
     @media(prefers-reduced-motion:reduce){.clock-view::before{transition:none}}
 
-    /* v6.12: select one screen at a time while changing its background */
+    /* v6.13: clock controls consolidated, independent glow sliders */
+    #settingsTime .effect-slider{margin:5px 0 14px 0}
+    #settingsTime .section:first-child{margin-top:8px}
+    #settingsBackground #syncDotTexture{accent-color:#a2ff7c}
+    /* v6.13: select one screen at a time while changing its background */
     .background-selector{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:6px 0 10px;background:#141e29}
     .background-selector button{border:1px solid #354859;background:#0a151d;color:#ccd9e5;border-radius:9px;font-size:11px;font-weight:750;padding:11px 3px;min-width:0;cursor:pointer}
     .background-selector button[aria-pressed="true"]{background:#a2ff7c;color:#101a13;border-color:#a2ff7c}
@@ -735,6 +739,191 @@
     #settingsBackground .wallpaper-card{margin-top:10px}
     #settingsBackground .wallpaper-card-actions button{min-height:35px}
     @media(max-width:430px){#wallpaperPreviewActive{width:98px;min-width:98px;height:73px}}
+
+    /* v6.15: notes, permanent clock pins and dated calendar reminders */
+    .clock-note-shelf{position:absolute;z-index:2;left:50%;transform:translateX(-50%);bottom:clamp(70px,11vh,120px);width:min(580px,88vw);max-width:100%;display:flex;flex-direction:column;align-items:stretch;gap:7px;pointer-events:none}
+    .clock-note-toolbar{display:flex;justify-content:flex-end;pointer-events:auto}
+    .clock-add-note{font:650 12px system-ui,sans-serif;padding:6px 11px;border:1px solid color-mix(in srgb,var(--clock) 36%,transparent);border-radius:999px;background:color-mix(in srgb,var(--screen) 78%,transparent);color:var(--clock);cursor:pointer;backdrop-filter:blur(10px)}
+    .clock-add-note:hover{background:color-mix(in srgb,var(--clock) 15%,var(--screen))}
+    .clock-note-list{display:flex;flex-direction:column;gap:5px;max-height:min(24vh,172px);overflow:auto;scrollbar-width:thin;pointer-events:auto}
+    .clock-note-card{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 11px;border-radius:12px;border:1px solid color-mix(in srgb,var(--clock) 23%,transparent);background:color-mix(in srgb,var(--screen) 88%,transparent);backdrop-filter:blur(12px);color:var(--clock);font-family:system-ui,sans-serif;box-shadow:0 8px 28px #0003}
+    .clock-note-kind{font-size:13px;flex:0 0 auto;opacity:.8}
+    .clock-note-words{flex:1;min-width:0;font-size:clamp(12px,1.1vw,15px);line-height:1.4;text-align:left;overflow-wrap:anywhere;white-space:pre-wrap;cursor:pointer;max-height:4.2em;overflow:hidden}
+    .clock-note-when{font-size:10px;opacity:.7;white-space:nowrap;flex-shrink:0}
+    .clock-note-clear{border:0;background:transparent;color:var(--clock);opacity:.75;font-size:21px;line-height:1;padding:3px 5px;border-radius:7px;flex-shrink:0;cursor:pointer}
+    .clock-note-clear:hover{opacity:1;background:color-mix(in srgb,var(--clock) 14%,transparent)}
+    .clock-note-shelf.notes-hidden .clock-note-list{display:none}
+    .note-dialog .note-textarea{min-height:85px;resize:vertical;font-family:inherit}
+    .note-dialog .note-pin-row{display:flex;flex-direction:row;align-items:center;justify-content:space-between;color:#c8d5e1;font-size:13px;margin:4px 0}
+    .notes-settings-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    .notes-settings-head h3{margin:0}
+    .notes-settings-head .ghost{padding:7px 9px;font-size:11px}
+    .notes-manager-list{display:flex;flex-direction:column;gap:7px;max-height:350px;overflow:auto;scrollbar-width:thin}
+    .note-manager-row{padding:10px;border:1px solid #344351;background:#0f1821;border-radius:11px;display:flex;align-items:flex-start;gap:9px;min-width:0;flex-wrap:wrap}
+    .note-manager-content{display:flex;flex-direction:column;gap:5px;min-width:140px;flex:1;color:#e0e9f1;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+    .note-manager-content small{font-size:10px;color:#9cafc2}
+    .note-manager-content .is-done{text-decoration:line-through;opacity:.6}
+    .note-manager-actions{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+    .note-manager-actions .mini-action{font-size:10px;padding:6px 7px}
+    .note-empty{font-size:12px;color:#a9b8c7;text-align:center;padding:15px}
+    .day-notes-body{padding:17px 20px 23px}
+    .day-notes-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:13px}
+    .day-notes-actions .ghost{font-size:12px;padding:8px 11px}
+    .calendar-note-marks{position:absolute;display:flex;align-items:center;gap:4px;left:50%;bottom:3px;transform:translateX(-50%);pointer-events:none}
+    .calendar-note-marks i{display:block;width:5px;height:5px;border-radius:50%;background:var(--clock)}
+    .calendar-note-marks .reminder-mark{background:#ffba65}
+    .calendar-day.selected .calendar-note-marks .note-mark{background:var(--screen)}
+    .calendar-day.selected .calendar-note-marks .reminder-mark{background:#824218}
+    .calendar-day-number{pointer-events:none}
+    .calendar-selected{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;white-space:normal;overflow:visible}
+    .calendar-open-day{font-size:11px;padding:4px 8px;border:1px solid color-mix(in srgb,var(--clock) 35%,transparent);background:transparent;border-radius:8px;color:var(--clock)}
+    .setting-tabs{display:flex!important;overflow-x:auto!important;scrollbar-width:thin;flex-wrap:nowrap!important;gap:4px}
+    .setting-tab{flex:0 0 auto!important;min-width:57px!important;padding:10px 6px!important}
+    @media(max-width:760px){
+      .clock-note-shelf{bottom:max(65px,calc(env(safe-area-inset-bottom) + 68px));width:92vw}
+      .clock-note-list{max-height:23vh}
+      .clock-note-card{padding:8px}
+      .clock-note-words{font-size:12px}
+      .clock-note-when{font-size:9px}
+      .calendar-note-marks{bottom:2px}
+    }
+    @media(max-height:570px){
+      .clock-note-shelf{bottom:55px;width:min(45vw,480px);left:auto;right:12px;transform:none}
+      .clock-note-list{max-height:35vh}
+      .clock-note-when{display:none}
+    }
+
+  
+    /* v6.15: lightweight quick note, calendar markers/scale, and background opacity */
+    .clock-note-toolbar{justify-content:center}
+    .clock-add-note{border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;
+      border-radius:50%;font:400 26px/1 system-ui,sans-serif;padding:5px 10px;min-width:38px;min-height:35px;
+      opacity:.64;transition:opacity .17s ease,transform .17s ease}
+    .clock-add-note:hover,.clock-add-note:focus-visible{opacity:1;transform:scale(1.13);outline-offset:3px}
+    .clock-add-note[hidden]{display:none!important}
+    .note-type-hint{color:#9fafc0;font-size:11px;line-height:1.4;margin:-3px 0 4px}
+    .calendar-inner,.display-mode .calendar-inner,.screen:fullscreen.is-calendar .calendar-inner{
+      width:min(100%,calc(630px * var(--calendar-scale,1)))!important}
+    .calendar-grid,.calendar-grid.compact{grid-auto-rows:minmax(calc(44px * var(--calendar-scale,1)),1fr)}
+    .calendar-day{background:color-mix(in srgb,var(--clock) var(--calendar-tile-fill,8%),transparent);
+      font-size:clamp(12px,calc(17px * var(--calendar-scale,1)),27px)}
+    .calendar-grid.compact .calendar-day{min-height:calc(37px * var(--calendar-scale,1))}
+    .display-mode .calendar-grid,.display-mode .calendar-grid.compact{
+      height:min(calc(410px * var(--calendar-scale,1)),calc(100dvh - 212px));grid-template-rows:repeat(6,minmax(0,1fr))}
+    .display-mode .calendar-day,.screen:fullscreen .calendar-day{font-size:clamp(12px,calc(20px * var(--calendar-scale,1)),30px)}
+    .calendar-note-marks{bottom:2px;gap:4px;min-height:12px;align-items:center;z-index:1}
+    .calendar-note-marks .calendar-marker-icon{display:block;width:clamp(10px,calc(12px * var(--calendar-scale,1)),16px);
+      height:clamp(10px,calc(12px * var(--calendar-scale,1)),16px);color:var(--clock);overflow:visible}
+    .calendar-note-marks .calendar-marker-icon.reminder-mark{color:#ffba65}
+    .calendar-day.selected .calendar-marker-icon.note-mark{color:var(--screen)}
+    .calendar-day.selected .calendar-marker-icon.reminder-mark{color:#754217}
+    .shortcuts-view .shortcut-entry:not(.is-add) .shortcut-icon{
+      background:color-mix(in srgb,var(--clock) var(--shortcut-icon-fill,11%),transparent)}
+    @media(max-width:780px){
+      .display-mode .calendar-grid,.display-mode .calendar-grid.compact{height:min(calc(350px * var(--calendar-scale,1)),calc(100dvh - 195px))}
+      .calendar-inner,.display-mode .calendar-inner{width:min(100%,calc(630px * var(--calendar-scale,1)))!important}
+      .calendar-note-marks{gap:2px}
+    }
+    @media(prefers-reduced-motion:reduce){.clock-add-note{transition:none!important}}
+    /* v6.17 — consistent dock, icon opacity, visible task center and fullscreen settings. */
+    .shortcuts-view .shortcut-entry:not(.is-add) .shortcut-icon {border-color:color-mix(in srgb,var(--clock) var(--shortcut-border-fill,24%),transparent)}
+    .display-mode .view-tabs:not(.is-collapsed){background:color-mix(in srgb,var(--screen) var(--dock-opacity,93%),transparent)!important}
+    html:fullscreen,html:fullscreen body{height:100dvh;width:100vw;background:var(--page);overflow:hidden}
+    html:fullscreen .screen{width:100%;height:100dvh}
+    html:fullscreen .settings-backdrop{display:none!important}
+    .notes-dock-icon{position:relative}
+    .notes-dock-count{position:absolute;top:-3px;right:-5px;display:grid;place-items:center;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:var(--clock);color:var(--screen);font:750 10px system-ui,sans-serif}
+    .notes-dock-count[hidden]{display:none}
+    .note-manager-check{display:grid;place-items:center;flex:0 0 21px;width:21px;height:21px;accent-color:var(--accent);margin-top:3px;cursor:pointer}
+    .note-manager-row.is-complete{opacity:.67}
+    .note-manager-row.is-complete .note-manager-content>span{text-decoration:line-through}
+    .note-manager-section-heading{font:750 11px system-ui,sans-serif;letter-spacing:.08em;color:#b5c6d6;display:flex;justify-content:space-between;margin:14px 0 7px}
+    .note-manager-section-heading:first-child{margin-top:0}
+    .notes-center-dialog{width:min(94vw,610px);max-height:min(88dvh,850px)}
+    .notes-center-body{padding:18px 20px 24px}
+    .notes-center-body .notes-manager-list{max-height:min(58dvh,560px)}
+    .notes-center-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
+    .notes-center-actions button{font-size:12px}
+    .note-manager-row .note-manager-content{min-width:0}
+    .note-manager-actions{flex-shrink:0}
+    .clock-note-done{width:19px;height:19px;flex:0 0 19px;accent-color:var(--clock);cursor:pointer}
+    .notification-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:9px 0}
+    .notification-status{font-size:11px;color:#a8b9c8;min-height:15px;margin:8px 0 0}
+    .notification-status[data-error="true"]{color:#ffadad}
+    @media(max-width:600px){.notes-center-body{padding:13px}.notes-center-dialog{max-height:calc(100dvh - 24px)}.notes-center-actions{gap:5px}}
+
+    /* v6.17 — compact task manager, discrete selection and accessible icon actions. */
+    .notes-center-dialog{width:min(94vw,720px);max-height:min(91dvh,850px)}
+    .notes-center-body{padding:12px 16px 18px}
+    .notes-center-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+    .notes-center-actions .ghost{font-size:12px;padding:7px 10px}
+    .notes-center-actions .spacer{flex:1}
+    .notes-center-filters{display:grid;grid-template-columns:minmax(110px,1fr) minmax(105px,125px) minmax(100px,122px);gap:7px;margin-bottom:9px}
+    .notes-center-filters input,.notes-center-filters select{background:#101b27;color:#e8f0f7;border:1px solid #334458;border-radius:9px;font:12px system-ui,sans-serif;height:35px;padding:0 10px;min-width:0;width:100%}
+    .notes-center-filters input:focus,.notes-center-filters select:focus{outline:2px solid var(--clock);outline-offset:1px}
+    .notes-bulk-tools{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:9px;padding:7px;border-radius:10px;background:#1a2632;border:1px solid #34485d}
+    .notes-bulk-tools[hidden]{display:none!important}
+    .notes-bulk-count{font:650 11px system-ui,sans-serif;color:#c4d2df;padding:0 4px}
+    .notes-bulk-tools .ghost{font-size:11px;padding:6px 8px}
+    .notes-bulk-tools button:disabled{opacity:.35;cursor:not-allowed}
+    .notes-center-body .notes-manager-list{max-height:min(55dvh,540px);gap:4px}
+    .note-manager-section-heading{margin:11px 0 5px;font-size:10px;color:#a1b3c4;letter-spacing:.07em}
+    .note-manager-section-heading:first-child{margin-top:0}
+    .note-manager-row{padding:7px 8px;border-radius:10px;flex-wrap:nowrap;align-items:center;gap:8px;min-height:48px}
+    .note-manager-content{gap:2px;min-width:0!important;overflow:hidden}
+    .note-manager-content small{font-size:10px;color:#a3b4c5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .note-manager-content>span{font-size:12px;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere;max-height:3.95em;overflow:hidden}
+    .note-manager-actions{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;margin-left:auto}
+    .note-icon-action,.note-task-toggle{display:grid;place-items:center;flex:none;border:1px solid transparent;border-radius:8px;background:transparent;color:#b8c9d9;cursor:pointer;transition:background .12s,color .12s}
+    .note-icon-action{width:30px;height:30px;padding:5px}
+    .note-icon-action svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+    .note-icon-action:hover,.note-icon-action:focus-visible{background:#2a3848;color:#f2f7ff}
+    .note-icon-action.is-active{color:var(--clock)}
+    .note-icon-action.is-danger:hover{background:#582a35;color:#ffa9b5}
+    .note-task-toggle{width:24px;height:24px;border:1.5px solid #607486;border-radius:50%;color:transparent;flex:0 0 24px;padding:0}
+    .note-task-toggle svg{width:14px;height:14px;stroke:currentColor;stroke-width:3;fill:none;stroke-linejoin:round;stroke-linecap:round}
+    .note-task-toggle:hover{border-color:var(--clock);background:color-mix(in srgb,var(--clock) 12%,transparent);color:var(--clock)}
+    .note-task-toggle.is-done{background:var(--clock);border-color:var(--clock);color:var(--screen)}
+    .note-manager-row.is-complete{opacity:.72}
+    .note-manager-row.is-complete .note-manager-content>span{text-decoration:line-through}
+    .note-bulk-select{width:17px;height:17px;accent-color:var(--clock);cursor:pointer;flex:0 0 17px}
+    .note-manager-row.is-multi-selected{border-color:var(--clock);background:color-mix(in srgb,var(--clock) 9%,#0f1821)}
+    .note-dialog-complete{margin:4px 0 8px;display:flex;align-items:center;gap:9px;justify-content:flex-start}
+    .note-dialog-complete .note-task-toggle{width:27px;height:27px;flex-basis:27px}
+    .note-dialog-complete .note-task-toggle svg{width:15px;height:15px}
+    .note-dialog-complete span{font-size:12px;color:#c8d5e1}
+    .clock-note-done.note-task-toggle{flex:0 0 20px;width:20px;height:20px;border-color:var(--clock);color:transparent}
+    .clock-note-done.note-task-toggle:hover{color:var(--clock)}
+    .clock-note-done.note-task-toggle.is-done{color:var(--screen)}
+    .calendar-day.selected .calendar-note-marks{gap:3px;bottom:3px}
+    .calendar-day.selected .calendar-marker-icon{box-sizing:content-box;overflow:visible;width:11px;height:11px;padding:2px;background:var(--screen);border:1px solid color-mix(in srgb,var(--screen) 80%,white 20%);border-radius:4px}
+    .calendar-day.selected .calendar-marker-icon.note-mark{color:var(--clock)}
+    .calendar-day.selected .calendar-marker-icon.reminder-mark{color:#ffba65}
+    .calendar-day.selected .calendar-note-marks i{box-sizing:content-box;display:block;width:5px;height:5px;background:var(--clock);padding:3px;border-radius:5px;border:1px solid color-mix(in srgb,var(--screen) 75%,transparent);background-clip:content-box;background-color:var(--clock)}
+    .calendar-day.selected .calendar-note-marks i.reminder-mark{background-color:#ffba65}
+    @media(max-width:600px){
+      .notes-center-body{padding:10px}
+      .notes-center-filters{grid-template-columns:1fr 1fr;gap:6px}
+      .notes-center-filters input{grid-column:1/-1}
+      .note-manager-row{padding:7px 5px;gap:5px}
+      .note-manager-actions{gap:0}
+      .note-icon-action{width:27px;height:27px;padding:5px}
+      .note-manager-content>span{font-size:11px}
+      .notes-center-body .notes-manager-list{max-height:52dvh}
+    }
+    /* v6.18: completed pinned notes stay visible, compact list previews, quick shortcut deletion. */
+    .clock-note-card.is-complete .clock-note-words{text-decoration:line-through;opacity:.7}
+    .clock-note-card.is-complete .clock-note-kind{opacity:.45}
+    .note-manager-content>span{display:block;min-width:0;max-width:100%;max-height:none!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis;overflow-wrap:normal!important}
+    .shortcut-entry .shortcut-quick-delete{position:absolute;top:2px;right:2px;z-index:5;display:grid;place-items:center;
+      width:25px;height:25px;border:1px solid color-mix(in srgb,var(--clock) 42%,transparent);border-radius:50%;
+      background:color-mix(in srgb,var(--screen) 90%,#000);color:var(--clock);font:700 19px/1 system-ui,sans-serif;
+      cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px #0006;opacity:.85}
+    .shortcut-entry .shortcut-quick-delete:hover,.shortcut-entry .shortcut-quick-delete:focus-visible{
+      background:#572936;color:#ffc2cd;border-color:#ff8199;opacity:1}
+    .shortcut-grid.is-editing .shortcut-entry:not(.is-add) .shortcut-tile:after{display:none!important}
+    .shortcut-entry .shortcut-quick-delete:active{transform:scale(.94)}
+    @media(pointer:coarse){.shortcut-entry .shortcut-quick-delete{width:30px;height:30px;font-size:21px;opacity:1}}
   </style>
 </head>
 <body>
@@ -765,6 +954,10 @@
           <span class="ampm" id="ampm" hidden></span>
           <canvas id="clock" class="clock-canvas" aria-label="Current time" role="img"></canvas>
           <div class="date-text" id="dateText"></div>
+          <section class="clock-note-shelf" id="clockNoteShelf" aria-label="Notes on the clock">
+            <div class="clock-note-toolbar"><button type="button" id="quickClockNote" class="clock-add-note" title="Quick note" aria-label="Add a note to the clock">+</button></div>
+            <div class="clock-note-list" id="clockNoteList" aria-live="polite"></div>
+          </section>
         </div>
         <div class="screen-view calendar-view" id="calendarView" hidden>
           <div class="calendar-inner">
@@ -779,7 +972,7 @@
             </div>
             <div class="calendar-weekdays" id="calendarWeekdays" aria-label="Calendar weekday headers"></div>
             <div class="calendar-grid" id="calendarGrid" aria-label="Select a calendar date"></div>
-            <div class="calendar-selected"><span>SELECTED DAY</span><strong id="calendarSelected" aria-live="polite"></strong></div>
+            <div class="calendar-selected"><span>SELECTED DAY</span><strong id="calendarSelected" aria-live="polite"></strong><button type="button" id="openSelectedDay" class="calendar-open-day" title="Notes and reminders for selected day">Notes ＋</button></div>
           </div>
         </div>
         <nav class="view-tabs" id="bottomDock" aria-label="Pages and app controls">
@@ -790,6 +983,7 @@
             <button class="view-tab" type="button" id="tabCalendar" aria-pressed="false">▤ <span>Calendar</span></button>
           </div>
           <span class="dock-divider" aria-hidden="true"></span>
+          <button class="dock-icon notes-dock-icon" id="openNotesCenter" type="button" aria-label="Open notes and reminders" title="Notes and reminders">☑<span class="notes-dock-count" id="notesDockCount" hidden>0</span></button>
           <button class="dock-icon" id="toggleSettings" type="button" aria-label="Open settings" aria-controls="settingsPanel" aria-expanded="false" title="Settings">⚙</button>
           <button class="dock-icon" id="fullscreen" type="button" aria-label="Enter full screen" title="Full screen">⛶</button></div>
         </nav>
@@ -803,6 +997,7 @@
         <button type="button" role="tab" class="setting-tab" id="settingsTabBackground" aria-controls="settingsBackground" aria-selected="false" data-settings="background">Background</button>
         <button type="button" role="tab" class="setting-tab" id="settingsTabTime" aria-controls="settingsTime" aria-selected="false" data-settings="time">Clock</button>
         <button type="button" role="tab" class="setting-tab" id="settingsTabCalendar" aria-controls="settingsCalendar" aria-selected="false" data-settings="calendar">Calendar</button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabNotes" aria-controls="settingsNotes" aria-selected="false" data-settings="notes">Notes</button>
         <button type="button" role="tab" class="setting-tab" id="settingsTabShortcuts" aria-controls="settingsShortcuts" aria-selected="false" data-settings="shortcuts">Shortcuts</button>
         <button type="button" role="tab" class="setting-tab" id="settingsTabDisplay" aria-controls="settingsDisplay" aria-selected="false" data-settings="display">General</button>
       </div>
@@ -845,23 +1040,7 @@
         </div>
         <button type="button" class="subtle-button" id="resetAllWallpapers">Reset all wallpapers</button>
       </section>
-<section class="section"><h3>SIZE & PIXELS</h3>
-        <label class="slider-row" for="clockScale">Clock size <output id="clockScaleValue">90%</output></label>
-        <input id="clockScale" class="range" type="range" min="30" max="180" step="5" value="90">
-        <label class="slider-row" for="pixelSize">Pixel size <output id="pixelSizeValue">78%</output></label>
-        <input id="pixelSize" class="range" type="range" min="40" max="100" step="2" value="78">
-        <label class="slider-row" for="pixelRound">Pixel rounding <output id="pixelRoundValue">100%</output></label>
-        <input id="pixelRound" class="range" type="range" min="0" max="100" step="5" value="100">
-        <button type="button" id="resetShape" class="subtle-button">Reset pixel shape to theme default</button>
-        <div id="minimalFontRow"><label class="setting-row">Minimal digit font <select id="clockFont"><option value="system">Modern</option><option value="pixel">Monospace</option><option value="rounded">Rounded</option><option value="serif">Serif</option><option value="tech">Tech</option></select></label></div>
-      </section>
-      <section class="section"><h3>CLOCK LIGHTING</h3>
-        <div id="unlitPixelControl"><label class="slider-row" for="unlitOpacity">Unlit pixels <output id="unlitOpacityValue">8%</output></label><input class="range" id="unlitOpacity" type="range" min="0" max="45" step="1" value="8"></div>
-        <label class="setting-row">Pixel / segment glow <span class="switch"><input type="checkbox" id="pixelGlow" checked><span></span></span></label>
-        <label class="setting-row">Backlight glow <span class="switch"><input type="checkbox" id="backlightGlow"><span></span></span></label>
-        <label class="slider-row" for="glowIntensity">Glow strength <output id="glowIntensityValue">45%</output></label><input class="range" id="glowIntensity" type="range" min="0" max="100" step="5" value="45">
-        <button type="button" id="resetClockEffects" class="subtle-button">Reset clock lighting</button>
-      </section></div>
+</div>
       <div class="settings-pane" id="settingsBackground" role="tabpanel" aria-labelledby="settingsTabBackground" hidden>
         <div class="background-selector" role="group" aria-label="Choose background screen">
           <button type="button" data-background-page="shortcuts" aria-pressed="false">▦ Shortcuts</button>
@@ -886,6 +1065,7 @@
           <button type="button" class="subtle-button" id="resetViewBackground">Reset this screen's background</button>
         </section>
         <section class="section background-settings"><h3>DOT TEXTURE</h3>
+          <label class="setting-row" for="syncDotTexture">Same dots on every screen <span class="switch"><input type="checkbox" id="syncDotTexture"><span></span></span></label>
           <label class="setting-row">Dot grid overlay <span class="switch"><input type="checkbox" id="dotGridEnabled"><span></span></span></label>
           <div id="dotGridControls">
             <div class="color-line"><label for="dotGridColor">Dot color</label><div class="color-input-group"><input class="color-picker" type="color" id="dotGridColor"><input class="color-hex-input" type="text" id="dotGridHex" maxlength="7" spellcheck="false" aria-label="Dot color hex"></div></div>
@@ -898,7 +1078,24 @@
           <button type="button" class="subtle-button" id="resetDotGrid">Reset dots on this screen</button>
         </section>
       </div>
-      <div class="settings-pane" id="settingsTime" role="tabpanel" aria-labelledby="settingsTabTime" hidden><section class="section"><h3>TIME & DATE</h3>
+      <div class="settings-pane" id="settingsTime" role="tabpanel" aria-labelledby="settingsTabTime" hidden><section class="section"><h3>SIZE & PIXELS</h3>
+        <label class="slider-row" for="clockScale">Clock size <output id="clockScaleValue">90%</output></label>
+        <input id="clockScale" class="range" type="range" min="30" max="180" step="5" value="90">
+        <label class="slider-row" for="pixelSize">Pixel size <output id="pixelSizeValue">78%</output></label>
+        <input id="pixelSize" class="range" type="range" min="40" max="100" step="2" value="78">
+        <label class="slider-row" for="pixelRound">Pixel rounding <output id="pixelRoundValue">100%</output></label>
+        <input id="pixelRound" class="range" type="range" min="0" max="100" step="5" value="100">
+        <button type="button" id="resetShape" class="subtle-button">Reset pixel shape to theme default</button>
+        <div id="minimalFontRow"><label class="setting-row">Minimal digit font <select id="clockFont"><option value="system">Modern</option><option value="pixel">Monospace</option><option value="rounded">Rounded</option><option value="serif">Serif</option><option value="tech">Tech</option></select></label></div>
+      </section>
+      <section class="section"><h3>CLOCK LIGHTING</h3>
+        <div id="unlitPixelControl"><label class="slider-row" for="unlitOpacity">Unlit pixels <output id="unlitOpacityValue">8%</output></label><input class="range" id="unlitOpacity" type="range" min="0" max="45" step="1" value="8"></div>
+        <label class="setting-row">Pixel / segment glow <span class="switch"><input type="checkbox" id="pixelGlow" checked><span></span></span></label>
+        <div class="effect-slider"><label class="slider-row" for="glowIntensity">Pixel glow strength <output id="glowIntensityValue">45%</output></label><input class="range" id="glowIntensity" type="range" min="0" max="100" step="1" value="45"></div>
+        <label class="setting-row">Backlight glow <span class="switch"><input type="checkbox" id="backlightGlow"><span></span></span></label>
+        <div class="effect-slider"><label class="slider-row" for="backlightStrength">Backlight strength <output id="backlightStrengthValue">45%</output></label><input class="range" id="backlightStrength" type="range" min="0" max="100" step="1" value="45"></div>
+        <button type="button" id="resetClockEffects" class="subtle-button">Reset clock lighting</button>
+      </section><section class="section"><h3>TIME & DATE</h3>
         <label class="setting-row">Time format <select id="timeFormat"><option value="24">24-hour (14:30)</option><option value="12">12-hour (2:30 PM)</option></select></label>
         <label class="setting-row">Show seconds <span class="switch"><input type="checkbox" id="seconds"><span></span></span></label>
         <label class="setting-row">Show date <span class="switch"><input type="checkbox" id="date" checked><span></span></span></label>
@@ -923,8 +1120,28 @@
         <label class="setting-row">Day style <select id="calendarStyle"><option value="soft">Soft tiles</option><option value="outline">Outlined tiles</option><option value="simple">Minimal</option></select></label>
         <label class="setting-row">Calendar font <select id="calendarFont"><option value="system">Clean</option><option value="rounded">Rounded</option><option value="pixel">Pixel / Mono</option><option value="serif">Classic Serif</option><option value="tech">Tech / Narrow</option></select></label>
         <label class="setting-row">Calendar layout <select id="calendarDensity"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
+        <label class="setting-row">Notes / reminders markers <select id="calendarMarkers"><option value="icons">Tiny icons</option><option value="dots">Dots</option></select></label>
+        <label class="slider-row" for="calendarScale">Calendar size <output id="calendarScaleValue">100%</output></label><input class="range" id="calendarScale" type="range" min="65" max="145" step="5" value="100">
+        <label class="slider-row" for="calendarTileOpacity">Day tile background opacity <output id="calendarTileOpacityValue">8%</output></label><input class="range" id="calendarTileOpacity" type="range" min="0" max="100" step="1" value="8">
 
       </section></div>
+      <div class="settings-pane" id="settingsNotes" role="tabpanel" aria-labelledby="settingsTabNotes" hidden>
+        <section class="section"><h3>ON THE CLOCK</h3>
+          <label class="setting-row">Show notes on clock <span class="switch"><input type="checkbox" id="clockShowNotes" checked><span></span></span></label>
+          <label class="setting-row">Show quick + on clock <span class="switch"><input type="checkbox" id="showQuickNote" checked><span></span></span></label>
+          <label class="setting-row">Double-click / double-tap clock to add <span class="switch"><input type="checkbox" id="clockDoubleClickNote"><span></span></span></label>
+          <label class="setting-row">Show next 7 days on clock <span class="switch"><input type="checkbox" id="clockShowUpcoming" checked><span></span></span></label>
+          <label class="slider-row" for="clockMaxNotes">Visible items <output id="clockMaxNotesValue">4</output></label><input type="range" class="range" id="clockMaxNotes" min="1" max="8" step="1" value="4">
+        </section>
+        <section class="section"><h3>DESKTOP NOTIFICATIONS</h3>
+          <label class="setting-row">Notify timed reminders while open <span class="switch"><input type="checkbox" id="enableNotifications"><span></span></span></label>
+          <div class="notification-controls"><button type="button" class="ghost" id="testNotification">Send test notification</button></div>
+          <p class="notification-status" id="notificationStatus" role="status" aria-live="polite"></p>
+        </section>
+        <section class="section"><div class="notes-settings-head"><h3>ALL NOTES &amp; REMINDERS</h3><div><button type="button" class="ghost" id="settingsAddNote">＋ Note</button> <button type="button" class="ghost" id="settingsAddReminder">＋ Reminder</button></div></div>
+          <div id="notesManagerList" class="notes-manager-list"></div>
+        </section>
+      </div>
       <div class="settings-pane" id="settingsShortcuts" role="tabpanel" aria-labelledby="settingsTabShortcuts" hidden>
         <section class="section shortcuts-help-section"><h3>SHORTCUTS</h3>
           <button type="button" class="ghost" id="editShortcutsFromSettings">Open shortcut editor ↗</button>
@@ -942,6 +1159,8 @@
           <label class="slider-row" for="shortcutSize">Icon size <output id="shortcutSizeValue">100%</output></label><input class="range" id="shortcutSize" type="range" min="60" max="160" step="5" value="100">
           <label class="slider-row" for="shortcutGap">Spacing <output id="shortcutGapValue">12px</output></label><input class="range" id="shortcutGap" type="range" min="2" max="32" step="2" value="12">
           <label class="slider-row" for="shortcutRounding">Corner rounding <output id="shortcutRoundingValue">28%</output></label><input class="range" id="shortcutRounding" type="range" min="0" max="50" step="2" value="28">
+          <label class="slider-row" for="shortcutBgOpacity">Icon background opacity <output id="shortcutBgOpacityValue">11%</output></label><input class="range" id="shortcutBgOpacity" type="range" min="0" max="100" step="1" value="11">
+          <label class="slider-row" for="shortcutBorderOpacity">Icon border opacity <output id="shortcutBorderOpacityValue">24%</output></label><input class="range" id="shortcutBorderOpacity" type="range" min="0" max="100" step="1" value="24">
         </section>
       </div>
       <div class="settings-pane" id="settingsDisplay" role="tabpanel" aria-labelledby="settingsTabDisplay" hidden>
@@ -949,6 +1168,7 @@
           <label class="setting-row">Open app on <select id="startPage"><option value="clock">Clock (center)</option><option value="shortcuts">Shortcuts (left)</option><option value="calendar">Calendar (right)</option></select></label>
           <label class="setting-row">Show page buttons <span class="switch"><input type="checkbox" id="showSwitchButtons" checked><span></span></span></label>
           <label class="setting-row">Auto-hide bottom menu <span class="switch"><input type="checkbox" id="autoHideDock"><span></span></span></label>
+          <label class="slider-row" for="dockBgOpacity">Bottom menu background opacity <output id="dockBgOpacityValue">93%</output></label><input class="range" id="dockBgOpacity" type="range" min="0" max="100" step="1" value="93">
           <button type="button" class="ghost" id="copyHomeLink">Copy app link</button>
         </section>
         <section class="section" id="backupSection"><h3>DATA &amp; BACKUPS</h3>
@@ -1005,6 +1225,32 @@
     <div class="form-actions"><button type="submit" class="primary" id="saveGroup">Create group</button><button type="button" class="ghost" id="cancelGroup">Cancel</button><button type="button" class="ghost danger-action" id="dissolveGroup" hidden>Dissolve (keep links)</button></div>
   </form>
 </dialog>
+<dialog id="noteDialog" class="shortcut-dialog note-dialog" aria-labelledby="noteDialogTitle">
+  <div class="shortcut-dialog-header"><div><p class="dialog-kicker">LITTLE PIXEL</p><h2 id="noteDialogTitle">New note</h2></div><button id="closeNoteDialog" class="dialog-close" type="button" aria-label="Close note editor" autofocus>×</button></div>
+  <form id="noteForm" class="shortcut-form">
+    <label>Type <select id="noteType" class="text-field"><option value="note">Note</option><option value="reminder">Reminder</option></select></label>
+    <p class="note-type-hint" id="noteTypeHint">Notes are free-form. Pin one to keep it on the clock.</p>
+    <label>Text <textarea class="text-field note-textarea" id="noteText" maxlength="600" rows="3" required placeholder="Write a note..."></textarea></label>
+    <label>Date <input class="text-field" id="noteDate" type="date"></label>
+    <label id="noteTimeWrap" hidden>Time (optional) <input class="text-field" id="noteTime" type="time"></label>
+    <label class="setting-row note-pin-row">Keep on clock <span class="switch"><input type="checkbox" id="notePinned" checked><span></span></span></label>
+    <div class="note-dialog-complete"><button id="noteToggleDone" class="note-task-toggle" type="button" aria-pressed="false" aria-label="Mark completed" title="Mark completed"></button><span id="noteDoneLabel">Mark completed</span></div>
+    <div class="form-actions"><button type="submit" class="primary" id="saveNoteButton">Save note</button><button type="button" class="ghost" id="cancelNoteButton">Cancel</button><button type="button" class="ghost danger-action" id="deleteNoteButton" hidden>Delete</button></div>
+  </form>
+</dialog>
+<dialog id="notesCenterDialog" class="shortcut-dialog notes-center-dialog" aria-labelledby="notesCenterTitle">
+  <div class="shortcut-dialog-header"><h2 id="notesCenterTitle">Notes &amp; reminders</h2><button id="closeNotesCenter" type="button" class="dialog-close" autofocus aria-label="Close notes and reminders">×</button></div>
+  <div class="notes-center-body">
+    <div class="notes-center-actions"><button type="button" class="ghost" id="centerAddNote">＋ Note</button><button type="button" class="ghost" id="centerAddReminder">＋ Reminder</button><span class="spacer"></span><button type="button" class="ghost" id="toggleNotesSelection" aria-pressed="false">Select</button></div>
+    <div class="notes-center-filters"><input id="notesSearch" type="search" placeholder="Search notes..." aria-label="Search notes and reminders"><select id="notesStatusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="active">Active</option><option value="completed">Completed</option></select><select id="notesTypeFilter" aria-label="Filter by type"><option value="all">All types</option><option value="note">Notes</option><option value="reminder">Reminders</option></select></div>
+    <div class="notes-bulk-tools" id="notesBulkTools" hidden><span id="notesBulkCount" class="notes-bulk-count">0 selected</span><button type="button" class="ghost" id="notesSelectVisible">Select shown</button><button type="button" class="ghost" id="notesBulkComplete">Complete</button><button type="button" class="ghost" id="notesBulkReopen">Reopen</button><button type="button" class="ghost danger-action" id="notesBulkDelete">Delete</button><button type="button" class="ghost" id="notesClearSelection">Clear</button></div>
+    <div id="notesCenterList" class="notes-manager-list" aria-live="polite"></div>
+  </div>
+</dialog>
+<dialog id="dayNotesDialog" class="shortcut-dialog day-notes-dialog" aria-labelledby="dayNotesTitle">
+  <div class="shortcut-dialog-header"><div><p class="dialog-kicker">CALENDAR</p><h2 id="dayNotesTitle">Selected day</h2></div><button type="button" id="closeDayNotes" class="dialog-close" aria-label="Close day details" autofocus>×</button></div>
+  <div class="day-notes-body"><div class="day-notes-actions"><button type="button" class="ghost" id="dayAddNote">＋ Note</button><button type="button" class="ghost" id="dayAddReminder">＋ Reminder</button></div><div id="dayNotesList" class="notes-manager-list"></div></div>
+</dialog>
 <div id="groupPopover" class="group-popover" role="dialog" aria-label="Shortcut group" hidden>
   <div id="groupMiniGrid" class="group-mini-grid"></div>
 </div>
@@ -1019,17 +1265,18 @@
     ocean:{background:'#091d29',color:'#70e5f5',round:100},
     rose:{background:'#080d12',color:'#ff6b90',round:16}
   };
-  const defaultViewBackground={wallpaperDim:20,wallpaperFit:'cover',dotGridEnabled:false,dotGridColor:'#ffffff',dotGridSize:2,dotGridGap:16,dotGridScale:100,dotGridRounding:100,dotGridOpacity:15};
-  const defaults = {viewBackgrounds:{shortcuts:{...defaultViewBackground},clock:{...defaultViewBackground},calendar:{...defaultViewBackground}},wallpaperModes:{shortcuts:'shared',clock:'shared',calendar:'shared'},wallpaperEnabled:false,wallpaperScope:'shared',wallpaperTarget:'clock',wallpapers:{shared:'',shortcuts:'',clock:'',calendar:''},wallpaperFit:'cover',wallpaperDim:20,dotGridEnabled:false,dotGridColor:'#ffffff',dotGridSize:2,dotGridGap:16,dotGridScale:100,dotGridRounding:100,dotGridOpacity:15,pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,unlitOpacity:8,pixelGlow:true,backlightGlow:false,glowIntensity:45,colonAnimation:'static',pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'auto',shortcutGridRows:6,shortcutPositions:{},shortcutColumns:4,shortcutGridWidth:92,shortcutCellHeight:104,customThemes:[],shortcutSize:100,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,weekStart:1,highlightWeekends:false,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[{id:'chatgpt',icon:'✦',label:'ChatGPT',url:'https://chatgpt.com/'},{id:'youtube',icon:'▶',label:'YouTube',url:'https://www.youtube.com/'},{id:'github',icon:'⌘',label:'GitHub',url:'https://github.com/'},{id:'duolingo',icon:'◉',label:'Duolingo',url:'https://www.duolingo.com/'}]};
+  const defaultViewBackground={wallpaperDim:20,wallpaperFit:'cover',dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11};
+  const defaults = {enableNotifications:false,notifiedReminderKeys:[],shortcutBorderOpacity:24,dockBgOpacity:93,notes:[],clockShowNotes:true,clockShowUpcoming:true,clockMaxNotes:4,showQuickNote:true,clockDoubleClickNote:false,calendarMarkers:'icons',calendarScale:100,calendarTileOpacity:8,shortcutBgOpacity:11,viewBackgrounds:{shortcuts:{...defaultViewBackground},clock:{...defaultViewBackground},calendar:{...defaultViewBackground}},wallpaperModes:{shortcuts:'shared',clock:'shared',calendar:'shared'},wallpaperEnabled:false,wallpaperScope:'shared',wallpaperTarget:'clock',wallpapers:{shared:'',shortcuts:'',clock:'',calendar:''},wallpaperFit:'cover',wallpaperDim:20,dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11,syncDotTexture:false,pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,unlitOpacity:8,pixelGlow:true,backlightGlow:false,glowIntensity:45,backlightStrength:45,colonAnimation:'static',pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:100,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'auto',shortcutGridRows:6,shortcutPositions:{},shortcutColumns:4,shortcutGridWidth:92,shortcutCellHeight:104,customThemes:[],shortcutSize:100,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,weekStart:1,highlightWeekends:false,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[{id:'chatgpt',icon:'✦',label:'ChatGPT',url:'https://chatgpt.com/'},{id:'youtube',icon:'▶',label:'YouTube',url:'https://www.youtube.com/'},{id:'github',icon:'⌘',label:'GitHub',url:'https://github.com/'},{id:'duolingo',icon:'◉',label:'Duolingo',url:'https://www.duolingo.com/'}]};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
     for(const key of Object.keys(defaults)) if(saved[key]!==undefined) state[key]=saved[key];
+    if(saved.backlightStrength===undefined && Number.isFinite(saved.glowIntensity))state.backlightStrength=saved.glowIntensity;
     // v6.9 compatibility: copy its single/split selection to the explicit per-screen mode.
     if(!saved.wallpaperModes && saved.wallpaperScope==='perPage'){
       state.wallpaperModes=Object.fromEntries(['shortcuts','clock','calendar'].map(k=>[k,saved.wallpapers?.[k]?'own':'shared']));
     }
-    // Migrate global wallpaper treatments from v6.10/v6.12 to all three screens.
+    // Migrate global wallpaper treatments from v6.10/v6.13 to all three screens.
     if(!saved.viewBackgrounds){
       const legacy={};for(const key of Object.keys(defaultViewBackground))legacy[key]=saved[key]??defaultViewBackground[key];
       state.viewBackgrounds=Object.fromEntries(['shortcuts','clock','calendar'].map(view=>[view,{...legacy}]));
@@ -1040,14 +1287,42 @@
     // Migrate color selected in the previous version without changing other themes.
     if(typeof saved.color==='string' && !state.themeColors[state.theme]) state.themeColors[state.theme]=saved.color;
   }catch{}
+  function sanitizeNotes(raw){
+    if(!Array.isArray(raw))return [];
+    const seen=new Set();const result=[];
+    for(const value of raw.slice(0,250)){
+      if(!value||typeof value!=='object'||Array.isArray(value))continue;
+      const text=typeof value.text==='string'?value.text.trim().slice(0,600):'';
+      if(!text)continue;
+      const type=value.type==='reminder'?'reminder':'note';
+      const date=typeof value.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value.date)&&!Number.isNaN(new Date(value.date+'T12:00:00').getTime())?value.date:'';
+      const time=type==='reminder'&&typeof value.time==='string'&&/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.time)?value.time:'';
+      let id=typeof value.id==='string'&&/^[a-zA-Z0-9_-]{1,80}$/.test(value.id)?value.id:'note-'+Math.random().toString(36).slice(2,10);
+      if(seen.has(id))id='note-'+Math.random().toString(36).slice(2,10);seen.add(id);
+      result.push({id,type,text,date,time,pinned:!!value.pinned,done:!!value.done,snoozedUntil:typeof value.snoozedUntil==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value.snoozedUntil)?value.snoozedUntil:'',createdAt:typeof value.createdAt==='number'&&Number.isFinite(value.createdAt)?value.createdAt:Date.now()});
+    }
+    return result;
+  }
+  state.notes=sanitizeNotes(state.notes);
+  state.enableNotifications=!!state.enableNotifications;
+  state.notifiedReminderKeys=Array.isArray(state.notifiedReminderKeys)?state.notifiedReminderKeys.filter(x=>typeof x==='string').slice(-150):[];
+  for(const [key,low,high,fallback] of [['calendarScale',65,145,100],['calendarTileOpacity',0,100,8],['shortcutBgOpacity',0,100,11],['shortcutBorderOpacity',0,100,24],['dockBgOpacity',0,100,93]]){
+    const value=Number(state[key]);state[key]=Number.isFinite(value)?Math.min(high,Math.max(low,value)):fallback;
+  }
+  state.calendarMarkers=['dots','icons'].includes(state.calendarMarkers)?state.calendarMarkers:'icons';
+  state.showQuickNote=state.showQuickNote!==false;
+  state.clockDoubleClickNote=!!state.clockDoubleClickNote;
+  state.clockShowNotes=state.clockShowNotes!==false;
+  state.clockShowUpcoming=state.clockShowUpcoming!==false;
+  state.clockMaxNotes=Number.isFinite(state.clockMaxNotes)?Math.max(1,Math.min(8,Math.round(state.clockMaxNotes))):4;
   if(!themePalettes[state.theme])state.theme='matrix';
   // Earlier builds used 'mono' for the Minimal font, while the renderer uses 'pixel'.
   if(state.clockFont==='mono')state.clockFont='pixel';
   if(!['static','blink','pulse'].includes(state.colonAnimation))state.colonAnimation='static';
-  for(const [key,min,max] of [['clockScale',25,220],['unlitOpacity',0,45],['glowIntensity',0,100]]){
+  for(const [key,min,max] of [['clockScale',25,220],['unlitOpacity',0,45],['glowIntensity',0,100],['backlightStrength',0,100]]){
     state[key]=Number.isFinite(state[key])?Math.max(min,Math.min(max,state[key])):defaults[key];
   }
-  state.pixelGlow=!!state.pixelGlow;state.backlightGlow=!!state.backlightGlow;
+  state.pixelGlow=!!state.pixelGlow;state.backlightGlow=!!state.backlightGlow;state.syncDotTexture=!!state.syncDotTexture;
   if(!Array.isArray(state.shortcuts))state.shortcuts=defaults.shortcuts;
   if(!Array.isArray(state.customThemes))state.customThemes=[];
   state.customThemes=state.customThemes.filter(x=>x&&typeof x==='object'&&typeof x.id==='string'&&typeof x.name==='string'&&themePalettes[x.base]).slice(0,30);
@@ -1129,8 +1404,17 @@
     return mode==='none'?'':mode==='own'?(images[view]||''):(images.shared||'');
   }
   function currentViewBackground(view){return state.viewBackgrounds?.[view]||defaultViewBackground;}
+  const dotTextureKeys=['dotGridEnabled','dotGridColor','dotGridSize','dotGridGap','dotGridScale','dotGridRounding','dotGridOpacity'];
+  function shareDotTexture(source){
+    const dots=Object.fromEntries(dotTextureKeys.map(key=>[key,source[key]]));
+    state.viewBackgrounds=Object.fromEntries(['shortcuts','clock','calendar'].map(page=>[page,{...currentViewBackground(page),...dots}]));
+  }
   function changeViewBackground(key,value){
-    state.viewBackgrounds={...state.viewBackgrounds,[backgroundEditView]:{...currentViewBackground(backgroundEditView),[key]:value}};
+    if(state.syncDotTexture && dotTextureKeys.includes(key)){
+      shareDotTexture({...currentViewBackground(backgroundEditView),[key]:value});
+    }else{
+      state.viewBackgrounds={...state.viewBackgrounds,[backgroundEditView]:{...currentViewBackground(backgroundEditView),[key]:value}};
+    }
     save();apply();
   }
   function applyBackdrop(){
@@ -1176,6 +1460,7 @@
     thumb.classList.toggle('has-image',!!image);
     thumb.firstElementChild.textContent=mode==='none'?'No wallpaper':mode==='own'?'Choose image':'No shared image';
     document.querySelector('[data-reset-wallpaper="active"]').disabled=mode==='shared'&&!state.wallpapers[name];
+    $('syncDotTexture').checked=state.syncDotTexture;
     $('dotGridEnabled').checked=!!cfg.dotGridEnabled;
     $('dotGridControls').classList.toggle('is-off',!cfg.dotGridEnabled);
     $('dotGridColor').value=cfg.dotGridColor;
@@ -1186,12 +1471,23 @@
   }
   function apply(){
     const color=currentColor(),background=currentBackground(),round=currentRound();
+    // Make active theme colors available to floating dialogs outside the screen element.
+    document.documentElement.style.setProperty('--clock',color);
+    document.documentElement.style.setProperty('--screen',background);
     screen.dataset.theme=state.theme;
     screen.dataset.calendarStyle=state.calendarStyle;
     screen.style.setProperty('--calendar-font',fontFamilies[state.calendarFont]||fontFamilies.system);
     $('calendarGrid').classList.toggle('compact',state.calendarDensity==='compact');
+    screen.style.setProperty('--calendar-scale',(state.calendarScale/100));
+    screen.style.setProperty('--calendar-tile-fill',state.calendarTileOpacity+'%');
+    $('calendarMarkers').value=state.calendarMarkers;
+    $('calendarScale').value=state.calendarScale;$('calendarScaleValue').textContent=state.calendarScale+'%';
+    $('calendarTileOpacity').value=state.calendarTileOpacity;$('calendarTileOpacityValue').textContent=state.calendarTileOpacity+'%';
     $('pageSwitch').hidden=!state.showSwitchButtons;
     $('autoHideDock').checked=!!state.autoHideDock;
+    screen.style.setProperty('--dock-opacity',state.dockBgOpacity+'%');
+    $('dockBgOpacity').value=state.dockBgOpacity;
+    $('dockBgOpacityValue').textContent=state.dockBgOpacity+'%';
     updateDockMode();
     screen.style.setProperty('--clock',color);
     screen.style.setProperty('--screen',background);
@@ -1201,7 +1497,7 @@
     screen.style.setProperty('--date-size',state.dateSize/100);
     // Clock size scales width AND height; Amber's segment size was previously height-limited.
     screen.style.setProperty('--clock-zoom',state.clockScale/90);
-    screen.style.setProperty('--backlight-opacity',state.backlightGlow?(state.glowIntensity/100*.48):0);
+    screen.style.setProperty('--backlight-opacity',state.backlightGlow?(state.backlightStrength/100*.48):0);
     for(const b of $('themes').querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.value===state.theme));
     ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont','calendarStyle','calendarFont','calendarDensity'].forEach(id=>$(id).value=state[id]);
     $('weekStart').value=String(state.weekStart);
@@ -1234,14 +1530,16 @@
     $('unlitOpacity').value=state.unlitOpacity;$('unlitOpacityValue').textContent=state.unlitOpacity+'%';
     $('pixelGlow').checked=state.pixelGlow;$('backlightGlow').checked=state.backlightGlow;
     $('glowIntensity').value=state.glowIntensity;$('glowIntensityValue').textContent=state.glowIntensity+'%';
-    $('glowIntensity').disabled=!state.pixelGlow&&!state.backlightGlow;
+    $('backlightStrength').value=state.backlightStrength;$('backlightStrengthValue').textContent=state.backlightStrength+'%';
+    $('glowIntensity').disabled=!state.pixelGlow;
+    $('backlightStrength').disabled=!state.backlightGlow;
     $('colonAnimation').value=state.colonAnimation;
     $('pixelSize').value=state.pixelSize;$('pixelSizeValue').textContent=state.pixelSize+'%';
     $('pixelRound').value=round;$('pixelRoundValue').textContent=round+'%';
     $('pixelSize').disabled=!pixelTheme;$('pixelRound').disabled=!pixelTheme;$('resetShape').disabled=!pixelTheme;
     $('startPage').value=state.startPage;
     applyShortcutLayout();
-    draw();renderCalendar();renderShortcuts();
+    draw();renderCalendar();renderShortcuts();renderClockNotes();renderNotesManager();syncNotesSettings();
   }
   const settingsTabs=[...document.querySelectorAll('.setting-tab')];
   function showSettingsTab(name,focus=false){
@@ -1262,7 +1560,7 @@
   });
   showSettingsTab('appearance');
   $('themes').addEventListener('click',e=>{const b=e.target.closest('button[data-value]');if(b)set('theme',b.dataset.value);});
-  const themeKeys=['theme','clockScale','pixelSize','unlitOpacity','pixelGlow','backlightGlow','glowIntensity','colonAnimation','dateFont','calendarFont','calendarStyle','dateSize','clockFont','matchDateColor','dotGridEnabled','dotGridColor','dotGridSize','dotGridGap','dotGridScale','dotGridRounding','dotGridOpacity'];
+  const themeKeys=['theme','clockScale','pixelSize','unlitOpacity','pixelGlow','backlightGlow','glowIntensity','backlightStrength','colonAnimation','syncDotTexture','dateFont','calendarFont','calendarStyle','dateSize','clockFont','matchDateColor','dotGridEnabled','dotGridColor','dotGridSize','dotGridGap','dotGridScale','dotGridRounding','dotGridOpacity'];
   const colorKeys=['themeColors','themeBackgrounds','themeRounds','themeDateColors'];
   function currentThemeSnapshot(){
     const preset=Object.fromEntries(themeKeys.map(k=>[k,state[k]]));
@@ -1284,6 +1582,7 @@
     const snap=item.snapshot||{};
     if(!themePalettes[snap.theme])return;
     for(const key of themeKeys){if(snap[key]!==undefined&&typeof snap[key]===typeof defaults[key])state[key]=snap[key];}
+    if(snap.backlightStrength===undefined && Number.isFinite(snap.glowIntensity))state.backlightStrength=snap.glowIntensity;
     if(snap.viewBackgrounds)state.viewBackgrounds=sanitizeViewBackgrounds(snap.viewBackgrounds);
     const base=state.theme;
     for(const [key,part] of [['themeColors','color'],['themeBackgrounds','background'],['themeDateColors','dateColor']]){
@@ -1311,7 +1610,8 @@
     state.customThemes=state.customThemes.filter(x=>x!==item);save();renderThemeManager();
   });
   renderThemeManager();
-  for(const key of ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont','calendarStyle','calendarFont','calendarDensity']) $(key).addEventListener('change',e=>set(key,e.target.value));
+  for(const key of ['timeFormat','dateFormat','weekdayStyle','dateSeparator','dateFont','clockFont','calendarStyle','calendarFont','calendarDensity','calendarMarkers']) $(key).addEventListener('change',e=>set(key,e.target.value));
+  for(const key of ['calendarScale','calendarTileOpacity'])$(key).addEventListener('input',e=>set(key,Number(e.target.value)));
   for(const key of ['seconds','date','weekday','matchDateColor','showSwitchButtons','showShortcutLabels','showOutsideDates','highlightWeekends']) $(key).addEventListener('change',e=>set(key,e.target.checked));
   $('weekStart').addEventListener('change',e=>set('weekStart',Number(e.target.value)));
 
@@ -1343,10 +1643,13 @@
     state.wallpaperModes={...state.wallpaperModes,[name]:'shared'};
     state.wallpapers={...state.wallpapers,[name]:''};
     state.viewBackgrounds={...state.viewBackgrounds,[name]:{...defaultViewBackground}};
+    if(state.syncDotTexture)shareDotTexture(defaultViewBackground);
     save();apply();
   });
   $('resetDotGrid').addEventListener('click',()=>{
-    state.viewBackgrounds={...state.viewBackgrounds,[backgroundEditView]:{...currentViewBackground(backgroundEditView),...Object.fromEntries(['dotGridEnabled','dotGridColor','dotGridSize','dotGridGap','dotGridScale','dotGridRounding','dotGridOpacity'].map(key=>[key,defaultViewBackground[key]]))}};
+    const dots=Object.fromEntries(dotTextureKeys.map(key=>[key,defaultViewBackground[key]]));
+    if(state.syncDotTexture)shareDotTexture({...currentViewBackground(backgroundEditView),...dots});
+    else state.viewBackgrounds={...state.viewBackgrounds,[backgroundEditView]:{...currentViewBackground(backgroundEditView),...dots}};
     save();apply();
   });
   let wallpaperUploadTarget='shared';
@@ -1383,6 +1686,11 @@
     }catch(error){message.textContent=error.message;message.dataset.error='true';}
     finally{event.target.value='';}
   });
+  $('syncDotTexture').addEventListener('change',e=>{
+    state.syncDotTexture=e.target.checked;
+    if(state.syncDotTexture)shareDotTexture(currentViewBackground(backgroundEditView));
+    save();apply();
+  });
   $('dotGridEnabled').addEventListener('change',e=>changeViewBackground('dotGridEnabled',e.target.checked));
   $('dotGridColor').addEventListener('input',e=>changeViewBackground('dotGridColor',e.target.value));
   $('dotGridHex').addEventListener('change',e=>{
@@ -1413,11 +1721,12 @@
   $('clockScale').addEventListener('input',e=>set('clockScale',Number(e.target.value)));
   $('unlitOpacity').addEventListener('input',e=>set('unlitOpacity',Number(e.target.value)));
   $('glowIntensity').addEventListener('input',e=>set('glowIntensity',Number(e.target.value)));
+  $('backlightStrength').addEventListener('input',e=>set('backlightStrength',Number(e.target.value)));
   $('pixelGlow').addEventListener('change',e=>set('pixelGlow',e.target.checked));
   $('backlightGlow').addEventListener('change',e=>set('backlightGlow',e.target.checked));
   $('colonAnimation').addEventListener('change',e=>set('colonAnimation',e.target.value));
   $('resetClockEffects').addEventListener('click',()=>{
-    for(const key of ['unlitOpacity','pixelGlow','backlightGlow','glowIntensity','colonAnimation'])state[key]=defaults[key];
+    for(const key of ['unlitOpacity','pixelGlow','backlightGlow','glowIntensity','backlightStrength','colonAnimation'])state[key]=defaults[key];
     save();apply();
   });
   $('pixelSize').addEventListener('input',e=>set('pixelSize',Number(e.target.value)));
@@ -1563,6 +1872,277 @@
     viewAnimations=[out,inc];
     out.finished.then(()=>{outgoing.hidden=true;}).catch(()=>{});
   }
+  // Notification delivery is best-effort while this webpage remains open.
+  async function sendSystemNotification(title,body){
+    if(!('Notification' in window))throw Error('This browser does not support notifications.');
+    if(Notification.permission!=='granted')throw Error('Notifications are not allowed for this site.');
+    // Use a service worker on mobile and as a fallback when the constructor is unavailable.
+    if('serviceWorker' in navigator){
+      try{
+        const registration=await navigator.serviceWorker.getRegistration();
+        if(registration?.showNotification){await registration.showNotification(title,{body,icon:'./icon-192.png',tag:'little-pixel-'+title});return;}
+      }catch{}
+    }
+    new Notification(title,{body,icon:'./icon-192.png'});
+  }
+  const notificationStatus=(message,error=false)=>{const el=$('notificationStatus');el.textContent=message;el.dataset.error=String(error);};
+  async function requestPermission(){
+    if(!('Notification' in window)){notificationStatus('Notifications are unavailable in this browser.',true);return false;}
+    if(!isSecureContext){notificationStatus('Use HTTPS (GitHub Pages) or localhost for notifications.',true);return false;}
+    const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;
+    if(permission!=='granted'){notificationStatus('Notifications are blocked. Change the website permission in Firefox.',true);return false;}
+    return true;
+  }
+  $('testNotification').addEventListener('click',async()=>{
+    try{
+      if(!await requestPermission())return;
+      await sendSystemNotification('Little Pixel · Test','Desktop notifications are working!');
+      notificationStatus('Test notification sent.');
+    }catch(error){notificationStatus(error?.message||'Could not show a notification.',true);}
+  });
+  $('enableNotifications').addEventListener('change',async event=>{
+    if(event.target.checked){
+      if(!await requestPermission()){event.target.checked=false;return;}
+      state.enableNotifications=true;notificationStatus('Notifications enabled while this app is open.');
+    }else{state.enableNotifications=false;notificationStatus('Notifications disabled.');}
+    save();
+  });
+  function checkDueReminders(){
+    if(!state.enableNotifications||!('Notification' in window)||Notification.permission!=='granted')return;
+    const now=Date.now();
+    for(const note of state.notes){
+      if(note.type!=='reminder'||note.done||!note.date||!note.time)continue;
+      const due=new Date(note.date+'T'+note.time+':00').getTime();
+      // An open page can deliver close to due time; old reminders should not flood notifications after a reload.
+      if(!Number.isFinite(due)||now<due||now-due>5*60*1000)continue;
+      const key=note.id+'|'+note.date+'|'+note.time;
+      if(state.notifiedReminderKeys.includes(key))continue;
+      state.notifiedReminderKeys.push(key);state.notifiedReminderKeys=state.notifiedReminderKeys.slice(-150);save();
+      sendSystemNotification('Little Pixel · Reminder',note.text).catch(()=>notificationStatus('A reminder notification was blocked.',true));
+    }
+  }
+  $('enableNotifications').checked=state.enableNotifications;
+  if(state.enableNotifications)notificationStatus('Notifications enabled while this app is open.');
+  setInterval(checkDueReminders,15000);
+  // Notes stay local. Clock dismissal unpins instead of deleting the original note.
+  const dateKey=date=>[date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');
+  const todayKey=()=>dateKey(new Date());
+  const newNoteId=()=>`note-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+  const fmtNoteDate=key=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric'}).format(new Date(key+'T12:00:00'));
+  function prettyNoteDate(note){return (note.date?fmtNoteDate(note.date):'')+(note.time?' · '+note.time:'');}
+  function notesForDay(key){return state.notes.filter(n=>n.date===key).sort((a,b)=>(a.time||'').localeCompare(b.time||'')||a.createdAt-b.createdAt);}
+  function noteMarkForDate(key){const entries=notesForDay(key);return {notes:entries.some(n=>n.type==='note'),reminders:entries.some(n=>n.type==='reminder'&&!n.done)};}
+  let editingNoteId=null,returnToDay=false,noteEditorDone=false;
+  function noteLabel(note){return note.type==='reminder'?'Reminder':'Note';}
+  function refreshNotes(){renderClockNotes();renderNotesManager();renderNotesCenter();renderCalendar();if($('dayNotesDialog').open)renderDayNotes();}
+  function visibleClockNotes(){
+    if(!state.clockShowNotes)return [];
+    const today=todayKey();
+    const selected=state.notes.filter(n=>n.pinned);
+    if(state.clockShowUpcoming){
+      const horizon=new Date();horizon.setDate(horizon.getDate()+7);
+      for(const n of state.notes){if(n.type==='reminder'&&!n.done&&!n.pinned&&n.date&&n.date>=today&&n.date<=dateKey(horizon)&&!(n.snoozedUntil&&n.snoozedUntil>=today))selected.push(n);}
+    }
+    return selected.sort((a,b)=>Number(b.pinned)-Number(a.pinned)||String(a.date||'').localeCompare(String(b.date||''))||a.createdAt-b.createdAt).slice(0,state.clockMaxNotes);
+  }
+  function renderClockNotes(){
+    const shelf=$('clockNoteShelf'),list=$('clockNoteList');list.replaceChildren();
+    shelf.classList.toggle('notes-hidden',!state.clockShowNotes);
+    if(!state.clockShowNotes)return;
+    for(const n of visibleClockNotes()){
+      const card=document.createElement('div');card.className='clock-note-card'+(n.done?' is-complete':'');
+      {
+        card.append(noteTaskButton(n,'clock'));
+      }
+      const symbol=document.createElement('span');symbol.className='clock-note-kind';symbol.textContent=n.type==='reminder'?'◷':'✎';symbol.title=noteLabel(n);
+      const words=document.createElement('span');words.className='clock-note-words';words.textContent=n.text;words.title='Click to edit';words.tabIndex=0;words.setAttribute('role','button');words.setAttribute('aria-label','Edit '+noteLabel(n)+': '+n.text);
+      words.addEventListener('click',()=>openNoteEditor(n));words.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openNoteEditor(n);}});
+      const clear=document.createElement('button');clear.className='clock-note-clear';clear.type='button';clear.textContent='×';clear.title=n.pinned?'Remove from clock (keep saved note)':'Dismiss upcoming reminder on clock';clear.setAttribute('aria-label',clear.title);
+      clear.addEventListener('click',()=>{if(n.pinned){n.pinned=false;}else {n.snoozedUntil=n.date?dateKey(new Date(Date.now()+8*86400000)):todayKey();}save();refreshNotes();});
+      if(n.type==='reminder'&&n.date){const when=document.createElement('span');when.className='clock-note-when';when.textContent=prettyNoteDate(n);card.append(symbol,words,when,clear);}else card.append(symbol,words,clear);
+      list.appendChild(card);
+    }
+    shelf.classList.toggle('has-notes',!!list.childElementCount);
+  }
+  // Icons are SVG elements, not checkbox inputs. Selection uses checkboxes only in multi-select mode.
+  function noteVector(name){
+    const ns='http://www.w3.org/2000/svg';const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');
+    svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');svg.setAttribute('stroke-width','2');
+    const parts={check:[['path',{d:'M5 12l5 5L20 7'}]],edit:[['path',{d:'M12 20h9'}],['path',{d:'M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4z'}]],pin:[['path',{d:'M16 3l5 5-4 1-3 4-1 5-4-4-5-1 4-3 1-4z'}],['path',{d:'M9 15l-5 6'}]],trash:[['path',{d:'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 10v7M14 10v7'}]]};
+    for(const [tag,attrs] of parts[name]||parts.check){const el=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);svg.append(el);}return svg;
+  }
+  function noteTaskButton(n,context='manager'){
+    const btn=document.createElement('button');btn.type='button';btn.className='note-task-toggle'+(n.done?' is-done':'')+(context==='clock'?' clock-note-done':'');
+    btn.title=n.done?'Mark incomplete':'Mark completed';btn.setAttribute('aria-label',(n.done?'Reopen ':'Complete ')+noteLabel(n)+': '+n.text);
+    btn.setAttribute('aria-pressed',String(!!n.done));btn.append(noteVector('check'));
+    btn.addEventListener('click',()=>{n.done=!n.done;save();refreshNotes();});return btn;
+  }
+  function noteIconAction(icon,title,handler,extra=''){
+    const btn=document.createElement('button');btn.type='button';btn.className='note-icon-action '+extra;btn.title=title;btn.setAttribute('aria-label',title);btn.append(noteVector(icon));btn.addEventListener('click',handler);return btn;
+  }
+  const selectedNoteIds=new Set();let notesSelectionMode=false;
+  function deleteNoteQuick(n){
+    if(!confirm('Delete "'+n.text.slice(0,70)+'" permanently?'))return;
+    state.notes=state.notes.filter(item=>item.id!==n.id);selectedNoteIds.delete(n.id);save();refreshNotes();
+  }
+  function makeNotesRow(n,{forCenter=false}={}){
+    const row=document.createElement('div');row.className='note-manager-row'+(n.done?' is-complete':'')+(forCenter&&selectedNoteIds.has(n.id)?' is-multi-selected':'');
+    if(forCenter&&notesSelectionMode){
+      const multi=document.createElement('input');multi.type='checkbox';multi.className='note-bulk-select';multi.checked=selectedNoteIds.has(n.id);
+      multi.title='Select '+noteLabel(n);multi.setAttribute('aria-label','Select '+noteLabel(n)+': '+n.text);
+      multi.addEventListener('change',()=>{if(multi.checked)selectedNoteIds.add(n.id);else selectedNoteIds.delete(n.id);renderNotesCenter();});row.append(multi);
+    }
+    row.append(noteTaskButton(n));
+    const text=document.createElement('div');text.className='note-manager-content';
+    const type=document.createElement('small');type.textContent=(n.type==='reminder'?'◷ Reminder':'✎ Note')+(n.date?' · '+prettyNoteDate(n):'')+(n.done?' · Done':'');
+    const body=document.createElement('span');body.textContent=n.text;body.className=n.done?'is-done':'';text.append(type,body);
+    const actions=document.createElement('div');actions.className='note-manager-actions';
+    actions.append(noteIconAction('pin',n.pinned?'Unpin from clock':'Pin to clock',()=>{n.pinned=!n.pinned;save();refreshNotes();},n.pinned?'is-active':''));
+    actions.append(noteIconAction('edit','Edit '+noteLabel(n),()=>{if($('dayNotesDialog').open){$('dayNotesDialog').close();openNoteEditor(n,{returnDay:true});}else openNoteEditor(n);}));
+    actions.append(noteIconAction('trash','Delete '+noteLabel(n),()=>deleteNoteQuick(n),'is-danger'));
+    row.append(text,actions);return row;
+  }
+  function renderNotesManager(){
+    const list=$('notesManagerList');list.replaceChildren();
+    if(!state.notes.length){const p=document.createElement('p');p.className='note-empty';p.textContent='No notes yet.';list.append(p);return;}
+    const sorted=[...state.notes].sort((a,b)=>Number(b.pinned)-Number(a.pinned)||(a.date||'9999').localeCompare(b.date||'9999')||b.createdAt-a.createdAt);
+    for(const n of sorted)list.appendChild(makeNotesRow(n));
+  }
+  function filteredNotes(){
+    const query=$('notesSearch').value.toLocaleLowerCase().trim();const status=$('notesStatusFilter').value,type=$('notesTypeFilter').value;
+    return state.notes.filter(n=>(status==='all'||(status==='completed')===!!n.done)&&(type==='all'||n.type===type)&&(!query||(n.text+' '+n.date+' '+n.time).toLocaleLowerCase().includes(query)));
+  }
+  function renderNotesCenter(){
+    const list=$('notesCenterList');list.replaceChildren();
+    const availableIds=new Set(state.notes.map(n=>n.id));for(const id of selectedNoteIds)if(!availableIds.has(id))selectedNoteIds.delete(id);
+    const filtered=filteredNotes();const order=(a,b)=>Number(b.pinned)-Number(a.pinned)||(a.date||'9999').localeCompare(b.date||'9999')||b.createdAt-a.createdAt;
+    function section(title,items){
+      if(!items.length)return;
+      const heading=document.createElement('div');heading.className='note-manager-section-heading';heading.textContent=title+' · '+items.length;list.append(heading);
+      for(const n of [...items].sort(order))list.append(makeNotesRow(n,{forCenter:true}));
+    }
+    section('Active',filtered.filter(n=>!n.done));section('Completed',filtered.filter(n=>n.done));
+    if(!filtered.length){const empty=document.createElement('p');empty.className='note-empty';empty.textContent=state.notes.length?'No matching items.':'No notes or reminders yet.';list.append(empty);}
+    $('notesBulkTools').hidden=!notesSelectionMode;$('toggleNotesSelection').setAttribute('aria-pressed',String(notesSelectionMode));
+    $('toggleNotesSelection').textContent=notesSelectionMode?'Done selecting':'Select';
+    $('notesBulkCount').textContent=selectedNoteIds.size+' selected';
+    for(const id of ['notesBulkComplete','notesBulkReopen','notesBulkDelete'])$(id).disabled=!selectedNoteIds.size;
+    $('notesSelectVisible').disabled=!filtered.length;
+    const count=$('notesDockCount');const pending=state.notes.filter(n=>n.type==='reminder'&&!n.done).length;
+    count.hidden=!pending;count.textContent=pending>99?'99+':String(pending);
+  }
+  function openNotesCenter(){
+    renderNotesCenter();if(!$('notesCenterDialog').open)$('notesCenterDialog').showModal();$('closeNotesCenter').focus({preventScroll:true});
+  }
+  $('openNotesCenter').addEventListener('click',openNotesCenter);
+  $('closeNotesCenter').addEventListener('click',()=>$('notesCenterDialog').close());
+  $('centerAddNote').addEventListener('click',()=>openNoteEditor(null,{type:'note'}));
+  $('centerAddReminder').addEventListener('click',()=>openNoteEditor(null,{type:'reminder'}));
+  for(const id of ['notesSearch','notesStatusFilter','notesTypeFilter'])$(id).addEventListener(id==='notesSearch'?'input':'change',renderNotesCenter);
+  $('toggleNotesSelection').addEventListener('click',()=>{notesSelectionMode=!notesSelectionMode;selectedNoteIds.clear();renderNotesCenter();});
+  $('notesSelectVisible').addEventListener('click',()=>{for(const n of filteredNotes())selectedNoteIds.add(n.id);renderNotesCenter();});
+  $('notesClearSelection').addEventListener('click',()=>{selectedNoteIds.clear();renderNotesCenter();});
+  function bulkNotes(action){
+    if(!selectedNoteIds.size)return;
+    if(action==='delete'&&!confirm('Delete '+selectedNoteIds.size+' selected item(s) permanently?'))return;
+    if(action==='delete')state.notes=state.notes.filter(n=>!selectedNoteIds.has(n.id));
+    else for(const n of state.notes)if(selectedNoteIds.has(n.id))n.done=action==='complete';
+    selectedNoteIds.clear();save();refreshNotes();
+  }
+  $('notesBulkComplete').addEventListener('click',()=>bulkNotes('complete'));
+  $('notesBulkReopen').addEventListener('click',()=>bulkNotes('reopen'));
+  $('notesBulkDelete').addEventListener('click',()=>bulkNotes('delete'));
+  function renderDayNotes(){
+    const key=dateKey(selectedDate);$('dayNotesTitle').textContent=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(selectedDate);
+    const list=$('dayNotesList');list.replaceChildren();
+    const items=notesForDay(key);
+    if(!items.length){const p=document.createElement('p');p.className='note-empty';p.textContent='Nothing on this day.';list.append(p);}
+    else for(const n of items)list.append(makeNotesRow(n));
+  }
+  function openDayNotes(){renderDayNotes();if(!$('dayNotesDialog').open)$('dayNotesDialog').showModal();$('closeDayNotes').focus({preventScroll:true});}
+  function openNoteEditor(note=null,{type='note',date='',pinned=false,returnDay=false}={}){
+    editingNoteId=note?.id||null;returnToDay=!!returnDay;
+    $('noteDialogTitle').textContent=note?'Edit '+noteLabel(note):'New '+(type==='reminder'?'reminder':'note');
+    $('noteType').value=note?.type||type;$('noteText').value=note?.text||'';$('noteDate').value=note?.date||date;$('noteTime').value=note?.time||'';
+    $('notePinned').checked=note?.pinned??pinned;$('deleteNoteButton').hidden=!note;noteEditorDone=!!note?.done;syncNoteEditorDone();
+    $('saveNoteButton').textContent=note?'Save changes':'Add '+(type==='reminder'?'reminder':'note');
+    toggleNoteTime();$('noteDialog').showModal();$('closeNoteDialog').focus({preventScroll:true});
+  }
+  function syncNoteEditorDone(){const btn=$('noteToggleDone');btn.replaceChildren(noteVector('check'));btn.classList.toggle('is-done',noteEditorDone);btn.setAttribute('aria-pressed',String(noteEditorDone));btn.title=noteEditorDone?'Mark incomplete':'Mark completed';btn.setAttribute('aria-label',btn.title);$('noteDoneLabel').textContent=noteEditorDone?'Completed':'Mark completed';}
+  $('noteToggleDone').addEventListener('click',()=>{noteEditorDone=!noteEditorDone;syncNoteEditorDone();});
+  function toggleNoteTime(){
+    const reminder=$('noteType').value==='reminder';
+    $('noteTimeWrap').hidden=!reminder;
+    $('noteDate').required=reminder;
+    $('noteTypeHint').textContent=reminder?'Choose a date. You can add a time and mark the reminder completed later.':'Notes are free-form. Pin one to keep it on the clock.';
+  }
+  function closeNoteEditor(){if($('noteDialog').open)$('noteDialog').close();editingNoteId=null;const back=returnToDay;returnToDay=false;if(back)openDayNotes();}
+  $('noteType').addEventListener('change',()=>{toggleNoteTime();$('saveNoteButton').textContent=editingNoteId?'Save changes':'Add '+$('noteType').value;});
+  function openFastClockNote(){
+    if(!state.clockDoubleClickNote && !state.showQuickNote)return;
+    if($('noteDialog').open||$('dayNotesDialog').open)return;
+    openNoteEditor(null,{type:'note',pinned:true});
+  }
+  $('quickClockNote').addEventListener('click',()=>openNoteEditor(null,{type:'note',pinned:true}));
+  // Double click on the actual clock, not the screen, to avoid accidental prompts.
+  $('clock').addEventListener('dblclick',event=>{if(!state.clockDoubleClickNote)return;event.preventDefault();openFastClockNote();});
+  let lastClockTouch=null;
+  $('clock').addEventListener('pointerup',event=>{
+    if(event.pointerType!=='touch'||!state.clockDoubleClickNote)return;
+    const now=Date.now();
+    if(lastClockTouch&&now-lastClockTouch.time<370&&Math.hypot(event.clientX-lastClockTouch.x,event.clientY-lastClockTouch.y)<36){
+      lastClockTouch=null;event.preventDefault();openFastClockNote();
+    }else lastClockTouch={time:now,x:event.clientX,y:event.clientY};
+  });
+  $('showQuickNote').addEventListener('change',event=>{state.showQuickNote=event.target.checked;save();syncNotesSettings();});
+  $('clockDoubleClickNote').addEventListener('change',event=>{state.clockDoubleClickNote=event.target.checked;save();syncNotesSettings();});
+  $('settingsAddNote').addEventListener('click',()=>openNoteEditor(null,{type:'note'}));
+  $('settingsAddReminder').addEventListener('click',()=>openNoteEditor(null,{type:'reminder'}));
+  $('dayAddNote').addEventListener('click',()=>{$('dayNotesDialog').close();openNoteEditor(null,{type:'note',date:dateKey(selectedDate),returnDay:true});});
+  $('dayAddReminder').addEventListener('click',()=>{$('dayNotesDialog').close();openNoteEditor(null,{type:'reminder',date:dateKey(selectedDate),returnDay:true});});
+  $('closeNoteDialog').addEventListener('click',closeNoteEditor);
+  $('cancelNoteButton').addEventListener('click',closeNoteEditor);
+  $('closeDayNotes').addEventListener('click',()=>$('dayNotesDialog').close());
+  $('openSelectedDay').addEventListener('click',openDayNotes);
+  $('noteDialog').addEventListener('click',e=>{if(e.target===$('noteDialog'))closeNoteEditor();});
+  $('dayNotesDialog').addEventListener('click',e=>{if(e.target===$('dayNotesDialog'))$('dayNotesDialog').close();});
+  $('noteDialog').addEventListener('close',()=>{editingNoteId=null;returnToDay=false;});
+  $('noteForm').addEventListener('submit',e=>{
+    e.preventDefault();const text=$('noteText').value.trim().slice(0,600);if(!text)return;
+    const now=Date.now(),existing=state.notes.find(n=>n.id===editingNoteId);
+    const note={id:existing?.id||newNoteId(),type:$('noteType').value==='reminder'?'reminder':'note',text,date:$('noteDate').value,time:$('noteType').value==='reminder'?$('noteTime').value:'',pinned:$('notePinned').checked,done:noteEditorDone,snoozedUntil:existing?.snoozedUntil||'',createdAt:existing?.createdAt||now};
+    if(existing)Object.assign(existing,note);else state.notes.push(note);
+    if(!note.date&&note.type==='reminder')note.done=false;
+    const back=returnToDay;returnToDay=false;$('noteDialog').close();editingNoteId=null;
+    save();refreshNotes();if(back)openDayNotes();
+  });
+  $('deleteNoteButton').addEventListener('click',()=>{
+    if(!editingNoteId)return;const n=state.notes.find(x=>x.id===editingNoteId);if(!n||!confirm('Delete this note permanently?'))return;
+    state.notes=state.notes.filter(x=>x.id!==editingNoteId);const back=returnToDay;returnToDay=false;$('noteDialog').close();editingNoteId=null;save();refreshNotes();if(back)openDayNotes();
+  });
+  for(const [id,key] of [['clockShowNotes','clockShowNotes'],['clockShowUpcoming','clockShowUpcoming']])$(id).addEventListener('change',e=>{state[key]=e.target.checked;save();refreshNotes();});
+  $('clockMaxNotes').addEventListener('input',e=>{state.clockMaxNotes=Number(e.target.value);$('clockMaxNotesValue').textContent=state.clockMaxNotes;save();renderClockNotes();});
+  function syncNotesSettings(){
+    $('clockShowNotes').checked=state.clockShowNotes;$('clockShowUpcoming').checked=state.clockShowUpcoming;
+    $('showQuickNote').checked=state.showQuickNote;
+    $('clockDoubleClickNote').checked=state.clockDoubleClickNote;
+    $('quickClockNote').hidden=!state.showQuickNote;
+    $('clockMaxNotes').value=state.clockMaxNotes;$('clockMaxNotesValue').textContent=state.clockMaxNotes;
+  }
+  syncNotesSettings();renderClockNotes();renderNotesManager();renderNotesCenter();
+  // Inline vector icons render sharply even in a small calendar cell, without a network request.
+  function calendarEventMarker(kind,style){
+    if(style==='dots'){const dot=document.createElement('i');dot.className=kind+'-mark';return dot;}
+    const ns='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('width','12');svg.setAttribute('height','12');svg.setAttribute('fill','none');
+    svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2.2');svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
+    svg.classList.add('calendar-marker-icon',kind+'-mark');
+    const paths=kind==='reminder'?[['circle',{cx:'12',cy:'12',r:'9'}],['path',{d:'M12 7v5l3.5 2'}]]
+      :[['rect',{x:'5',y:'3',width:'14',height:'18',rx:'2'}],['path',{d:'M9 8h6M9 12h6M9 16h4'}]];
+    for(const [tag,attrs] of paths){const el=document.createElementNS(ns,tag);for(const [key,val] of Object.entries(attrs))el.setAttribute(key,val);svg.append(el);}
+    return svg;
+  }
   function renderCalendar(){
     const year=displayMonth.getFullYear(),month=displayMonth.getMonth();
     $('calendarMonth').textContent=new Intl.DateTimeFormat('en-GB',{month:'long',year:'numeric'}).format(displayMonth);
@@ -1590,11 +2170,18 @@
       if(state.highlightWeekends&&inMonth&&(cellDate.getDay()===0||cellDate.getDay()===6))b.classList.add('weekend');
       if(isToday)b.classList.add('today');
       if(isSelected&&inMonth)b.classList.add('selected');
-      b.textContent=(!inMonth&&!state.showOutsideDates)?'':String(cellDate.getDate());
+      b.textContent='';
+      const number=document.createElement('span');number.className='calendar-day-number';number.textContent=(!inMonth&&!state.showOutsideDates)?'':String(cellDate.getDate());b.appendChild(number);
+      if(inMonth){const mark=noteMarkForDate(dateKey(cellDate));if(mark.notes||mark.reminders){
+        const indicators=document.createElement('span');indicators.className='calendar-note-marks';indicators.setAttribute('aria-hidden','true');
+        if(mark.notes)indicators.append(calendarEventMarker('note',state.calendarMarkers));
+        if(mark.reminders)indicators.append(calendarEventMarker('reminder',state.calendarMarkers));
+        b.appendChild(indicators);b.classList.add('has-calendar-notes');
+      }}
       b.title=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(cellDate);
       b.setAttribute('aria-label',b.title+(isToday?' (today)':''));
       b.setAttribute('aria-pressed',String(isSelected));
-      b.addEventListener('click',()=>{selectedDate=cellDate;if(!inMonth)displayMonth=new Date(cellDate.getFullYear(),cellDate.getMonth(),1);renderCalendar();});
+      b.addEventListener('click',()=>{selectedDate=cellDate;if(!inMonth)displayMonth=new Date(cellDate.getFullYear(),cellDate.getMonth(),1);renderCalendar();openDayNotes();});
       grid.appendChild(b);
     }
     $('calendarSelected').textContent=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(selectedDate);
@@ -1609,7 +2196,7 @@
   $('nextMonth').addEventListener('click',()=>shiftMonth(1));
   $('calendarToday').addEventListener('click',()=>{selectedDate=new Date();displayMonth=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1);renderCalendar();});
   let touchStart=null, suppressClickUntil=0;
-  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,.view-tabs,#exitFs,a');
+  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,.view-tabs,#exitFs,.clock-note-shelf,a');
   screen.addEventListener('pointerdown',e=>{
     if(e.pointerType==='touch' && !shortcutsEditMode && !gestureIgnored(e.target)) touchStart={x:e.clientX,y:e.clientY,pointerId:e.pointerId};
   });
@@ -1715,6 +2302,12 @@
     view.style.setProperty('--shortcut-icon-size-display',Math.round(82*size/100)+'px');
     view.style.setProperty('--shortcut-radius',radius+'px');
     view.style.setProperty('--shortcut-gap',gap+'px');
+    view.style.setProperty('--shortcut-icon-fill',state.shortcutBgOpacity+'%');
+    view.style.setProperty('--shortcut-border-fill',state.shortcutBorderOpacity+'%');
+    $('shortcutBorderOpacity').value=state.shortcutBorderOpacity;
+    $('shortcutBorderOpacityValue').textContent=state.shortcutBorderOpacity+'%';
+    $('shortcutBgOpacity').value=state.shortcutBgOpacity;
+    $('shortcutBgOpacityValue').textContent=state.shortcutBgOpacity+'%';
     $('showShortcutLabels').checked=state.showShortcutLabels!==false;
     const gridMode=state.shortcutLayout==='grid';
     $('shortcutLayoutAuto').setAttribute('aria-pressed',String(!gridMode));
@@ -1728,6 +2321,9 @@
       $(key+'Value').textContent=state[key]+(key==='shortcutColumns'?'':['shortcutGap','shortcutCellHeight'].includes(key)?'px':'%');
     }
   }
+  $('shortcutBgOpacity').addEventListener('input',event=>set('shortcutBgOpacity',Number(event.target.value)));
+  $('shortcutBorderOpacity').addEventListener('input',event=>set('shortcutBorderOpacity',Number(event.target.value)));
+  $('dockBgOpacity').addEventListener('input',event=>set('dockBgOpacity',Number(event.target.value)));
   /* Shortcut entries are links or one-level folders. Links inside a folder are never duplicated on the grid. */
   const isGroup=item=>item?.type==='group'&&Array.isArray(item.items);
   const topEntry=id=>state.shortcuts.find(item=>item.id===id);
@@ -1910,6 +2506,22 @@
     handle.addEventListener('pointercancel',clearGesture);
     handle.addEventListener('lostpointercapture',()=>{if(gesture&&!gesture.active)clearGesture();});
   }
+  function quickDeleteGridItem(item){
+    if(isGroup(item)){
+      if(!confirm('Dissolve group "'+(item.label||'Group')+'"? Its shortcuts will stay and return to the main grid.'))return;
+      const before=state.shortcuts,positions={...state.shortcutPositions};
+      const idx=before.findIndex(entry=>entry.id===item.id);if(idx<0)return;
+      state.shortcuts=[...before.slice(0,idx),...(item.items||[]),...before.slice(idx+1)];
+      if(!persistShortcutOrder()){state.shortcuts=before;state.shortcutPositions=positions;alert('Could not save shortcut changes.');return;}
+    }else{
+      if(!confirm('Delete shortcut "'+(item.label||'Shortcut')+'"?'))return;
+      const before=state.shortcuts,positions={...state.shortcutPositions};
+      state.shortcuts=before.filter(entry=>entry.id!==item.id);
+      delete state.shortcutPositions[item.id];
+      if(!persistShortcutOrder()){state.shortcuts=before;state.shortcutPositions=positions;alert('Could not save shortcut changes.');return;}
+    }
+    movingShortcutId=null;renderShortcuts();
+  }
   function makeEntry(item,index,total){
     const entry=document.createElement('div');entry.className='shortcut-entry'+(isGroup(item)?' is-group':'');entry.dataset.id=item.id;
     const tile=document.createElement(shortcutsEditMode?'button':isGroup(item)?'button':'a');tile.className='shortcut-tile';
@@ -1927,6 +2539,14 @@
     const icon=isGroup(item)?folderIcon(item):makeIcon(item,'shortcut-icon');
     const label=document.createElement('span');label.className='shortcut-caption';label.textContent=item.label||'Shortcut';label.hidden=state.showShortcutLabels===false;
     tile.append(icon,label);entry.appendChild(tile);
+    if(shortcutsEditMode){
+      const remove=document.createElement('button');remove.type='button';remove.className='shortcut-quick-delete';remove.textContent='×';
+      remove.title=isGroup(item)?'Dissolve group (keep shortcuts)':'Delete shortcut';
+      remove.setAttribute('aria-label',(isGroup(item)?'Dissolve group ':'Delete shortcut ')+(item.label||''));
+      remove.addEventListener('pointerdown',event=>event.stopPropagation());
+      remove.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();quickDeleteGridItem(item);});
+      entry.appendChild(remove);
+    }
     if(shortcutsEditMode){
       entry.draggable=true;entry.title='Drag to rearrange; hold to move on touchscreens';
       bindHoldToMove(tile,{
@@ -2385,6 +3005,7 @@
         const clean={...defaults};
         for(const [key,defaultValue] of Object.entries(defaults)){
           if(key==='shortcuts'){if(raw.shortcuts!==undefined)clean.shortcuts=sanitizedShortcuts(raw.shortcuts);continue;}
+          if(key==='notes'){if(raw.notes!==undefined)clean.notes=sanitizeNotes(raw.notes);continue;}
           if(key==='pinPreview')continue;
           if(key==='customThemes'){
             if(Array.isArray(raw.customThemes))clean.customThemes=raw.customThemes.filter(t=>t&&typeof t==='object'&&typeof t.id==='string'&&t.id.length<80&&typeof t.name==='string'&&t.name.length<=40&&t.snapshot&&typeof t.snapshot==='object'&&themePalettes[t.snapshot.theme]).slice(0,30).map(t=>({id:t.id,name:t.name,base:t.snapshot.theme,snapshot:t.snapshot}));
@@ -2433,6 +3054,8 @@
             }
           }
         }
+        // A v6.12 backup stored one strength for both lighting effects.
+        if(raw.backlightStrength===undefined && Number.isFinite(raw.glowIntensity))clean.backlightStrength=Math.max(0,Math.min(100,raw.glowIntensity));
         if(!themePalettes[clean.theme])clean.theme='matrix';
         if(!raw.viewBackgrounds && raw.wallpaperEnabled===false && Object.values(clean.wallpapers||{}).some(Boolean))
           clean.wallpaperModes=Object.fromEntries(['shortcuts','clock','calendar'].map(name=>[name,'none']));
@@ -2475,13 +3098,13 @@
   setInterval(()=>{
     const n=new Date();
     if(currentView==='clock'&&(n.getSeconds()!==lastTick||state.colonAnimation==='pulse'))draw();
-    const day=n.toDateString();if(day!==lastDay){lastDay=day;renderCalendar();}
+    const day=n.toDateString();if(day!==lastDay){lastDay=day;renderCalendar();renderClockNotes();}
   },120);
   const ro=new ResizeObserver(draw);ro.observe(canvas);
   $('fullscreen').addEventListener('click',async()=>{
     try{
       if(document.fullscreenElement)await document.exitFullscreen();
-      else await screen.requestFullscreen();
+      else await document.documentElement.requestFullscreen();
     }catch{$('status').textContent='Full screen is unavailable in this browser.';}
   });
   $('exitFs').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen();});
