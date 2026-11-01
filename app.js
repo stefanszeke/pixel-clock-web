@@ -9,7 +9,7 @@
     rose:{background:'#080d12',color:'#ff6b90',round:16}
   };
   const defaultViewBackground={wallpaperDim:20,wallpaperFit:'cover',dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11};
-  const defaults = {enableNotifications:false,notifiedReminderKeys:[],shortcutBorderOpacity:24,dockBgOpacity:93,notes:[],clockShowNotes:true,clockShowUpcoming:true,clockMaxNotes:4,showQuickNote:true,clockDoubleClickNote:false,calendarMarkers:'icons',calendarScale:100,calendarTileOpacity:7,shortcutBgOpacity:11,viewBackgrounds:{shortcuts:{...defaultViewBackground},clock:{...defaultViewBackground},calendar:{...defaultViewBackground}},wallpaperModes:{shortcuts:'shared',clock:'shared',calendar:'shared'},wallpaperEnabled:false,wallpaperScope:'shared',wallpaperTarget:'clock',wallpapers:{shared:'',shortcuts:'',clock:'',calendar:''},wallpaperFit:'cover',wallpaperDim:20,dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11,syncDotTexture:false,pinPreview:true,theme:'matrix',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,unlitOpacity:4,pixelGlow:true,backlightGlow:true,glowIntensity:12,backlightStrength:14,colonAnimation:'static',pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:80,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'grid',shortcutGridRows:5,shortcutPositions:{},shortcutColumns:12,shortcutGridWidth:90,shortcutCellHeight:104,customThemes:[],shortcutSize:80,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,weekStart:1,highlightWeekends:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[]};
+  const defaults = {enableNotifications:false,notifiedReminderKeys:[],shortcutBorderOpacity:24,dockBgOpacity:93,notes:[],clockShowNotes:true,clockShowUpcoming:true,clockMaxNotes:4,showQuickNote:true,clockDoubleClickNote:false,calendarMarkers:'icons',calendarScale:100,calendarTileOpacity:7,shortcutBgOpacity:11,viewBackgrounds:{shortcuts:{...defaultViewBackground},clock:{...defaultViewBackground},calendar:{...defaultViewBackground}},wallpaperModes:{shortcuts:'shared',clock:'shared',calendar:'shared'},wallpaperEnabled:false,wallpaperScope:'shared',wallpaperTarget:'clock',wallpapers:{shared:'',shortcuts:'',clock:'',calendar:''},wallpaperFit:'cover',wallpaperDim:20,dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11,syncDotTexture:false,pinPreview:true,theme:'rose',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,unlitOpacity:4,pixelGlow:true,backlightGlow:true,glowIntensity:12,backlightStrength:14,colonAnimation:'static',pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:80,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'grid',shortcutGridRows:5,shortcutPositions:{},shortcutColumns:12,shortcutGridWidth:90,shortcutCellHeight:104,customThemes:[],shortcutSize:80,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,weekStart:1,highlightWeekends:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[]};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
@@ -58,7 +58,7 @@
   state.clockShowNotes=state.clockShowNotes!==false;
   state.clockShowUpcoming=state.clockShowUpcoming!==false;
   state.clockMaxNotes=Number.isFinite(state.clockMaxNotes)?Math.max(1,Math.min(8,Math.round(state.clockMaxNotes))):4;
-  if(!themePalettes[state.theme])state.theme='matrix';
+  if(!themePalettes[state.theme])state.theme=defaults.theme;
   // Earlier builds used 'mono' for the Minimal font, while the renderer uses 'pixel'.
   if(state.clockFont==='mono')state.clockFont='pixel';
   if(!['static','blink','pulse'].includes(state.colonAnimation))state.colonAnimation='static';
@@ -128,6 +128,10 @@
   const segs={0:'abcedf',1:'bc',2:'abged',3:'abgcd',4:'fgbc',5:'afgcd',6:'afgecd',7:'abc',8:'abcdefg',9:'abcdfg'};
   function colorCss(hex,a){const v=hex.replace('#','');const r=parseInt(v.slice(0,2),16),g=parseInt(v.slice(2,4),16),b=parseInt(v.slice(4,6),16);return `rgba(${r},${g},${b},${a})`;}
   function save(){try{localStorage.setItem('little-pixel-clock',JSON.stringify(state));}catch{}}
+  // Persist the first-run defaults before the Firefox bridge starts. Without
+  // this, the bridge sees an empty localStorage, never saves a profile snapshot,
+  // and native shortcut following cannot populate a fresh install.
+  if(!localStorage.getItem('little-pixel-clock'))save();
   function set(key,value){state[key]=value;save();apply();}
   function chooseColor(color){state.themeColors={...state.themeColors,[state.theme]:color};save();apply();}
   function chooseBackground(color){state.themeBackgrounds={...state.themeBackgrounds,[state.theme]:color};save();apply();}
@@ -286,6 +290,9 @@
   }
   const settingsTabs=[...document.querySelectorAll('.setting-tab')];
   function showSettingsTab(name,focus=false){
+    const selectedTab=settingsTabs.find(tab=>tab.dataset.settings===name);
+    const categoryLabel=$('settingsCurrentCategory');
+    if(categoryLabel&&selectedTab)categoryLabel.textContent=selectedTab.querySelector('.tab-label')?.textContent||'Style';
     for(const tab of settingsTabs){
       const selected=tab.dataset.settings===name;
       tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;
@@ -537,7 +544,12 @@
       for(let row=0;row<7;row++)for(let c=0;c<width;c++){
         const x=x0+(col+c+.5)*u,y=y0+(row+.5)*u,lit=glyph[row][c]==='1';
         const size=u*(lit?scale:scale*.86);
-        if(lit){ctx.fillStyle=color;ctx.globalAlpha=chars[n]===':'?colon:1;litGlow(u);}
+        if(lit){
+          // When the colon blinks off, retain its unlit pixels rather than erasing them.
+          const intensity=chars[n]===':'?inactive+(1-inactive)*colon:1;
+          ctx.fillStyle=color;ctx.globalAlpha=intensity;
+          if(chars[n]===':'&&colon===0)ctx.shadowBlur=0;else litGlow(u);
+        }
         else{ctx.fillStyle=colorCss(color,inactive);ctx.globalAlpha=1;ctx.shadowBlur=0;}
         roundRect(x-size/2,y-size/2,size,size,size*(round/200));
       }
@@ -554,7 +566,8 @@
     for(let i=0;i<chars.length;i++){
       const ch=chars[i];ctx.save();ctx.translate(startX+x*scale,startY);ctx.scale(scale,scale);
       if(ch===':'){
-        ctx.fillStyle=color;ctx.globalAlpha=colon;litGlow(12*scale);
+        ctx.fillStyle=color;ctx.globalAlpha=inactive+(1-inactive)*colon;
+        if(colon===0)ctx.shadowBlur=0;else litGlow(12*scale);
         roundRect(2,12,4,5,1.5);roundRect(2,30,4,5,1.5);
       }else for(const [seg,rr] of Object.entries(segments)){
         const lit=(segs[ch]||'').includes(seg);
@@ -573,7 +586,7 @@
     litGlow(size*.3);
     const total=ctx.measureText(time).width;let x=(r.width-total)/2;
     for(const ch of time){
-      const cw=ctx.measureText(ch).width;ctx.globalAlpha=ch===':'?colonAlpha():1;
+      const cw=ctx.measureText(ch).width;ctx.globalAlpha=ch===':'?(state.unlitOpacity/100+(1-state.unlitOpacity/100)*colonAlpha()):1;
       ctx.fillText(ch,x+cw/2,r.height/2+size*.025);x+=cw;
     }
     clearGlow();
@@ -951,13 +964,16 @@
     const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;
     if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.4)return;
     suppressClickUntil=Date.now()+550;
-    if(dx<0&&currentView==='shortcuts')showView('clock');
+    if(currentView==='shortcuts' && (dx<0 || ($('shortcutEmpty').hidden===false && dx>0))){
+      // The no-shortcuts card is not a dead end: swipe either way to get back to the clock.
+      e.preventDefault();showView('clock');
+    }
     else if(dx<0&&currentView==='clock')showView('calendar');
     else if(dx>0&&currentView==='calendar')showView('clock');
     else if(dx>0&&currentView==='clock')showView('shortcuts');
   });
   screen.addEventListener('pointercancel',()=>{touchStart=null;});
-  $('calendarGrid').addEventListener('click',e=>{
+  for(const id of ['calendarGrid','shortcutEmpty'])$(id).addEventListener('click',e=>{
     if(Date.now()<suppressClickUntil){e.preventDefault();e.stopImmediatePropagation();}
   },true);
   screen.addEventListener('keydown',e=>{
@@ -1819,7 +1835,7 @@
         }
         // A v6.12 backup stored one strength for both lighting effects.
         if(raw.backlightStrength===undefined && Number.isFinite(raw.glowIntensity))clean.backlightStrength=Math.max(0,Math.min(100,raw.glowIntensity));
-        if(!themePalettes[clean.theme])clean.theme='matrix';
+        if(!themePalettes[clean.theme])clean.theme=defaults.theme;
         if(!raw.viewBackgrounds && raw.wallpaperEnabled===false && Object.values(clean.wallpapers||{}).some(Boolean))
           clean.wallpaperModes=Object.fromEntries(['shortcuts','clock','calendar'].map(name=>[name,'none']));
         if(!['auto','grid'].includes(clean.shortcutLayout))clean.shortcutLayout='auto';

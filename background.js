@@ -211,7 +211,13 @@ browser.runtime.onMessage.addListener((request)=>{
    if(request.type==='syncNow'){
     await adoptSynced();return await writeSynced();
    }
-   if(request.type==='followNow')return await followFirefox(true);
+   if(request.type==='followNow'){
+    // Include the canonical snapshot: an already-imported shortcut can be present
+    // in storage while this New Tab still displays an older empty state.
+    const result=await followFirefox(true);
+    const snapshot=(await browser.storage.local.get(SNAP))[SNAP]||null;
+    return {...result,snapshot,storedCount:Array.isArray(snapshot?.state?.shortcuts)?snapshot.state.shortcuts.length:0};
+   }
    if(request.type==='notifyTest')return await notification(request.title||'Little Pixel · Test',request.body||'Firefox notifications are working.');
    return {ok:false,error:'Unknown operation'};
   }catch(e){status.lastError=e.message;return {ok:false,error:e.message};}

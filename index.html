@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0c1511">
+  <meta name="theme-color" content="#080d12">
   <meta name="description" content="Little Pixel: a customizable clock, calendar and shortcuts home screen.">
   <title>New Tab</title>
+  <!-- Firefox uses this same browser-owned icon for its built-in New Tab. -->
+  <link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <script src="display-init.js"></script>
   <style>
@@ -943,6 +945,74 @@
     .shortcut-empty-status{font-size:11px;line-height:1.45;margin-top:10px;color:var(--screen-ink)}
     .shortcut-empty-status:empty{display:none}
     @media (max-width:520px){.setting-tab{min-height:42px!important}.shortcut-empty{padding:15px 12px!important}}
+
+    /* v6.19.3 — reserve dock space on short/mobile calendars, with no overlap. */
+    .display-mode .calendar-view,
+    html:fullscreen .screen.is-calendar .calendar-view{
+      overflow-y:auto!important;overscroll-behavior:contain;
+      padding-bottom:calc(84px + env(safe-area-inset-bottom))!important;
+      justify-content:flex-start!important;
+      scrollbar-width:thin;
+    }
+    .display-mode .calendar-inner,
+    html:fullscreen .screen.is-calendar .calendar-inner{margin-block:auto}
+    @media(max-height:620px){
+      .display-mode .calendar-view,html:fullscreen .screen.is-calendar .calendar-view{
+        padding:8px 10px calc(76px + env(safe-area-inset-bottom))!important;
+      }
+      .display-mode .calendar-title-row,html:fullscreen .screen.is-calendar .calendar-title-row{margin-bottom:4px!important}
+      .display-mode .calendar-top,html:fullscreen .screen.is-calendar .calendar-top{
+        margin-bottom:5px!important;grid-template-columns:38px 1fr 38px!important;
+      }
+      .display-mode .calendar-arrow,html:fullscreen .screen.is-calendar .calendar-arrow{
+        width:38px!important;height:38px!important;font-size:24px!important;
+      }
+      .display-mode .calendar-weekdays,html:fullscreen .screen.is-calendar .calendar-weekdays{margin-bottom:3px!important}
+      .display-mode .calendar-weekdays>span,html:fullscreen .screen.is-calendar .calendar-weekdays>span{padding:2px 0!important}
+      .display-mode .calendar-grid,.display-mode .calendar-grid.compact,
+      html:fullscreen .screen.is-calendar .calendar-grid,html:fullscreen .screen.is-calendar .calendar-grid.compact{
+        height:clamp(138px,calc(100dvh - 310px),260px)!important;
+        grid-template-rows:repeat(6,minmax(0,1fr))!important;
+      }
+      .display-mode .calendar-day,html:fullscreen .screen.is-calendar .calendar-day{
+        min-height:0!important;height:auto!important;font-size:clamp(12px,2.6vh,17px)!important;
+      }
+      .display-mode .calendar-selected,html:fullscreen .screen.is-calendar .calendar-selected{
+        min-height:27px!important;height:auto!important;margin-top:4px!important;font-size:11px!important;
+      }
+      .display-mode .calendar-selected strong,html:fullscreen .screen.is-calendar .calendar-selected strong{font-size:11px!important}
+    }
+    /* Keep the quick-add action centered immediately under the clock/date, even in landscape. */
+    .clock-view>.clock-note-toolbar{
+      position:relative;z-index:2;display:flex;justify-content:center;align-items:center;
+      width:100%;min-height:35px;flex:none;pointer-events:auto;
+    }
+    .clock-view>.clock-note-toolbar .clock-add-note{display:grid;place-items:center;margin-inline:auto}
+    .clock-note-shelf{left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(580px,88vw)!important}
+    @media(max-height:570px){
+      .clock-note-shelf{bottom:59px!important;max-height:24dvh}
+      .clock-note-list{max-height:24dvh}
+    }
+    /* Ensure horizontal swipe is recognized over the empty-shortcuts message. */
+    .shortcut-empty{touch-action:pan-y}
+    /* Phone settings: a single icon row with a visible current category label. */
+    .settings-current-category{display:none}
+    .display-mode.settings-open .setting-tabs{position:sticky;top:68px;z-index:4}
+    @media(max-width:600px){
+      .display-mode.settings-open .setting-tabs{
+        grid-template-columns:repeat(7,minmax(0,1fr))!important;
+        gap:3px!important;padding:4px!important;top:62px;
+      }
+      .display-mode.settings-open .setting-tab{
+        min-height:42px!important;padding:6px 0!important;
+      }
+      .display-mode.settings-open .setting-tab .tab-symbol{font-size:21px}
+      .display-mode.settings-open .setting-tab .tab-label{display:none}
+      .display-mode.settings-open .settings-current-category{
+        display:inline;font-size:12px;font-weight:600;color:#a6b8cb;letter-spacing:0;
+      }
+      .display-mode.settings-open .settings-current-category::before{content:'·';margin-inline:5px}
+    }
 </style>
 </head>
 <body>
@@ -956,11 +1026,11 @@
       <div class="preview-head"><div class="preview-heading"><h2>Preview</h2><span class="muted">· Choose a screen</span></div>
         <div class="preview-nav" role="group" aria-label="Preview screen">
           <button type="button" class="preview-icon" id="previewShortcuts" title="Preview shortcuts" aria-label="Preview shortcuts" aria-pressed="false">▦<span>Links</span></button>
-          <button type="button" class="preview-icon" id="previewClock" title="Preview clock" aria-label="Preview clock" aria-pressed="true">◷<span>Clock</span></button>
-          <button type="button" class="preview-icon" id="previewCalendar" title="Preview calendar" aria-label="Preview calendar" aria-pressed="false">▤<span>Calendar</span></button>
+          <button type="button" class="preview-icon" id="previewClock" title="Preview clock" aria-label="Preview clock" aria-pressed="true">◷<span class="tab-label">Clock</span></button>
+          <button type="button" class="preview-icon" id="previewCalendar" title="Preview calendar" aria-label="Preview calendar" aria-pressed="false">▤<span class="tab-label">Calendar</span></button>
         </div>
       </div>
-      <div class="screen" id="screen" data-theme="matrix" tabindex="0" aria-label="Three pages: shortcuts to the left, clock in the middle, calendar to the right. Swipe to change pages.">
+      <div class="screen" id="screen" data-theme="rose" tabindex="0" aria-label="Three pages: shortcuts to the left, clock in the middle, calendar to the right. Swipe to change pages.">
         <button class="fs-exit" id="exitFs" type="button">Exit full screen</button>
         <div class="screen-view shortcuts-view" id="shortcutsView" hidden>
           <button type="button" id="shortcutsEditToggle" class="shortcuts-edit-toggle" title="Edit shortcuts" aria-label="Edit shortcuts" aria-pressed="false">✎</button>
@@ -978,8 +1048,8 @@
           <span class="ampm" id="ampm" hidden></span>
           <canvas id="clock" class="clock-canvas" aria-label="Current time" role="img"></canvas>
           <div class="date-text" id="dateText"></div>
+          <div class="clock-note-toolbar"><button type="button" id="quickClockNote" class="clock-add-note" title="Quick note" aria-label="Add a note to the clock">+</button></div>
           <section class="clock-note-shelf" id="clockNoteShelf" aria-label="Notes on the clock">
-            <div class="clock-note-toolbar"><button type="button" id="quickClockNote" class="clock-add-note" title="Quick note" aria-label="Add a note to the clock">+</button></div>
             <div class="clock-note-list" id="clockNoteList" aria-live="polite"></div>
           </section>
         </div>
@@ -1002,7 +1072,7 @@
         <nav class="view-tabs" id="bottomDock" aria-label="Pages and app controls">
           <button id="dockHandle" class="dock-handle" type="button" aria-controls="dockItems" aria-label="Expand navigation" aria-expanded="true" title="Show navigation" hidden>⌃</button>
           <div id="dockItems" class="dock-items"><div class="page-switch" id="pageSwitch" role="group" aria-label="Choose a page">
-            <button class="view-tab" type="button" id="tabShortcuts" aria-pressed="false">▦ <span>Shortcuts</span></button>
+            <button class="view-tab" type="button" id="tabShortcuts" aria-pressed="false">▦ <span class="tab-label">Shortcuts</span></button>
             <button class="view-tab" type="button" id="tabClock" aria-pressed="true">◷ <span>Clock</span></button>
             <button class="view-tab" type="button" id="tabCalendar" aria-pressed="false">▤ <span>Calendar</span></button>
           </div>
@@ -1015,15 +1085,15 @@
       <span id="status" class="sr-only" role="status" aria-live="polite"></span>
     </section>
     <aside class="panel controls" id="settingsPanel" aria-label="Customize Little Pixel Clock" aria-hidden="true" inert>
-      <div class="settings-head"><div><h2>Settings</h2></div><button class="settings-close" type="button" id="closeSettings" aria-label="Close settings" title="Close settings">×</button></div>
+      <div class="settings-head"><div><h2>Settings <span id="settingsCurrentCategory" class="settings-current-category">Style</span></h2></div><button class="settings-close" type="button" id="closeSettings" aria-label="Close settings" title="Close settings">×</button></div>
       <div class="setting-tabs" role="tablist" aria-label="Customization categories">
-        <button type="button" role="tab" class="setting-tab" id="settingsTabAppearance" aria-controls="settingsAppearance" aria-selected="true" data-settings="appearance"><span class="tab-symbol" aria-hidden="true">◉</span><span>Style</span></button>
-        <button type="button" role="tab" class="setting-tab" id="settingsTabBackground" aria-controls="settingsBackground" aria-selected="false" data-settings="background"><span class="tab-symbol" aria-hidden="true">▦</span><span>Background</span></button>
-        <button type="button" role="tab" class="setting-tab" id="settingsTabTime" aria-controls="settingsTime" aria-selected="false" data-settings="time"><span class="tab-symbol" aria-hidden="true">◷</span><span>Clock</span></button>
-        <button type="button" role="tab" class="setting-tab" id="settingsTabCalendar" aria-controls="settingsCalendar" aria-selected="false" data-settings="calendar"><span class="tab-symbol" aria-hidden="true">▤</span><span>Calendar</span></button>
-        <button type="button" role="tab" class="setting-tab" id="settingsTabNotes" aria-controls="settingsNotes" aria-selected="false" data-settings="notes"><span class="tab-symbol" aria-hidden="true">☑</span><span>Notes</span></button>
-        <button type="button" role="tab" class="setting-tab" id="settingsTabShortcuts" aria-controls="settingsShortcuts" aria-selected="false" data-settings="shortcuts"><span class="tab-symbol" aria-hidden="true">▣</span><span>Shortcuts</span></button>
-        <button type="button" role="tab" class="setting-tab" id="settingsTabDisplay" aria-controls="settingsDisplay" aria-selected="false" data-settings="display"><span class="tab-symbol" aria-hidden="true">⚙</span><span>General</span></button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabAppearance" aria-controls="settingsAppearance" aria-selected="true" data-settings="appearance" title="Appearance settings"><span class="tab-symbol" aria-hidden="true">◉</span><span class="tab-label">Style</span></button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabBackground" aria-controls="settingsBackground" aria-selected="false" data-settings="background" title="Background settings"><span class="tab-symbol" aria-hidden="true">▦</span><span class="tab-label">Background</span></button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabTime" aria-controls="settingsTime" aria-selected="false" data-settings="time" title="Time settings"><span class="tab-symbol" aria-hidden="true">◷</span><span>Clock</span></button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabCalendar" aria-controls="settingsCalendar" aria-selected="false" data-settings="calendar" title="Calendar settings"><span class="tab-symbol" aria-hidden="true">▤</span><span>Calendar</span></button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabNotes" aria-controls="settingsNotes" aria-selected="false" data-settings="notes" title="Notes settings"><span class="tab-symbol" aria-hidden="true">☑</span><span class="tab-label">Notes</span></button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabShortcuts" aria-controls="settingsShortcuts" aria-selected="false" data-settings="shortcuts" title="Shortcuts settings"><span class="tab-symbol" aria-hidden="true">▣</span><span>Shortcuts</span></button>
+        <button type="button" role="tab" class="setting-tab" id="settingsTabDisplay" aria-controls="settingsDisplay" aria-selected="false" data-settings="display" title="Display settings"><span class="tab-symbol" aria-hidden="true">⚙</span><span class="tab-label">General</span></button>
       </div>
       <div class="settings-pane" id="settingsAppearance" role="tabpanel" aria-labelledby="settingsTabAppearance"><section class="section"><h3>THEME</h3><div class="themes" id="themes">
         <button type="button" class="theme" data-value="matrix" aria-pressed="true"><span class="mini matrix">● 08:42</span><span class="name">LED Matrix</span></button>

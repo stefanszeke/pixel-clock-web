@@ -75,3 +75,10 @@ The Firefox Integration ⓘ help markers and tooltips distinguish native Firefox
 - New Tab title remains *New Tab*. A custom tab favicon is no longer declared; Firefox decides the normal page icon. Extension branding stays in the manifest.
 - Settings navigation is a compact 2-row icon-and-label palette instead of a horizontally scrolling row.
 - **Export Firefox bookmarks HTML** makes a standard bookmarks import file from Little Pixel's shortcuts, preserving groups as bookmark folders. In Firefox use `Ctrl+Shift+O` → Import and Backup → Import Bookmarks from HTML. **This is not a native pinned New Tab JSON export** (Firefox's supported JSON backup is for bookmarks).
+
+## 6.19.2 update / test
+
+- Reload the temporary extension in `about:debugging#/runtime/this-firefox`, then open a new tab.
+- If the shortcuts page is empty, select **Import Firefox shortcuts**. It now explicitly reloads the latest saved shortcut list, including any sites stored in the background by a previous attempt.
+- Rose Night applies to fresh/default settings only. To try it with existing settings choose it manually in Style/Clock settings, or Factory Reset after exporting a backup.
+- Tab icon: attempts the same browser-owned `chrome://branding/content/icon32.png` resource as Firefox New Tab. This may be blocked depending on Firefox security behavior; it is not bundled and we do not claim a guaranteed native icon.

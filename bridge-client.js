@@ -29,21 +29,43 @@
   setStatus(res.ok?'Synced small settings, links, and notes. Images stay local.':(res.error||'Sync unsuccessful'),!res.ok);
  });
  // Manual import uses the extension background, which checks pinned and New Tab sources.
+ let importing=false;
  async function importFirefoxShortcuts(){
+  importing=true;
   const emptyStatus=document.getElementById('emptyImportStatus');
   const emptyButton=document.getElementById('emptyImportFirefox');
   if(emptyButton){emptyButton.disabled=true;emptyButton.textContent='Importing…';}
   if(emptyStatus)emptyStatus.textContent='Checking Firefox shortcuts…';
   try{
    const res=await send({type:'followNow'});
+   const storedCount=Number(res?.storedCount)||0;
    const message=!res?.ok?(res?.error||'Firefox could not provide the shortcut list.'):
     res.count>0?`Imported ${res.count} site${res.count===1?'':'s'} from Firefox.`:
-    res.found>0?`Firefox returned ${res.found} sites; all are already imported.`:
+    storedCount>0?`Found ${storedCount} saved shortcuts; restoring the displayed grid.`:
+    res.found>0?`Firefox returned ${res.found} sites, but no links were stored. Check the extension debugger.`:
     'Firefox returned no sites. Try adding a pinned shortcut in the native New Tab, then import again; or add a link using ✎.';
    setStatus(message,!res?.ok);
    if(emptyStatus)emptyStatus.textContent=message;
+   // A saved Firefox import may happen before this page's storage listener is ready,
+   // so don't depend on an onChanged notification. Hydrate explicitly and redraw.
+   if(res?.ok && res.snapshot?.state){
+    const latest=JSON.stringify(res.snapshot.state);
+    if(latest!==localStorage.getItem(key)){
+     incoming=true;last=latest;
+     try{localStorage.setItem(key,latest);}catch(e){throw Error('Could not restore imported shortcuts: '+e.message);}
+     location.replace(location.pathname+'?page=shortcuts');
+     return;
+    }
+    // If the stored grid already equals the page cache, force a one-time
+    // app-render refresh for a stale in-memory grid instead of reporting success.
+    if(storedCount>0 && document.getElementById('shortcutEmpty')?.hidden===false){
+     incoming=true;last=latest;
+     location.replace(location.pathname+'?page=shortcuts');
+     return;
+    }
+   }
   }catch(e){setStatus('Import failed: '+e.message,true);if(emptyStatus)emptyStatus.textContent='Import failed: '+e.message;}
-  finally{if(emptyButton){emptyButton.disabled=false;emptyButton.textContent='↧ Import Firefox shortcuts';}}
+  finally{importing=false;if(emptyButton){emptyButton.disabled=false;emptyButton.textContent='↧ Import Firefox shortcuts';}}
  }
  document.getElementById('importFirefoxSites')?.addEventListener('click',importFirefoxShortcuts);
  document.getElementById('emptyImportFirefox')?.addEventListener('click',importFirefoxShortcuts);
@@ -62,7 +84,7 @@
  const watcher=setInterval(saveLatest,750);
  window.addEventListener('pagehide',()=>{if(!active)return;saveLatest().catch(()=>{});});
  browser.storage.onChanged.addListener((changes,area)=>{
-  if(resetting||area!=='local'||!changes.lpSnapshot?.newValue)return;
+  if(resetting||importing||area!=='local'||!changes.lpSnapshot?.newValue)return;
   const snap=changes.lpSnapshot.newValue;
   if(snap.source===clientId||!snap.state)return;
   const next=JSON.stringify(snap.state);
