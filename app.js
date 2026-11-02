@@ -9,7 +9,7 @@
     rose:{background:'#080d12',color:'#ff6b90',round:16}
   };
   const defaultViewBackground={wallpaperDim:20,wallpaperFit:'cover',dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11};
-  const defaults = {enableNotifications:false,notifiedReminderKeys:[],shortcutBorderOpacity:24,dockBgOpacity:93,notes:[],clockShowNotes:true,clockShowUpcoming:true,clockMaxNotes:4,showQuickNote:true,clockDoubleClickNote:false,calendarMarkers:'icons',calendarScale:100,calendarTileOpacity:7,shortcutBgOpacity:11,viewBackgrounds:{shortcuts:{...defaultViewBackground},clock:{...defaultViewBackground},calendar:{...defaultViewBackground}},wallpaperModes:{shortcuts:'shared',clock:'shared',calendar:'shared'},wallpaperEnabled:false,wallpaperScope:'shared',wallpaperTarget:'clock',wallpapers:{shared:'',shortcuts:'',clock:'',calendar:''},wallpaperFit:'cover',wallpaperDim:20,dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11,syncDotTexture:false,pinPreview:true,theme:'rose',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,unlitOpacity:4,pixelGlow:true,backlightGlow:true,glowIntensity:12,backlightStrength:14,colonAnimation:'static',pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:80,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'grid',shortcutGridRows:5,shortcutPositions:{},shortcutColumns:12,shortcutGridWidth:90,shortcutCellHeight:104,customThemes:[],shortcutSize:80,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,weekStart:1,highlightWeekends:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',shortcuts:[]};
+  const defaults = {enableNotifications:false,notifiedReminderKeys:[],shortcutBorderOpacity:24,dockBgOpacity:93,dockScale:100,dockAlignment:'center',notes:[],clockShowNotes:true,clockShowUpcoming:true,clockMaxNotes:4,showQuickNote:true,clockDoubleClickNote:false,calendarMarkers:'icons',calendarScale:100,calendarTileOpacity:7,shortcutBgOpacity:11,viewBackgrounds:{shortcuts:{...defaultViewBackground},clock:{...defaultViewBackground},calendar:{...defaultViewBackground}},wallpaperModes:{shortcuts:'shared',clock:'shared',calendar:'shared'},wallpaperEnabled:false,wallpaperScope:'shared',wallpaperTarget:'clock',wallpapers:{shared:'',shortcuts:'',clock:'',calendar:''},wallpaperFit:'cover',wallpaperDim:20,dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11,syncDotTexture:false,pinPreview:true,theme:'rose',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,unlitOpacity:4,pixelGlow:true,backlightGlow:true,glowIntensity:12,backlightStrength:14,colonAnimation:'static',pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:80,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'grid',shortcutGridRows:5,shortcutPositions:{},shortcutColumns:12,shortcutGridWidth:90,shortcutCellHeight:104,customThemes:[],shortcutSize:80,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,weekStart:1,highlightWeekends:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',firefoxDismissedUrls:[],shortcuts:[]};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
@@ -52,6 +52,8 @@
   for(const [key,low,high,fallback] of [['calendarScale',65,145,100],['calendarTileOpacity',0,100,8],['shortcutBgOpacity',0,100,11],['shortcutBorderOpacity',0,100,24],['dockBgOpacity',0,100,93]]){
     const value=Number(state[key]);state[key]=Number.isFinite(value)?Math.min(high,Math.max(low,value)):fallback;
   }
+  state.dockScale=Number.isFinite(Number(state.dockScale))?Math.min(150,Math.max(65,Number(state.dockScale))):100;
+  state.dockAlignment=['left','center','right'].includes(state.dockAlignment)?state.dockAlignment:'center';
   state.calendarMarkers=['dots','icons'].includes(state.calendarMarkers)?state.calendarMarkers:'icons';
   state.showQuickNote=state.showQuickNote!==false;
   state.clockDoubleClickNote=!!state.clockDoubleClickNote;
@@ -67,6 +69,8 @@
   }
   state.pixelGlow=!!state.pixelGlow;state.backlightGlow=!!state.backlightGlow;state.syncDotTexture=!!state.syncDotTexture;
   if(!Array.isArray(state.shortcuts))state.shortcuts=defaults.shortcuts;
+  if(!Array.isArray(state.firefoxDismissedUrls))state.firefoxDismissedUrls=[];
+  state.firefoxDismissedUrls=state.firefoxDismissedUrls.filter(u=>typeof u==='string'&&/^https?:\/\//i.test(u)).slice(-250);
   if(!Array.isArray(state.customThemes))state.customThemes=[];
   state.customThemes=state.customThemes.filter(x=>x&&typeof x==='object'&&typeof x.id==='string'&&typeof x.name==='string'&&themePalettes[x.base]).slice(0,30);
   if(!['auto','grid'].includes(state.shortcutLayout))state.shortcutLayout='auto';
@@ -231,6 +235,12 @@
     $('calendarScale').value=state.calendarScale;$('calendarScaleValue').textContent=state.calendarScale+'%';
     $('calendarTileOpacity').value=state.calendarTileOpacity;$('calendarTileOpacityValue').textContent=state.calendarTileOpacity+'%';
     $('pageSwitch').hidden=!state.showSwitchButtons;
+    $('dockAlignment').value=state.dockAlignment;
+    $('dockScale').value=state.dockScale;
+    $('dockScaleValue').textContent=state.dockScale+'%';
+    $('bottomDock').dataset.align=state.dockAlignment;
+    screen.style.setProperty('--lp-dock-scale',String(state.dockScale/100));
+    screen.style.setProperty('--lp-dock-mobile-scale',String(Math.min(1.05,state.dockScale/100)));
     $('autoHideDock').checked=!!state.autoHideDock;
     screen.style.setProperty('--dock-opacity',state.dockBgOpacity+'%');
     $('dockBgOpacity').value=state.dockBgOpacity;
@@ -343,9 +353,9 @@
   }
   $('savedThemePicker').addEventListener('change',()=>renderThemeManager());
   $('applySavedTheme').addEventListener('click',()=>loadSavedTheme(state.customThemes.find(x=>x.id===$('savedThemePicker').value)));
-  $('saveThemeAs').addEventListener('click',()=>{
-    if(state.customThemes.length>=30){alert('You can save up to 30 themes.');return;}
-    const name=prompt('Name this theme:', 'My theme '+(state.customThemes.length+1));
+  $('saveThemeAs').addEventListener('click',async()=>{
+    if(state.customThemes.length>=30){lpDialogs.notice('You can save up to 30 themes.');return;}
+    const name=await lpDialogs.input('Name this theme:', 'My theme '+(state.customThemes.length+1));
     if(name===null)return;const trimmed=name.trim().slice(0,40);if(!trimmed)return;
     const id='theme-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
     state.customThemes.push({id,name:trimmed,base:state.theme,snapshot:currentThemeSnapshot()});
@@ -355,8 +365,8 @@
     const item=state.customThemes.find(x=>x.id===$('savedThemePicker').value);if(!item)return;
     item.base=state.theme;item.snapshot=currentThemeSnapshot();save();renderThemeManager(item.id);
   });
-  $('deleteSavedTheme').addEventListener('click',()=>{
-    const item=state.customThemes.find(x=>x.id===$('savedThemePicker').value);if(!item||!confirm('Delete saved theme “'+item.name+'”?'))return;
+  $('deleteSavedTheme').addEventListener('click',async()=>{
+    const item=state.customThemes.find(x=>x.id===$('savedThemePicker').value);if(!item||!await lpDialogs.confirm('Delete saved theme “'+item.name+'”?'))return;
     state.customThemes=state.customThemes.filter(x=>x!==item);save();renderThemeManager();
   });
   renderThemeManager();
@@ -382,8 +392,8 @@
     if(name!=='shared')state.wallpaperModes={...state.wallpaperModes,[name]:'shared'};
     save();apply();
   }));
-  $('resetAllWallpapers').addEventListener('click',()=>{
-    if(!confirm('Remove the shared wallpaper and all screen-specific wallpaper images?'))return;
+  $('resetAllWallpapers').addEventListener('click',async()=>{
+    if(!await lpDialogs.confirm('Remove the shared wallpaper and all screen-specific wallpaper images?'))return;
     state.wallpapers={...defaults.wallpapers};
     state.wallpaperModes={...defaults.wallpaperModes};
     save();apply();
@@ -739,9 +749,9 @@
   function noteIconAction(icon,title,handler,extra=''){
     const btn=document.createElement('button');btn.type='button';btn.className='note-icon-action '+extra;btn.title=title;btn.setAttribute('aria-label',title);btn.append(noteVector(icon));btn.addEventListener('click',handler);return btn;
   }
-  const selectedNoteIds=new Set();let notesSelectionMode=false;
-  function deleteNoteQuick(n){
-    if(!confirm('Delete "'+n.text.slice(0,70)+'" permanently?'))return;
+  const selectedNoteIds=new Set();const notesSelectionMode=true;
+  async function deleteNoteQuick(n){
+    if(!await lpDialogs.confirm('Delete "'+n.text.slice(0,70)+'" permanently?'))return;
     state.notes=state.notes.filter(item=>item.id!==n.id);selectedNoteIds.delete(n.id);save();refreshNotes();
   }
   function makeNotesRow(n,{forCenter=false}={}){
@@ -782,8 +792,7 @@
     }
     section('Active',filtered.filter(n=>!n.done));section('Completed',filtered.filter(n=>n.done));
     if(!filtered.length){const empty=document.createElement('p');empty.className='note-empty';empty.textContent=state.notes.length?'No matching items.':'No notes or reminders yet.';list.append(empty);}
-    $('notesBulkTools').hidden=!notesSelectionMode;$('toggleNotesSelection').setAttribute('aria-pressed',String(notesSelectionMode));
-    $('toggleNotesSelection').textContent=notesSelectionMode?'Done selecting':'Select';
+    $('notesBulkTools').hidden=false;
     $('notesBulkCount').textContent=selectedNoteIds.size+' selected';
     for(const id of ['notesBulkComplete','notesBulkReopen','notesBulkDelete'])$(id).disabled=!selectedNoteIds.size;
     $('notesSelectVisible').disabled=!filtered.length;
@@ -798,12 +807,11 @@
   $('centerAddNote').addEventListener('click',()=>openNoteEditor(null,{type:'note'}));
   $('centerAddReminder').addEventListener('click',()=>openNoteEditor(null,{type:'reminder'}));
   for(const id of ['notesSearch','notesStatusFilter','notesTypeFilter'])$(id).addEventListener(id==='notesSearch'?'input':'change',renderNotesCenter);
-  $('toggleNotesSelection').addEventListener('click',()=>{notesSelectionMode=!notesSelectionMode;selectedNoteIds.clear();renderNotesCenter();});
   $('notesSelectVisible').addEventListener('click',()=>{for(const n of filteredNotes())selectedNoteIds.add(n.id);renderNotesCenter();});
   $('notesClearSelection').addEventListener('click',()=>{selectedNoteIds.clear();renderNotesCenter();});
-  function bulkNotes(action){
+  async function bulkNotes(action){
     if(!selectedNoteIds.size)return;
-    if(action==='delete'&&!confirm('Delete '+selectedNoteIds.size+' selected item(s) permanently?'))return;
+    if(action==='delete'&&!await lpDialogs.confirm('Delete '+selectedNoteIds.size+' selected item(s) permanently?'))return;
     if(action==='delete')state.notes=state.notes.filter(n=>!selectedNoteIds.has(n.id));
     else for(const n of state.notes)if(selectedNoteIds.has(n.id))n.done=action==='complete';
     selectedNoteIds.clear();save();refreshNotes();
@@ -875,8 +883,8 @@
     const back=returnToDay;returnToDay=false;$('noteDialog').close();editingNoteId=null;
     save();refreshNotes();if(back)openDayNotes();
   });
-  $('deleteNoteButton').addEventListener('click',()=>{
-    if(!editingNoteId)return;const n=state.notes.find(x=>x.id===editingNoteId);if(!n||!confirm('Delete this note permanently?'))return;
+  $('deleteNoteButton').addEventListener('click',async()=>{
+    if(!editingNoteId)return;const n=state.notes.find(x=>x.id===editingNoteId);if(!n||!await lpDialogs.confirm('Delete this note permanently?'))return;
     state.notes=state.notes.filter(x=>x.id!==editingNoteId);const back=returnToDay;returnToDay=false;$('noteDialog').close();editingNoteId=null;save();refreshNotes();if(back)openDayNotes();
   });
   for(const [id,key] of [['clockShowNotes','clockShowNotes'],['clockShowUpcoming','clockShowUpcoming']])$(id).addEventListener('change',e=>{state[key]=e.target.checked;save();refreshNotes();});
@@ -1015,28 +1023,35 @@
   const imageUrl=raw=>{
     try{const url=new URL(String(raw||'').trim());return url.protocol==='https:'?url.href:null;}catch{return null;}
   };
-  const faviconSources=site=>{
-    const url=normalizedUrl(site);if(!url)return [];
-    const parsed=new URL(url),host=parsed.hostname;
-    return [
-      'https://www.google.com/s2/favicons?sz=128&domain_url='+encodeURIComponent(parsed.origin),
-      'https://icons.duckduckgo.com/ip3/'+encodeURIComponent(host)+'.ico',
-      parsed.origin+'/favicon.ico'
-    ];
+  // Older versions stored placeholder ↗ as an explicit 'symbol' icon. That
+  // must not prevent these links from using their actual website icon.
+  const isLegacyFavicon=item=>(!item.iconMode||item.iconMode==='symbol')&&(!item.icon||['↗','➚','➤'].includes(item.icon));
+  const effectiveIconMode=item=>isLegacyFavicon(item)?'favicon':(item.iconMode||'symbol');
+  const faviconSources=item=>{
+    const url=normalizedUrl(item.url);if(!url)return [];
+    // First keep real Firefox-cached icons. Then try *only that website's own*
+    // files (no external favicon aggregation services or browsing disclosure).
+    const parsed=new URL(url);
+    const cached=typeof item.faviconData==='string'&&/^data:image\/(?:png|jpeg|gif|svg\+xml|webp|x-icon|vnd\.microsoft\.icon);base64,/i.test(item.faviconData)&&item.faviconData.length<150000?item.faviconData:null;
+    const linked=typeof item.faviconUrl==='string'&&imageUrl(item.faviconUrl)?item.faviconUrl:null;
+    const base=parsed.origin;
+    return [...new Set([cached,linked,base+'/favicon.ico',base+'/favicon.svg',base+'/apple-touch-icon.png',base+'/favicon.png',base+'/assets/favicon.ico',base+'/static/favicon.ico'].filter(Boolean))];
   };
   function makeIcon(item,cls){
     const holder=document.createElement('span');holder.className=cls;
-    const mode=item.iconMode||'symbol';
-    const sources=mode==='favicon'?faviconSources(item.url):
+    const mode=effectiveIconMode(item);
+    const sources=mode==='favicon'?faviconSources(item):
       mode==='upload'&&String(item.iconImage||'').startsWith('data:image/')?[item.iconImage]:
       mode==='imageUrl'&&imageUrl(item.iconUrl)?[imageUrl(item.iconUrl)]:[];
-    const fallbackText=item.icon||((normalizedUrl(item.url)&&new URL(normalizedUrl(item.url)).hostname[0].toUpperCase())||'↗');
+    const valid=normalizedUrl(item.url);
+    const hostname=valid?new URL(valid).hostname.replace(/^www\./i,''):'';
+    // A missing favicon should be recognizable by site, not become a generic arrow.
+    const fallbackText=mode==='favicon'?(hostname.slice(0,1).toUpperCase()||'🌐'):(item.icon||hostname.slice(0,1).toUpperCase()||'↗');
     const fallback=()=>{holder.classList.remove('is-image','is-favicon');holder.replaceChildren();holder.textContent=fallbackText;};
     fallback();
     function loadFrom(index){
-      if(index>=sources.length)return fallback();
+      if(index>=sources.length)return; // Keep the already rendered fallback.
       const img=document.createElement('img');img.alt='';img.referrerPolicy='no-referrer';img.decoding='async';
-      // Some favicon endpoints are blocked by privacy add-ons or respond with an error.
       img.addEventListener('load',()=>{
         if(!img.naturalWidth||!img.naturalHeight){loadFrom(index+1);return;}
         holder.replaceChildren(img);holder.classList.add(mode==='favicon'?'is-favicon':'is-image');
@@ -1094,12 +1109,15 @@
   const maxGridRows=()=>Math.max(3,Math.min(12,Number(state.shortcutGridRows)||6));
   const maxSlots=()=>maxGridCols()*Math.max(maxGridRows(),Math.ceil((state.shortcuts.length+2)/maxGridCols()));
   let shortcutsEditMode=false,draggedShortcutId=null,movingShortcutId=null,activeGroupId=null,editingGroupId=null;
+  let pendingCreationSlot=null;
+  const selectedShortcutIds=new Set();
   let groupAnchor=null;
   function toggleShortcutsEdit(force){
     const active=document.activeElement;
     if(active?.matches?.('input:not([type="checkbox"]):not([type="range"]),textarea,[contenteditable="true"]'))active.blur();
     shortcutsEditMode=typeof force==='boolean'?force:!shortcutsEditMode;
     if(shortcutsEditMode)closeGroupPopover();
+    else selectedShortcutIds.clear();
     movingShortcutId=null;
     $('shortcutsEditToggle').setAttribute('aria-pressed',String(shortcutsEditMode));
     $('shortcutsEditToggle').textContent=shortcutsEditMode?'✓':'⚙';
@@ -1268,22 +1286,73 @@
     handle.addEventListener('pointercancel',clearGesture);
     handle.addEventListener('lostpointercapture',()=>{if(gesture&&!gesture.active)clearGesture();});
   }
-  function quickDeleteGridItem(item){
-    if(isGroup(item)){
-      if(!confirm('Dissolve group "'+(item.label||'Group')+'"? Its shortcuts will stay and return to the main grid.'))return;
-      const before=state.shortcuts,positions={...state.shortcutPositions};
-      const idx=before.findIndex(entry=>entry.id===item.id);if(idx<0)return;
-      state.shortcuts=[...before.slice(0,idx),...(item.items||[]),...before.slice(idx+1)];
-      if(!persistShortcutOrder()){state.shortcuts=before;state.shortcutPositions=positions;alert('Could not save shortcut changes.');return;}
-    }else{
-      if(!confirm('Delete shortcut "'+(item.label||'Shortcut')+'"?'))return;
-      const before=state.shortcuts,positions={...state.shortcutPositions};
-      state.shortcuts=before.filter(entry=>entry.id!==item.id);
-      delete state.shortcutPositions[item.id];
-      if(!persistShortcutOrder()){state.shortcuts=before;state.shortcutPositions=positions;alert('Could not save shortcut changes.');return;}
+  function addToGroup(linkId,groupId){
+    const link=topEntry(linkId),group=topEntry(groupId);
+    if(!link||isGroup(link)||!isGroup(group)||link.id===group.id)return false;
+    if(group.items.some(x=>normalizedUrl(x.url)===normalizedUrl(link.url)))return false;
+    const before=state.shortcuts,positions={...state.shortcutPositions};
+    state.shortcuts=before.filter(x=>x.id!==linkId).map(x=>x.id===groupId?{...x,items:[...x.items,link]}:x);
+    delete state.shortcutPositions[linkId];
+    if(!persistShortcutOrder()){state.shortcuts=before;state.shortcutPositions=positions;return false;}
+    movingShortcutId=null;renderShortcuts();return true;
+  }
+  async function deleteGroupWithOptions(group){
+    const decision=await lpDialogs.confirmGroupRemoval(group.label||'Group',(group.items||[]).length);
+    if(!decision.confirmed)return false;
+    const before=state.shortcuts,positions={...state.shortcutPositions},dismissed=[...state.firefoxDismissedUrls];
+    const idx=before.findIndex(x=>x.id===group.id);if(idx<0)return false;
+    state.shortcuts=[...before.slice(0,idx),...(decision.removeLinks?[]:group.items),...before.slice(idx+1)];
+    delete state.shortcutPositions[group.id];
+    if(decision.removeLinks){
+      const removed=group.items.filter(x=>x.firefoxFollowed&&x.url).map(x=>x.url);
+      state.firefoxDismissedUrls=[...new Set([...dismissed,...removed])].slice(-250);
     }
+    if(!persistShortcutOrder()){
+      state.shortcuts=before;state.shortcutPositions=positions;state.firefoxDismissedUrls=dismissed;
+      await lpDialogs.notice('Could not save shortcut changes.');return false;
+    }
+    closeGroupEditor();movingShortcutId=null;renderShortcuts();return true;
+  }
+  async function quickDeleteGridItem(item){
+    if(isGroup(item)){await deleteGroupWithOptions(item);return;}
+    if(!await lpDialogs.confirm('Delete shortcut "'+(item.label||'Shortcut')+'"?'))return;
+    const before=state.shortcuts,positions={...state.shortcutPositions},dismissed=[...state.firefoxDismissedUrls];
+    state.shortcuts=before.filter(entry=>entry.id!==item.id);
+    if(item.firefoxFollowed && item.url)state.firefoxDismissedUrls=[...new Set([...state.firefoxDismissedUrls,item.url])].slice(-250);
+    delete state.shortcutPositions[item.id];selectedShortcutIds.delete(item.id);
+    if(!persistShortcutOrder()){state.shortcuts=before;state.shortcutPositions=positions;state.firefoxDismissedUrls=dismissed;lpDialogs.notice('Could not save shortcut changes.');return;}
     movingShortcutId=null;renderShortcuts();
   }
+  function refreshShortcutBulkBar(){
+    for(const id of [...selectedShortcutIds])if(!state.shortcuts.some(x=>!isGroup(x)&&x.id===id))selectedShortcutIds.delete(id);
+    const count=selectedShortcutIds.size;
+    $('shortcutBulkBar').hidden=!shortcutsEditMode;
+    $('shortcutBulkCount').textContent=count+' selected';
+    $('shortcutBulkDelete').disabled=!count;
+    $('shortcutBulkGroup').disabled=!count;
+    $('shortcutBulkAll').disabled=!state.shortcuts.some(x=>!isGroup(x));
+    $('shortcutBulkClear').disabled=!count;
+  }
+  $('shortcutBulkAll').addEventListener('click',()=>{
+    state.shortcuts.filter(x=>!isGroup(x)).forEach(x=>selectedShortcutIds.add(x.id));renderShortcuts();
+  });
+  $('shortcutBulkClear').addEventListener('click',()=>{selectedShortcutIds.clear();renderShortcuts();});
+  $('shortcutBulkGroup').addEventListener('click',()=>{if(selectedShortcutIds.size)openGroupEditor(null,{preselectedIds:[...selectedShortcutIds]});});
+  $('shortcutBulkDelete').addEventListener('click',async()=>{
+    const ids=new Set(selectedShortcutIds);
+    if(!ids.size)return;
+    if(!await lpDialogs.confirm('Permanently delete '+ids.size+' selected shortcut'+(ids.size===1?'':'s')+'? Groups and their links will not be changed.'))return;
+    const before=state.shortcuts,positions={...state.shortcutPositions},dismissed=[...state.firefoxDismissedUrls];
+    const removed=before.filter(x=>!isGroup(x)&&ids.has(x.id));
+    state.shortcuts=before.filter(x=>isGroup(x)||!ids.has(x.id));
+    for(const link of removed)delete state.shortcutPositions[link.id];
+    state.firefoxDismissedUrls=[...new Set([...dismissed,...removed.filter(x=>x.firefoxFollowed&&x.url).map(x=>x.url)])].slice(-250);
+    if(!persistShortcutOrder()){
+      state.shortcuts=before;state.shortcutPositions=positions;state.firefoxDismissedUrls=dismissed;
+      await lpDialogs.notice('Could not save shortcut changes.');return;
+    }
+    selectedShortcutIds.clear();movingShortcutId=null;renderShortcuts();
+  });
   function makeEntry(item,index,total){
     const entry=document.createElement('div');entry.className='shortcut-entry'+(isGroup(item)?' is-group':'');entry.dataset.id=item.id;
     const tile=document.createElement(shortcutsEditMode?'button':isGroup(item)?'button':'a');tile.className='shortcut-tile';
@@ -1302,20 +1371,35 @@
     const label=document.createElement('span');label.className='shortcut-caption';label.textContent=item.label||'Shortcut';label.hidden=state.showShortcutLabels===false;
     tile.append(icon,label);entry.appendChild(tile);
     if(shortcutsEditMode){
+      if(!isGroup(item)){
+        const selected=document.createElement('input');selected.type='checkbox';selected.className='shortcut-select';
+        selected.checked=selectedShortcutIds.has(item.id);selected.setAttribute('aria-label','Select '+(item.label||'shortcut')+' for bulk deletion');
+        selected.draggable=false;
+        selected.addEventListener('pointerdown',event=>event.stopPropagation());
+        selected.addEventListener('click',event=>event.stopPropagation());
+        selected.addEventListener('change',()=>{
+          if(selected.checked)selectedShortcutIds.add(item.id);else selectedShortcutIds.delete(item.id);
+          entry.classList.toggle('is-bulk-selected',selected.checked);refreshShortcutBulkBar();
+        });
+        entry.classList.toggle('is-bulk-selected',selected.checked);
+        entry.appendChild(selected);
+      }
       const remove=document.createElement('button');remove.type='button';remove.className='shortcut-quick-delete';remove.textContent='×';
-      remove.title=isGroup(item)?'Dissolve group (keep shortcuts)':'Delete shortcut';
-      remove.setAttribute('aria-label',(isGroup(item)?'Dissolve group ':'Delete shortcut ')+(item.label||''));
+      remove.title=isGroup(item)?'Delete group (choose whether to keep its shortcuts)':'Delete shortcut';
+      remove.setAttribute('aria-label',(isGroup(item)?'Delete group ':'Delete shortcut ')+(item.label||''));
       remove.addEventListener('pointerdown',event=>event.stopPropagation());
       remove.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();quickDeleteGridItem(item);});
       entry.appendChild(remove);
     }
     if(shortcutsEditMode){
-      entry.draggable=true;entry.title='Drag to rearrange; hold to move on touchscreens';
+      entry.draggable=true;entry.title=isGroup(item)?'Drop another shortcut here to add it to this group':'Drag to arrange or drop onto a folder to group; hold to move on touchscreens';
       bindHoldToMove(tile,{
         enabled:()=>shortcutsEditMode,
         source:()=>entry,preview:()=>tile,
         targetSelector:state.shortcutLayout==='grid'?'.shortcut-slot':'.shortcut-entry[data-id]',
         drop:target=>{
+          const targetGroup=target?.querySelector?.('.shortcut-entry.is-group')||target?.closest?.('.shortcut-entry.is-group');
+          if(targetGroup&&!isGroup(item)&&addToGroup(item.id,targetGroup.dataset.id))return;
           if(state.shortcutLayout==='grid'){
             const dest=target?Number(target.dataset.slot):NaN;
             if(Number.isInteger(dest)&&dest!==state.shortcutPositions[item.id])putInSlot(item.id,dest);
@@ -1335,10 +1419,12 @@
       entry.addEventListener('dragover',event=>{event.preventDefault();event.dataTransfer.dropEffect='move';entry.classList.add('drop-target');});
       entry.addEventListener('dragleave',()=>entry.classList.remove('drop-target'));
       entry.addEventListener('drop',event=>{
-        event.preventDefault();event.stopPropagation();entry.classList.remove('drop-target');
-        const from=draggedShortcutId||event.dataTransfer.getData('text/plain');
-        if(from){if(state.shortcutLayout==='grid')putInSlot(from,state.shortcutPositions[item.id]);else reorderShortcuts(from,item.id);}
-        draggedShortcutId=null;
+        entry.classList.remove('drop-target');if(!draggedShortcutId)return;event.preventDefault();event.stopPropagation();
+        const from=draggedShortcutId;
+        if(from){
+          if(isGroup(item)&&from!==item.id&&addToGroup(from,item.id)){draggedShortcutId=null;return;}
+          if(state.shortcutLayout==='grid')putInSlot(from,state.shortcutPositions[item.id]);else reorderShortcuts(from,item.id);
+        }        draggedShortcutId=null;
       });
       entry.addEventListener('dragend',()=>{draggedShortcutId=null;document.querySelectorAll('.shortcut-entry').forEach(n=>n.classList.remove('dragging','drop-target'));});
       // The icon itself is the drag handle; no separate Move buttons under tiles.
@@ -1359,6 +1445,7 @@
     const free=state.shortcutLayout==='grid';grid.classList.toggle('free-grid',free);
     const data=state.shortcuts.filter(item=>item&&(isGroup(item)||normalizedUrl(item.url)));
     $('shortcutEmpty').hidden=data.length>0||shortcutsEditMode;
+    refreshShortcutBulkBar();
     if(!free){
       data.forEach((item,index)=>grid.appendChild(makeEntry(item,index,data.length)));
       if(shortcutsEditMode){grid.append(addTile(()=>openShortcutEditor(),'link','+ Shortcut'),addTile(()=>openGroupEditor(),'group','+ Group'));}
@@ -1371,64 +1458,269 @@
         else{
           wrapper.classList.add('is-empty');
           if(shortcutsEditMode){
-            const btn=document.createElement('button');btn.className='shortcut-place';btn.type='button';btn.textContent=movingShortcutId?'＋':'';
-            btn.setAttribute('aria-label','Place shortcut in cell '+(slot+1));btn.addEventListener('click',()=>{if(movingShortcutId)putInSlot(movingShortcutId,slot);});wrapper.appendChild(btn);
+            const btn=document.createElement('button');btn.className='shortcut-place';btn.type='button';btn.textContent='＋';
+            btn.setAttribute('aria-label',(movingShortcutId?'Move selected shortcut to':'Create a shortcut or group in')+' cell '+(slot+1));
+            btn.title=movingShortcutId?'Move selected shortcut here':'Create shortcut or group here';
+            btn.addEventListener('click',async()=>{
+              if(movingShortcutId){putInSlot(movingShortcutId,slot);return;}
+              const choice=await lpDialogs.chooseCellAction(slot+1);
+              if(!shortcutsEditMode||state.shortcutLayout!=='grid')return;
+              if(choice==='shortcut')openShortcutEditor(null,slot);
+              else if(choice==='group')openGroupEditor(null,{slot});
+            });wrapper.appendChild(btn);
           }
         }
         if(shortcutsEditMode){
           wrapper.addEventListener('dragover',event=>{event.preventDefault();wrapper.classList.add('is-drop-target');});
           wrapper.addEventListener('dragleave',()=>wrapper.classList.remove('is-drop-target'));
-          wrapper.addEventListener('drop',event=>{event.preventDefault();wrapper.classList.remove('is-drop-target');const from=draggedShortcutId||event.dataTransfer.getData('text/plain');if(from)putInSlot(from,slot);draggedShortcutId=null;});
+          wrapper.addEventListener('drop',event=>{wrapper.classList.remove('is-drop-target');if(!draggedShortcutId)return;event.preventDefault();event.stopPropagation();const from=draggedShortcutId;if(from)putInSlot(from,slot);draggedShortcutId=null;});
           if(match&&movingShortcutId&&movingShortcutId!==match.id){
             wrapper.addEventListener('click',event=>{if(event.target.closest('.shortcut-tile,.shortcut-move-actions'))return;putInSlot(movingShortcutId,slot);});
           }
         }
         grid.appendChild(wrapper);
       }
-      if(shortcutsEditMode){
-        const buttons=document.createElement('div');buttons.className='shortcut-grid-add-actions';
-        for(const [title,action] of [['+ Shortcut',()=>openShortcutEditor()],['+ Group',()=>openGroupEditor()]]){
-          const b=document.createElement('button');b.type='button';b.textContent=title;b.addEventListener('click',action);buttons.appendChild(b);
-        }
-        // Overlay the buttons over the page; do not change grid height or vertical position.
-        $('shortcutsView').appendChild(buttons);
-      }
+      // Free grid has direct + controls in each empty cell, so no redundant
+      // overlay buttons that might collide with the bulk-selection toolbar.
     }
   }
+  /* Bookmark toolbar/sidebar drag-in. URLs need no permissions; folder contents
+     are read through Firefox's optional bookmarks permission, requested on drop. */
+  const dropStatus=$('shortcutDropStatus');
+  function reportDrop(message,error=false){
+    dropStatus.hidden=false;dropStatus.textContent=message;dropStatus.style.color=error?'#ff9eab':'';
+    clearTimeout(reportDrop.timer);reportDrop.timer=setTimeout(()=>dropStatus.hidden=true,6500);
+  }
+  const createLink=(url,label)=>({id:'dropped-'+Date.now()+'-'+Math.random().toString(36).slice(2,9),label:(label||new URL(url).hostname).slice(0,45),url,icon:'↗',iconMode:'favicon'});
+  function extractDragBookmark(transfer){
+    const raw=transfer.getData('text/x-moz-place');
+    if(raw){
+      try{
+        const value=JSON.parse(raw),nodes=Array.isArray(value)?value:[value];
+        const node=nodes.find(x=>x&&typeof x==='object');
+        if(node){
+          const folder=String(node.type||'').includes('container')||(!node.uri&&!node.url&&!!node.itemGuid);
+          if(folder)return {kind:'folder',id:String(node.itemGuid||node.guid||node.id||''),title:node.title||'Bookmarks'};
+          const url=normalizedUrl(node.uri||node.url);
+          if(url)return {kind:'url',url,title:node.title||''};
+        }
+      }catch{}
+    }
+    const moz=transfer.getData('text/x-moz-url');
+    if(moz){const [url,title]=moz.split(/\r?\n/);const valid=normalizedUrl(url);if(valid)return {kind:'url',url:valid,title:title||''};}
+    const uri=transfer.getData('text/uri-list').split(/\r?\n/).find(s=>s&&!s.startsWith('#'));
+    const url=normalizedUrl(uri||transfer.getData('text/plain'));
+    return url?{kind:'url',url,title:''}:null;
+  }
+  function addDroppedLink(url,title,targetGroup=null){
+    const canonical=normalizedUrl(url);if(!canonical)return 0;
+    const matching=allLinks(state.shortcuts).some(x=>normalizedUrl(x.url)===canonical);
+    if(matching){reportDrop('That link is already in Little Pixel.');return 0;}
+    const link=createLink(canonical,title),before=state.shortcuts;
+    if(targetGroup){
+      state.shortcuts=before.map(x=>x.id===targetGroup.id?{...x,items:[...x.items,link]}:x);
+    }else state.shortcuts=[...before,link];
+    if(!persistShortcutOrder()){state.shortcuts=before;reportDrop('Could not save the shortcut.',true);return 0;}
+    renderShortcuts();return 1;
+  }
+  function bookmarkLinks(node,list=[]){
+    if(node?.url){const url=normalizedUrl(node.url);if(url)list.push({url,label:node.title||new URL(url).hostname});}
+    for(const child of node?.children||[])if(list.length<200)bookmarkLinks(child,list);
+    return list;
+  }
+  async function addDroppedFolder(id,title,targetGroup){
+    if(!id||typeof browser==='undefined'||!browser.bookmarks){reportDrop('Firefox bookmark access is unavailable. Reinstall the updated extension.',true);return;}
+    try{
+      // bookmarks permission is installed with the extension (no async prompt during drop).
+      const tree=await browser.bookmarks.getSubTree(id),links=bookmarkLinks(tree?.[0]);
+      if(!links?.length){reportDrop('That folder has no supported website bookmarks.');return;}
+      const existing=new Set(allLinks(state.shortcuts).map(x=>normalizedUrl(x.url)));
+      const unique=[];
+      for(const item of links){if(!existing.has(item.url)){unique.push(createLink(item.url,item.label));existing.add(item.url);}}
+      if(!unique.length){reportDrop('All links in that folder are already on the grid.');return;}
+      const previous=state.shortcuts;
+      if(targetGroup)state.shortcuts=previous.map(x=>x.id===targetGroup.id?{...x,items:[...x.items,...unique]}:x);
+      else state.shortcuts=[...previous,{id:'bookmark-group-'+Date.now(),type:'group',label:String(title||tree[0]?.title||'Bookmarks').slice(0,40),columns:'auto',items:unique}];
+      if(!persistShortcutOrder()){state.shortcuts=previous;reportDrop('Not enough storage to import this bookmark folder.',true);return;}
+      renderShortcuts();reportDrop('Imported '+unique.length+' bookmark'+(unique.length===1?'':'s')+'.');
+    }catch(e){reportDrop('Could not read bookmark folder: '+e.message+' Try Create Group → Firefox bookmark folder instead.',true);}
+  }
+  function bookmarkFolderCount(node){
+    if(node?.url)return normalizedUrl(node.url)?1:0;
+    return (node?.children||[]).reduce((sum,child)=>sum+bookmarkFolderCount(child),0);
+  }
+  async function openBookmarkPicker(targetGroupId=null){
+    const dialog=$('bookmarkPickerDialog'),list=$('bookmarkFolderList'),select=$('bookmarkTargetGroup');
+    select.replaceChildren(new Option('Create a new group',''));
+    for(const group of state.shortcuts.filter(isGroup))select.add(new Option('Add to '+group.label,group.id));
+    if(targetGroupId && state.shortcuts.some(g=>g.id===targetGroupId&&isGroup(g)))select.value=targetGroupId;
+    $('bookmarkFolderSearch').value='';$('bookmarkFolderError').hidden=true;list.replaceChildren();
+    const wait=document.createElement('p');wait.className='inline-help';wait.textContent='Reading Firefox bookmark folders…';list.append(wait);
+    dialog.showModal();
+    try{
+      if(!browser?.bookmarks)throw Error('Bookmarks permission missing. Reload the updated Firefox extension.');
+      const roots=await browser.bookmarks.getTree();list.replaceChildren();let total=0;
+      function traverse(node,parents=[]){
+        if(node?.url)return;
+        const path=[...parents,node.title||'Bookmarks'];
+        if(node.id&&parents.length){
+          total++;
+          const button=document.createElement('button');button.type='button';button.className='bookmark-folder-row';button.dataset.search=path.join(' ').toLowerCase();
+          const icon=document.createElement('span');icon.textContent='📁';
+          const title=document.createElement('span');title.className='bookmark-path';title.textContent=path.join(' / ');
+          const count=document.createElement('span');count.className='bookmark-count';count.textContent=bookmarkFolderCount(node)+' links';
+          button.append(icon,title,count);
+          button.addEventListener('click',async()=>{
+            const target=topEntry(select.value);button.disabled=true;
+            await addDroppedFolder(node.id,node.title,isGroup(target)?target:null);
+            button.disabled=false;dialog.close();
+          });list.append(button);
+        }
+        for(const child of node.children||[])traverse(child,path);
+      }
+      for(const root of roots)traverse(root);
+      if(!total){const empty=document.createElement('p');empty.className='inline-help';empty.textContent='Firefox has no bookmark folders to import.';list.append(empty);}
+    }catch(e){list.replaceChildren();$('bookmarkFolderError').hidden=false;$('bookmarkFolderError').textContent='Could not load folders: '+e.message;}
+  }
+  $('importBookmarkFolder').addEventListener('click',()=>{
+    const target=editingGroupId;
+    // Only one modal dialog may be visible at once. The picker is the group
+    // creation alternative, not a separate always-visible toolbar action.
+    if($('groupDialog').open)$('groupDialog').close();
+    openBookmarkPicker(target);
+  });
+  $('closeBookmarkPicker').addEventListener('click',()=>$('bookmarkPickerDialog').close());
+  $('bookmarkFolderSearch').addEventListener('input',event=>{
+    const query=event.target.value.trim().toLowerCase();
+    for(const button of $('bookmarkFolderList').querySelectorAll('.bookmark-folder-row'))button.hidden=!!query&&!button.dataset.search.includes(query);
+  });
+  $('bookmarkPickerDialog').addEventListener('click',e=>{if(e.target===$('bookmarkPickerDialog'))$('bookmarkPickerDialog').close();});
+  // Recognize Firefox's native bookmark flavor as well as standard link drops.
+  // Drop is accepted in view mode; the grid never changes Firefox's original bookmarks.
+  $('shortcutsView').addEventListener('dragover',event=>{
+    if(draggedShortcutId)return;
+    const kinds=Array.from(event.dataTransfer?.types||[]);
+    if(!kinds.some(k=>['text/x-moz-place','text/x-moz-url','text/uri-list','text/plain'].includes(k)))return;
+    event.preventDefault();event.dataTransfer.dropEffect='copy';$('shortcutsView').classList.add('is-external-drag');
+  });
+  $('shortcutsView').addEventListener('dragleave',event=>{
+    if(!event.currentTarget.contains(event.relatedTarget))$('shortcutsView').classList.remove('is-external-drag');
+  });
+  $('shortcutsView').addEventListener('drop',event=>{
+    $('shortcutsView').classList.remove('is-external-drag');
+    if(draggedShortcutId)return;
+    const incoming=extractDragBookmark(event.dataTransfer);if(!incoming)return;
+    event.preventDefault();event.stopPropagation();
+    const entry=event.target.closest('.shortcut-entry.is-group');
+    const targetGroup=entry?topEntry(entry.dataset.id):null;
+    if(incoming.kind==='url'){
+      const count=addDroppedLink(incoming.url,incoming.title,targetGroup);
+      if(count)reportDrop('Added '+(incoming.title||new URL(incoming.url).hostname)+' to '+(targetGroup?.label||'Shortcuts')+'.');
+    }else addDroppedFolder(incoming.id,incoming.title,targetGroup);
+  });
+  // In free-grid edit mode empty slots are also drop targets. Let external drags
+  // bubble to shortcutsView instead of treating their URL as an internal tile id.
   $('shortcutsEditToggle').addEventListener('click',()=>toggleShortcutsEdit());
   $('editShortcutsFromSettings').addEventListener('click',()=>{showView('shortcuts');toggleShortcutsEdit(true);$('shortcutsEditToggle').focus();});
   $('shortcutLayoutAuto').addEventListener('click',()=>set('shortcutLayout','auto'));
   $('shortcutLayoutGrid').addEventListener('click',()=>set('shortcutLayout','grid'));
   $('shortcutGridRows').addEventListener('input',e=>set('shortcutGridRows',Number(e.target.value)));
-  let editingShortcutId=null, pendingShortcutImage='';
+  let editingShortcutId=null, pendingShortcutImage='',pendingFavicon=null,pendingFaviconUrl='';
+  let faviconLookupGeneration=0;
   function currentFormItem(){return {icon:$('shortcutIcon').value.trim().slice(0,8)||'↗',iconMode:$('shortcutIconMode').value,
-    iconImage:pendingShortcutImage,iconUrl:$('shortcutImageUrl').value.trim(),url:$('shortcutUrl').value};}
+    iconImage:pendingShortcutImage,iconUrl:$('shortcutImageUrl').value.trim(),url:$('shortcutUrl').value,
+    ...(pendingFavicon?.faviconData?{faviconData:pendingFavicon.faviconData}:{}),
+    ...(pendingFavicon?.faviconUrl?{faviconUrl:pendingFavicon.faviconUrl}:{} )};}
   function updateIconPreview(){ $('shortcutIconPreview').replaceChildren(makeIcon(currentFormItem(),'icon-live-preview-content')); }
   function showIconControls(){
     const mode=$('shortcutIconMode').value;
     for(const [name,id] of Object.entries({symbol:'shortcutSymbolControls',favicon:'shortcutFaviconControls',upload:'shortcutUploadControls',imageUrl:'shortcutImageUrlControls'}))$(id).hidden=name!==mode;
-    $('symbolPicker').hidden=true;$('openSymbolPicker').setAttribute('aria-expanded','false');
     updateIconPreview();
   }
-  const renderSymbols=()=>{
-    const query=$('symbolSearch').value.trim().toLowerCase();
-    const grid=$('symbolGrid');grid.replaceChildren();
-    const items=symbols.filter(([symbol,keywords])=>!query||keywords.includes(query)||symbol.includes(query));
-    for(const [symbol,keywords] of items){
-      const btn=document.createElement('button');btn.type='button';btn.className='symbol-choice';btn.textContent=symbol;
-      btn.title=keywords;btn.setAttribute('aria-label',keywords);
-      btn.addEventListener('click',()=>{$('shortcutIcon').value=symbol;updateIconPreview();$('symbolPicker').hidden=true;$('openSymbolPicker').setAttribute('aria-expanded','false');});
-      grid.appendChild(btn);
+  // Discover a favicon only when the user saves a shortcut or clicks Refresh.
+  // No tab listeners, background icon-repair loop or dashboard reloads.
+  function iconStatus(text){$('shortcutFaviconStatus').textContent=text;}
+  function usableIcon(value){
+    return typeof value==='string'&&(
+      (/^data:image\/(?:png|jpeg|gif|svg\+xml|webp|x-icon|vnd\.microsoft\.icon);base64,/i.test(value)&&value.length<150000)||
+      !!imageUrl(value));
+  }
+  function probeIcon(url,timeout=1400){
+    return new Promise(resolve=>{
+      const img=new Image();let done=false;
+      const finish=good=>{if(done)return;done=true;clearTimeout(timer);img.onload=img.onerror=null;resolve(good);};
+      const timer=setTimeout(()=>finish(false),timeout);
+      img.onload=()=>finish(img.naturalWidth>0&&img.naturalHeight>0);
+      img.onerror=()=>finish(false);
+      img.referrerPolicy='no-referrer';img.src=url;
+    });
+  }
+  // Firefox Tabs metadata access is granted at installation for one-time
+  // shortcut import and explicit favicon Save/Refresh. No icon monitoring.
+  function requestFaviconTabPermission(){
+    if(typeof browser==='undefined'||!browser.permissions?.contains)return Promise.resolve(false);
+    return browser.permissions.contains({permissions:['tabs']}).catch(()=>false);
+  }
+  async function findFavicon(rawUrl,{refresh=false,allowTabLoad=false}={}){
+    const url=normalizedUrl(rawUrl);if(!url)return null;
+    const current=editingShortcutId?state.shortcuts.find(item=>item.id===editingShortcutId):null;
+    // A working saved icon should be kept when editing labels. Explicit Refresh
+    // is allowed to replace it, but a failed lookup will never erase it.
+    if(!refresh && current && normalizedUrl(current.url)===url){
+      if(usableIcon(current.faviconData))return {faviconData:current.faviconData};
+      if(usableIcon(current.faviconUrl))return {faviconUrl:current.faviconUrl};
     }
-    if(!items.length){const message=document.createElement('p');message.className='inline-help';message.textContent='No symbols found. Try another word or enter your own emoji.';grid.appendChild(message);}
-  };
-  $('openSymbolPicker').addEventListener('click',()=>{
-    const opened=$('symbolPicker').hidden;$('symbolPicker').hidden=!opened;$('openSymbolPicker').setAttribute('aria-expanded',String(opened));
-    if(opened){renderSymbols();$('openSymbolPicker').focus({preventScroll:true});}
+    if(!refresh && pendingFaviconUrl===url && pendingFavicon)return pendingFavicon;
+    let fromFirefox='';
+    if(typeof browser!=='undefined' && browser.runtime?.sendMessage){
+      try{
+        const answer=await Promise.race([
+          browser.runtime.sendMessage({type:'lookupShortcutFavicon',url,openTemporaryTab:allowTabLoad}),
+          new Promise(resolve=>setTimeout(()=>resolve(null),17000))
+        ]);
+        if(answer?.ok&&usableIcon(answer.icon))fromFirefox=answer.icon;
+      }catch{}
+    }
+    if(fromFirefox){
+      if(fromFirefox.startsWith('data:'))return {faviconData:fromFirefox};
+      return {faviconUrl:fromFirefox}; // Firefox has already verified this tab icon.
+    }
+    // Use the site's OWN icons. No third-party lookups and no permission prompts.
+    const root=new URL(url).origin;
+    const candidates=[root+'/favicon.ico',root+'/favicon.svg',root+'/apple-touch-icon.png',root+'/favicon.png',root+'/assets/favicon.ico',root+'/static/favicon.ico'];
+    // Try common icon paths in parallel; failures do not block saving for long.
+    const good=await Promise.all(candidates.map(candidate=>probeIcon(candidate,1800)));
+    const first=good.findIndex(Boolean);
+    return first<0?null:{faviconUrl:candidates[first]};
+  }
+  async function lookupEditorFavicon({refresh=false,tabPermission=null}={}){
+    const url=normalizedUrl($('shortcutUrl').value);
+    if(!url){iconStatus('Enter a website URL first.');return null;}
+    const token=++faviconLookupGeneration;
+    $('shortcutRefreshFavicon').disabled=true;
+    iconStatus(refresh?'Refreshing website icon…':'Finding website icon using Firefox…');
+    try{
+      // Tab permission is requested at the very beginning of the explicit
+      // Save/Refresh click. Never try to open temporary tabs without it.
+      const allowTabLoad=tabPermission===null?false:!!(await tabPermission);
+      const found=await findFavicon(url,{refresh,allowTabLoad});
+      if(token!==faviconLookupGeneration||normalizedUrl($('shortcutUrl').value)!==url)return null;
+      if(found){pendingFavicon=found;pendingFaviconUrl=url;iconStatus('Website icon found.');updateIconPreview();}
+      else iconStatus('Firefox could not find an icon for this site. Its initial will be shown. You can retry after the website finishes loading.');
+      return found;
+    }finally{if(token===faviconLookupGeneration)$('shortcutRefreshFavicon').disabled=false;}
+  }
+  $('shortcutRefreshFavicon').addEventListener('click',()=>{
+    const tabPermission=requestFaviconTabPermission(); // direct user gesture
+    void lookupEditorFavicon({refresh:true,tabPermission});
   });
-  $('symbolSearch').addEventListener('input',renderSymbols);
   $('shortcutIconMode').addEventListener('change',showIconControls);
-  for(const field of ['shortcutIcon','shortcutUrl','shortcutImageUrl'])$(field).addEventListener('input',updateIconPreview);
+  for(const field of ['shortcutIcon','shortcutImageUrl'])$(field).addEventListener('input',updateIconPreview);
+  $('shortcutUrl').addEventListener('input',()=>{
+    const url=normalizedUrl($('shortcutUrl').value);
+    if(url!==pendingFaviconUrl){pendingFavicon=null;pendingFaviconUrl='';faviconLookupGeneration++;iconStatus('Icon will be looked up when you save, or press Refresh favicon.');}
+    updateIconPreview();
+  });
   $('shortcutUpload').addEventListener('change',async event=>{
     const file=event.target.files?.[0];if(!file)return;
     if(!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type)||file.size>4*1024*1024){
@@ -1456,12 +1748,15 @@
     if(event.target.closest('input[type="text"],input[type="url"],input[type="search"],textarea,[contenteditable="true"]'))return;
     active.blur();
   },true);
-  function openShortcutEditor(item=null){
+  function openShortcutEditor(item=null,slot=null){
     resetShortcutForm();
+    if(!item&&Number.isInteger(slot))pendingCreationSlot=slot;
     if(item){
       editingShortcutId=item.id;pendingShortcutImage=item.iconImage||'';
+      pendingFavicon=item.faviconData?{faviconData:item.faviconData}:item.faviconUrl?{faviconUrl:item.faviconUrl}:null;
+      pendingFaviconUrl=normalizedUrl(item.url)||'';
       $('shortcutIcon').value=item.icon||'';$('shortcutLabel').value=item.label||'';$('shortcutUrl').value=item.url||'';
-      $('shortcutIconMode').value=['symbol','favicon','upload','imageUrl'].includes(item.iconMode)?item.iconMode:'symbol';
+      $('shortcutIconMode').value=['symbol','favicon','upload','imageUrl'].includes(effectiveIconMode(item))?effectiveIconMode(item):'favicon';
       $('shortcutImageUrl').value=item.iconUrl||'';
       $('shortcutFormHeading').textContent='Edit shortcut';$('saveShortcut').textContent='Save changes';
       $('removeShortcut').hidden=false;showIconControls();
@@ -1469,7 +1764,8 @@
     $('shortcutDialog').showModal();$('closeShortcutDialog').focus({preventScroll:true});
   }
   function resetShortcutForm(){
-    editingShortcutId=null;pendingShortcutImage='';$('shortcutForm').reset();$('shortcutIconMode').value='symbol';
+    faviconLookupGeneration++;editingShortcutId=null;pendingShortcutImage='';pendingFavicon=null;pendingFaviconUrl='';pendingCreationSlot=null;$('shortcutForm').reset();
+    iconStatus('Icon will be looked up when you save, or press Refresh favicon.');$('shortcutIconMode').value='favicon';
     $('shortcutFormHeading').textContent='Add shortcut';$('saveShortcut').textContent='Add shortcut';
     $('removeShortcut').hidden=true;$('shortcutError').hidden=true;showIconControls();
   }
@@ -1479,27 +1775,54 @@
   $('closeShortcutDialog').addEventListener('click',closeShortcutEditor);
   $('shortcutDialog').addEventListener('click',event=>{if(event.target===$('shortcutDialog'))closeShortcutEditor();});
   $('shortcutDialog').addEventListener('close',resetShortcutForm);
-  $('removeShortcut').addEventListener('click',()=>{
+  $('removeShortcut').addEventListener('click',async()=>{
     if(!editingShortcutId)return;
-    if(!confirm('Remove this shortcut?'))return;
-    const before=[...state.shortcuts];state.shortcuts=state.shortcuts.filter(item=>item.id!==editingShortcutId);
-    if(!persistShortcutOrder()){state.shortcuts=before;$('shortcutError').hidden=false;$('shortcutError').textContent='Unable to save changes.';return;}
+    if(!await lpDialogs.confirm('Remove this shortcut?'))return;
+    const before=[...state.shortcuts];const removed=before.find(item=>item.id===editingShortcutId);
+    state.shortcuts=state.shortcuts.filter(item=>item.id!==editingShortcutId);
+    if(removed?.firefoxFollowed && removed.url)state.firefoxDismissedUrls=[...new Set([...state.firefoxDismissedUrls,removed.url])].slice(-250);
+    if(!persistShortcutOrder()){state.shortcuts=before;if(removed?.firefoxFollowed)state.firefoxDismissedUrls=state.firefoxDismissedUrls.filter(url=>url!==removed.url);$('shortcutError').hidden=false;$('shortcutError').textContent='Unable to save changes.';return;}
     closeShortcutEditor();renderShortcuts();
   });
-  $('shortcutForm').addEventListener('submit',event=>{
+  $('shortcutForm').addEventListener('submit',async event=>{
     event.preventDefault();
     const url=normalizedUrl($('shortcutUrl').value);const mode=$('shortcutIconMode').value;
     const invalid=message=>{$('shortcutError').hidden=false;$('shortcutError').textContent=message;};
     if(!url){invalid('Enter a valid http:// or https:// website address.');$('shortcutUrl').focus();return;}
     if(mode==='upload'&&!pendingShortcutImage){invalid('Choose a custom image first.');return;}
     if(mode==='imageUrl'&&!imageUrl($('shortcutImageUrl').value)){invalid('Enter an HTTPS image address.');return;}
+    // One lookup at save time. It updates only this shortcut, not the whole app.
+    // Request Firefox's tab-icon permission directly from the Save click;
+    // permission dialogs require user activation. Skip for existing saved icons.
+    const previousIcon=editingShortcutId?state.shortcuts.find(x=>x.id===editingShortcutId):null;
+    const hasPreservedIcon=previousIcon&&normalizedUrl(previousIcon.url)===url&&
+      (usableIcon(previousIcon.faviconData)||usableIcon(previousIcon.faviconUrl));
+    const tabPermission=(mode==='favicon'&&!hasPreservedIcon&&!pendingFavicon)?requestFaviconTabPermission():null;
+    const saveButton=$('saveShortcut');saveButton.disabled=true;
+    let foundIcon=null;
+    try{
+      if(mode==='favicon'){
+        foundIcon=pendingFaviconUrl===url?pendingFavicon:null;
+        if(!foundIcon)foundIcon=await lookupEditorFavicon({tabPermission});
+      }
+    }finally{saveButton.disabled=false;}
+    const previous=editingShortcutId?state.shortcuts.find(x=>x.id===editingShortcutId):null;
     const item={id:editingShortcutId||('link-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),
       icon:$('shortcutIcon').value.trim().slice(0,8)||'↗',label:$('shortcutLabel').value.trim().slice(0,45)||new URL(url).hostname,url,iconMode:mode,
-      ...(mode==='upload'?{iconImage:pendingShortcutImage}:{}),...(mode==='imageUrl'?{iconUrl:imageUrl($('shortcutImageUrl').value)}:{})};
-    const before=state.shortcuts;
+      ...(mode==='upload'?{iconImage:pendingShortcutImage}:{}),...(mode==='imageUrl'?{iconUrl:imageUrl($('shortcutImageUrl').value)}:{}),
+      ...(mode==='favicon'&&foundIcon?.faviconData?{faviconData:foundIcon.faviconData}:{}),
+      ...(mode==='favicon'&&foundIcon?.faviconUrl?{faviconUrl:foundIcon.faviconUrl}:{}),
+      // A missing/failed refresh must never erase a previously saved good icon.
+      ...(mode==='favicon'&&!foundIcon&&previous?.faviconData&&normalizedUrl(previous.url)===url?{faviconData:previous.faviconData}:{}),
+      ...(mode==='favicon'&&!foundIcon&&previous?.faviconUrl&&normalizedUrl(previous.url)===url?{faviconUrl:previous.faviconUrl}:{}),
+      ...(previous?.firefoxFollowed?{firefoxFollowed:true,firefoxOriginalTitle:previous.firefoxOriginalTitle}:{} )};
+    const before=state.shortcuts,oldPositions={...state.shortcutPositions};
     state.shortcuts=editingShortcutId?before.map(x=>x.id===editingShortcutId?item:x):[...before,item];
+    // A new shortcut created from an empty grid cell stays in that exact cell.
+    if(!editingShortcutId&&Number.isInteger(pendingCreationSlot)&&!Object.values(state.shortcutPositions).includes(pendingCreationSlot))
+      state.shortcutPositions[item.id]=pendingCreationSlot;
     try{localStorage.setItem('little-pixel-clock',JSON.stringify(state));}
-    catch{state.shortcuts=before;invalid('Browser storage is full. Try a smaller image or fewer shortcuts.');return;}
+    catch{state.shortcuts=before;state.shortcutPositions=oldPositions;invalid('Browser storage is full. Try a smaller image or fewer shortcuts.');return;}
     closeShortcutEditor();renderShortcuts();
   });
   $('cancelShortcut').addEventListener('click',closeShortcutEditor);
@@ -1508,69 +1831,92 @@
 
   /* Create or edit Android-style folder groups, with explicit non-destructive dissolve. */
   let groupEditorOrder=[];
-  function renderGroupOrder(){
-    const list=$('groupOrderList'),selected=new Set([...$('groupChooseList').querySelectorAll('input:checked')].map(x=>x.value));
-    const all=[...(editingGroupId?topEntry(editingGroupId)?.items||[]:[]),...state.shortcuts.filter(x=>!isGroup(x))];
-    const byId=new Map(all.map(x=>[x.id,x]));
+  // One visual picker: checked tiles stay above unchecked tiles and can be
+  // reordered in place. There is no secondary order dialog or repeated list.
+  function syncGroupTileOrder(){
+    const list=$('groupChooseList'),tiles=[...list.querySelectorAll('label[data-id]')];
+    const selected=new Set(tiles.filter(tile=>tile.querySelector('input')?.checked).map(tile=>tile.dataset.id));
     groupEditorOrder=groupEditorOrder.filter(id=>selected.has(id));
-    for(const id of selected)if(!groupEditorOrder.includes(id))groupEditorOrder.push(id);
-    list.replaceChildren();$('groupMemberOrder').hidden=!groupEditorOrder.length;
-    for(const [i,id] of groupEditorOrder.entries()){
-      const item=byId.get(id);if(!item)continue;
-      const row=document.createElement('div');row.className='group-member-row';row.draggable=true;row.dataset.id=id;
-      const grip=document.createElement('span');grip.textContent='⠿';grip.title='Drag to reorder';
-      const title=document.createElement('span');title.className='group-member-label';title.textContent=item.label||item.url;
-      row.append(grip,makeIcon(item,'shortcut-item-icon'),title);
-      for(const [sym,delta] of [['↑',-1],['↓',1]]){
-        const btn=document.createElement('button');btn.className='mini-action';btn.type='button';btn.textContent=sym;btn.disabled=i+delta<0||i+delta>=groupEditorOrder.length;
-        btn.setAttribute('aria-label',(delta<0?'Move ':'Move ')+item.label+(delta<0?' earlier':' later'));
-        btn.addEventListener('click',()=>{const newIndex=i+delta;[groupEditorOrder[i],groupEditorOrder[newIndex]]=[groupEditorOrder[newIndex],groupEditorOrder[i]];renderGroupOrder();});row.appendChild(btn);
-      }
-      bindHoldToMove(row,{
-        enabled:()=>!!$('groupDialog').open,source:()=>row,preview:()=>row,
-        exclude:'button',targetSelector:'.group-member-row',
-        drop:target=>{
-          const from=groupEditorOrder.indexOf(id),to=groupEditorOrder.indexOf(target?.dataset.id);
-          if(from<0||to<0||from===to)return;
-          const [moved]=groupEditorOrder.splice(from,1);groupEditorOrder.splice(to,0,moved);renderGroupOrder();
-        }
-      });
-      row.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',id);e.dataTransfer.effectAllowed='move';row.classList.add('dragging');});
-      row.addEventListener('dragend',()=>row.classList.remove('dragging'));
-      row.addEventListener('dragover',e=>{e.preventDefault();row.classList.add('drop-target');});
-      row.addEventListener('dragleave',()=>row.classList.remove('drop-target'));
-      row.addEventListener('drop',e=>{
-        e.preventDefault();row.classList.remove('drop-target');const dragged=e.dataTransfer.getData('text/plain');
-        const source=groupEditorOrder.indexOf(dragged),target=groupEditorOrder.indexOf(id);
-        if(source<0||target<0||source===target)return;
-        const [moved]=groupEditorOrder.splice(source,1);groupEditorOrder.splice(target,0,moved);renderGroupOrder();
-      });
-      list.appendChild(row);
+    for(const tile of tiles)if(selected.has(tile.dataset.id)&&!groupEditorOrder.includes(tile.dataset.id))groupEditorOrder.push(tile.dataset.id);
+    const rank=new Map(groupEditorOrder.map((id,i)=>[id,i]));
+    tiles.sort((a,b)=>{
+      const aa=rank.has(a.dataset.id),bb=rank.has(b.dataset.id);
+      return aa!==bb?(aa?-1:1):aa?(rank.get(a.dataset.id)-rank.get(b.dataset.id)):Number(a.dataset.originalIndex)-Number(b.dataset.originalIndex);
+    });
+    for(const tile of tiles){
+      tile.classList.toggle('is-checked',selected.has(tile.dataset.id));
+      tile.draggable=selected.has(tile.dataset.id);
+      tile.setAttribute('aria-label',(selected.has(tile.dataset.id)?'Selected; drag to reorder: ':'Select: ')+(tile.querySelector('.group-choice-caption')?.textContent||'shortcut'));
+      list.appendChild(tile);
     }
+    $('groupSelectionCount').textContent=selected.size+' selected · drag selected tiles to reorder';
   }
-  function openGroupEditor(group=null){
+  function moveGroupTile(fromId,toId){
+    const a=groupEditorOrder.indexOf(fromId),b=groupEditorOrder.indexOf(toId);
+    if(a<0||b<0||a===b)return;
+    const [moved]=groupEditorOrder.splice(a,1);groupEditorOrder.splice(b,0,moved);
+    syncGroupTileOrder();
+    $('groupChooseList').querySelectorAll('label').forEach(tile=>tile.classList.remove('is-order-target'));
+  }
+  function openGroupEditor(group=null,{preselectedIds=[],slot=null}={}){
     editingGroupId=group?.id||null;
+    pendingCreationSlot=!group&&Number.isInteger(slot)?slot:null;
+    const initiallySelected=new Set(group?.items.map(x=>x.id)||preselectedIds);
     $('groupFormHeading').textContent=group?'Edit group':'New group';
     $('saveGroup').textContent=group?'Save group':'Create group';
     $('dissolveGroup').hidden=!group;
     $('groupLabel').value=group?.label||'';
     $('groupColumns').value=group?.columns||'auto';
     $('groupError').hidden=true;
-    groupEditorOrder=(group?.items||[]).map(x=>x.id);
+    groupEditorOrder=group?(group.items||[]).map(x=>x.id):state.shortcuts.filter(x=>!isGroup(x)&&initiallySelected.has(x.id)).map(x=>x.id);
+    $('groupSearch').value='';
     const list=$('groupChooseList');list.replaceChildren();
     const choices=[...(group?.items||[]),...state.shortcuts.filter(item=>!isGroup(item))];
     if(!choices.length){const p=document.createElement('p');p.className='inline-help';p.textContent='Add a shortcut first, then return here to put it into a group.';list.appendChild(p);}
-    for(const link of choices){
+    for(const [choiceIndex,link] of choices.entries()){
       if(!normalizedUrl(link.url))continue;
-      const label=document.createElement('label');
-      const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=link.id;checkbox.checked=!!group?.items.some(it=>it.id===link.id);
+      const label=document.createElement('label');label.classList.toggle('is-checked',initiallySelected.has(link.id));
+      label.dataset.id=link.id;label.dataset.originalIndex=choiceIndex;label.tabIndex=0;
+      label.dataset.label=((link.label||'')+' '+link.url).toLowerCase();
+      const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=link.id;checkbox.checked=initiallySelected.has(link.id);
       const icon=makeIcon(link,'shortcut-item-icon');
-      const txt=document.createElement('span');txt.textContent=link.label||link.url;
-      label.append(checkbox,icon,txt);list.appendChild(label);checkbox.addEventListener('change',renderGroupOrder);
+      const txt=document.createElement('span');txt.className='group-choice-caption';txt.textContent=link.label||link.url;
+      label.append(checkbox,icon,txt);list.appendChild(label);
+      checkbox.addEventListener('change',syncGroupTileOrder);
+      label.addEventListener('dragstart',event=>{
+        if(!checkbox.checked){event.preventDefault();return;}
+        event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('application/x-little-pixel-group',link.id);
+        label.classList.add('is-dragging');
+      });
+      label.addEventListener('dragover',event=>{
+        if(!checkbox.checked)return;
+        if(!event.dataTransfer.types.includes('application/x-little-pixel-group'))return;
+        event.preventDefault();event.dataTransfer.dropEffect='move';label.classList.add('is-order-target');
+      });
+      label.addEventListener('dragleave',()=>label.classList.remove('is-order-target'));
+      label.addEventListener('drop',event=>{
+        const from=event.dataTransfer.getData('application/x-little-pixel-group');
+        if(!from||!checkbox.checked)return;
+        event.preventDefault();event.stopPropagation();moveGroupTile(from,link.id);
+      });
+      label.addEventListener('dragend',()=>{list.querySelectorAll('label').forEach(el=>el.classList.remove('is-dragging','is-order-target'));});
+      label.addEventListener('keydown',event=>{
+        if(!checkbox.checked||!event.altKey||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;
+        event.preventDefault();const pos=groupEditorOrder.indexOf(link.id);
+        const delta=['ArrowLeft','ArrowUp'].includes(event.key)?-1:1;
+        const other=groupEditorOrder[pos+delta];if(other)moveGroupTile(link.id,other);
+        label.focus();
+      });
+      bindHoldToMove(label,{
+        enabled:()=>!!$('groupDialog').open&&checkbox.checked,
+        source:()=>label,preview:()=>label,exclude:'input',targetSelector:'#groupChooseList label.is-checked',
+        drop:target=>{if(target?.dataset.id)moveGroupTile(link.id,target.dataset.id);}
+      });
     }
-    renderGroupOrder();$('groupDialog').showModal();$('closeGroupDialog').focus({preventScroll:true});
+    syncGroupTileOrder();$('groupDialog').showModal();$('closeGroupDialog').focus({preventScroll:true});
   }
-  function closeGroupEditor(){if($('groupDialog').open)$('groupDialog').close();editingGroupId=null;}
+  $('groupSearch').addEventListener('input',event=>{const term=event.target.value.trim().toLowerCase();for(const tile of $('groupChooseList').querySelectorAll('label'))tile.hidden=!!term&&!tile.dataset.label.includes(term);});
+  function closeGroupEditor(){if($('groupDialog').open)$('groupDialog').close();editingGroupId=null;pendingCreationSlot=null;}
   $('closeGroupDialog').addEventListener('click',closeGroupEditor);
   $('cancelGroup').addEventListener('click',closeGroupEditor);
   $('groupDialog').addEventListener('click',e=>{if(e.target===$('groupDialog'))closeGroupEditor();});
@@ -1591,24 +1937,29 @@
       const pos=without.findIndex(item=>item.id===group.id);without.splice(pos,1,newGroup,...leftovers);
     }else without.push(newGroup);
     state.shortcuts=without;
+    // The new group replaces the selected links' top-level grid cells.
+    for(const id of selected)delete state.shortcutPositions[id];
+    if(!group){
+      const requestedSlot=Number.isInteger(pendingCreationSlot)?pendingCreationSlot:null;
+      const selectedSlots=members.map(link=>oldPositions[link.id]).filter(Number.isInteger).sort((a,b)=>a-b);
+      const preferred=requestedSlot??selectedSlots[0];
+      if(Number.isInteger(preferred)&&!Object.values(state.shortcutPositions).includes(preferred))state.shortcutPositions[newGroup.id]=preferred;
+    }
     if(!persistShortcutOrder()){
       state.shortcuts=old;state.shortcutPositions=oldPositions;$('groupError').hidden=false;$('groupError').textContent='Unable to save group.';return;
     }
-    closeGroupEditor();renderShortcuts();
+    selectedShortcutIds.clear();closeGroupEditor();renderShortcuts();
   });
-  $('dissolveGroup').addEventListener('click',()=>{
-    const group=topEntry(editingGroupId);if(!isGroup(group))return;
-    if(!confirm('Dissolve '+group.label+'? Every shortcut will return to the main grid; none will be deleted.'))return;
-    const before=state.shortcuts,idx=before.findIndex(item=>item.id===group.id);
-    state.shortcuts=[...before.slice(0,idx),...group.items,...before.slice(idx+1)];
-    if(!persistShortcutOrder()){state.shortcuts=before;$('groupError').hidden=false;$('groupError').textContent='Could not save changes.';return;}
-    closeGroupEditor();renderShortcuts();
+  $('dissolveGroup').addEventListener('click',async()=>{
+    const group=topEntry(editingGroupId);if(isGroup(group))await deleteGroupWithOptions(group);
   });
   showIconControls();
   $('startPage').addEventListener('change',e=>set('startPage',e.target.value));
   const dock=$('bottomDock'),handle=$('dockHandle'),dockItems=$('dockItems');
   let dockExpanded=false;
-  let dockLeaveTimeout;
+  let dockLeaveTimeout, dockFocusedByMouse=false;
+  dock.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')dockFocusedByMouse=true;});
+  dock.addEventListener('keydown',()=>{dockFocusedByMouse=false;});
   function setDockExpanded(expanded){
     dockExpanded=!!expanded;
     const compact=!!state.autoHideDock && !dockExpanded;
@@ -1627,6 +1978,8 @@
     else if(document.documentElement.classList.contains('settings-open'))setDockExpanded(true);
     else setDockExpanded(false);
   }
+  $('dockAlignment').addEventListener('change',e=>set('dockAlignment',e.target.value));
+  $('dockScale').addEventListener('input',e=>set('dockScale',Number(e.target.value)));
   $('autoHideDock').addEventListener('change',e=>set('autoHideDock',e.target.checked));
   handle.addEventListener('click',()=>{
     clearTimeout(dockLeaveTimeout);
@@ -1643,7 +1996,14 @@
   dock.addEventListener('pointerleave',e=>{
     if(e.pointerType!=='mouse'||!state.autoHideDock)return;
     clearTimeout(dockLeaveTimeout);
-    dockLeaveTimeout=setTimeout(()=>{if(!document.documentElement.classList.contains('settings-open')&&!dock.matches(':focus-within'))setDockExpanded(false);},300);
+    // A mouse-clicked dock button may retain DOM focus long after the cursor
+    // leaves. Blur that mouse focus so auto-hide actually closes promptly;
+    // keyboard focus still keeps the dock open for accessibility.
+    if(dockFocusedByMouse&&dock.contains(document.activeElement)&&document.activeElement.matches('button'))document.activeElement.blur();
+    dockFocusedByMouse=false;
+    dockLeaveTimeout=setTimeout(()=>{
+      if(!document.documentElement.classList.contains('settings-open')&&!dock.matches(':hover')&&!dock.matches(':focus-within'))setDockExpanded(false);
+    },75);
   });
   dock.addEventListener('focusin',()=>{if(state.autoHideDock)setDockExpanded(true);});
   dock.addEventListener('focusout',()=>{if(!state.autoHideDock)return;setTimeout(()=>{if(!dock.matches(':focus-within')&&!dock.matches(':hover')&&!document.documentElement.classList.contains('settings-open'))setDockExpanded(false)},120);});
@@ -1702,6 +2062,8 @@
       if(ids.has(id))id='import-'+i+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,5);
       ids.add(id);
       const result={id,label:typeof s.label==='string'?s.label.slice(0,45):new URL(url).hostname,url,icon:typeof s.icon==='string'?s.icon.slice(0,8):'↗',iconMode};
+      if(iconMode==='favicon'&&typeof s.faviconData==='string'&&/^data:image\/(?:png|jpeg|gif|svg\+xml|webp|x-icon|vnd\.microsoft\.icon);base64,/i.test(s.faviconData)&&s.faviconData.length<150000)result.faviconData=s.faviconData;
+      if(iconMode==='favicon'&&typeof s.faviconUrl==='string'&&imageUrl(s.faviconUrl))result.faviconUrl=imageUrl(s.faviconUrl);
       if(iconMode==='upload'&&typeof s.iconImage==='string'&&/^data:image\/(?:png|jpeg|gif|webp|x-icon|vnd\.microsoft\.icon);base64,/i.test(s.iconImage)&&s.iconImage.length<500000)result.iconImage=s.iconImage;
       if(iconMode==='imageUrl'&&typeof s.iconUrl==='string'&&normalUrl(s.iconUrl))result.iconUrl=normalUrl(s.iconUrl);
       return result;
@@ -1747,7 +2109,33 @@
   }
   $('exportEverything').addEventListener('click',()=>downloadBackup('full'));
   $('exportLinks').addEventListener('click',()=>downloadBackup('shortcuts'));
-  // Firefox supports importing bookmarks from HTML, not arbitrary pinned New Tab JSON.
+  // Firefox native New Tab pinned shortcuts are stored as a JSON array in
+  // about:config > browser.newtabpage.pinned. This is NOT a bookmarks import file.
+  $('exportFirefoxNative')?.addEventListener('click',()=>{
+    const source=[...state.shortcuts];
+    if(state.shortcutLayout==='grid'){
+      source.sort((a,b)=>{
+        const ap=state.shortcutPositions[a.id],bp=state.shortcutPositions[b.id];
+        return (Number.isInteger(ap)?ap:10000)-(Number.isInteger(bp)?bp:10000);
+      });
+    }
+    const native=[];
+    const add=link=>{
+      const url=normalizedUrl(link.url);
+      if(url)native.push({url,label:String(link.label||new URL(url).hostname).slice(0,150)});
+    };
+    for(const item of source){
+      if(isGroup(item))for(const link of item.items||[])add(link);
+      else add(item);
+    }
+    const payload=JSON.stringify(native); // One line for pasting into about:config.
+    const url=URL.createObjectURL(new Blob([payload],{type:'application/json;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download='firefox-newtab-pinned-shortcuts.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    showBackupStatus(`Exported ${native.length} Firefox New Tab shortcuts as JSON. To restore, back up and edit about:config → browser.newtabpage.pinned (manual paste, not Firefox bookmarks import). Groups become separate links.`);
+  });
+  // Bookmarks HTML is a separate export format for Firefox's bookmark importer.
   $('exportFirefoxBookmarks')?.addEventListener('click',()=>{
     const esc=value=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     const renderItems=(items,level)=>items.map(item=>{
@@ -1780,7 +2168,7 @@
       }else{
         const raw=backup.config??(backup.app==='little-pixel-clock'?backup:null);
         if(!raw||typeof raw!=='object'||Array.isArray(raw))throw Error('This file does not contain an app configuration.');
-        if(!confirm('Import all settings? This replaces the current colors, settings, and shortcuts. Export your current configuration first if you want a backup.'))return;
+        if(!await lpDialogs.confirm('Import all settings? This replaces the current colors, settings, and shortcuts. Export your current configuration first if you want a backup.'))return;
         const clean={...defaults};
         for(const [key,defaultValue] of Object.entries(defaults)){
           if(key==='shortcuts'){if(raw.shortcuts!==undefined)clean.shortcuts=sanitizedShortcuts(raw.shortcuts);continue;}
@@ -1851,7 +2239,7 @@
   // Keep the page inert until the background has completed the reset, then reload.
   $('factoryReset')?.addEventListener('click',async()=>{
     const message='Factory reset Little Pixel?\n\nThis permanently deletes saved notes, reminders, themes, wallpapers, shortcuts, and layouts from this Firefox profile AND overwrites your Firefox-synced Little Pixel data.\n\nFirefox native New Tab shortcuts will be imported again automatically. Export a backup first if you want to keep anything.';
-    if(!confirm(message))return;
+    if(!await lpDialogs.confirm(message))return;
     const button=$('factoryReset'),feedback=$('factoryResetFeedback');
     button.disabled=true;feedback.textContent='Resetting Little Pixel…';
     window.dispatchEvent(new Event('little-pixel:reset-start'));
@@ -1865,6 +2253,26 @@
       window.dispatchEvent(new Event('little-pixel:reset-cancel'));
       feedback.textContent='Reset failed: '+error.message;button.disabled=false;
     }
+  });
+
+  // Apply a completed one-time Firefox import in place. Avoid refreshing the
+  // whole app or interrupting the clock/settings; the bridge has already saved
+  // the canonical snapshot. Other background updates remain unchanged.
+  window.addEventListener('little-pixel:firefox-imported',event=>{
+    const imported=event.detail;
+    if(!Array.isArray(imported?.shortcuts))return;
+    // An open editor may contain unsaved changes. Leave the existing view alone
+    // instead of discarding it; new tabs still read the canonical snapshot.
+    if(document.querySelector('dialog[open]')||shortcutsEditMode){
+      const status=$('firefoxBridgeStatus');
+      if(status)status.textContent='Imported shortcuts saved. Exit Edit Mode or open another tab to display them.';
+      return;
+    }
+    state.shortcuts=structuredClone(imported.shortcuts);
+    if(Array.isArray(imported.firefoxDismissedUrls))
+      state.firefoxDismissedUrls=structuredClone(imported.firefoxDismissedUrls);
+    // Keep the current page (Clock/Calendar/Shortcuts) unchanged.
+    renderShortcuts();
   });
 
   // The WebExtension bridge performs native import and reports available sites.
