@@ -9,7 +9,7 @@
     rose:{background:'#080d12',color:'#ff6b90',round:16}
   };
   const defaultViewBackground={wallpaperDim:20,wallpaperFit:'cover',dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11};
-  const defaults = {enableNotifications:false,notifiedReminderKeys:[],shortcutBorderOpacity:24,dockBgOpacity:93,dockScale:100,dockAlignment:'center',notes:[],clockShowNotes:true,clockShowUpcoming:true,clockMaxNotes:4,showQuickNote:true,clockDoubleClickNote:false,calendarMarkers:'icons',calendarScale:100,calendarTileOpacity:7,shortcutBgOpacity:11,viewBackgrounds:{shortcuts:{...defaultViewBackground},clock:{...defaultViewBackground},calendar:{...defaultViewBackground}},wallpaperModes:{shortcuts:'shared',clock:'shared',calendar:'shared'},wallpaperEnabled:false,wallpaperScope:'shared',wallpaperTarget:'clock',wallpapers:{shared:'',shortcuts:'',clock:'',calendar:''},wallpaperFit:'cover',wallpaperDim:20,dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11,syncDotTexture:false,pinPreview:true,theme:'rose',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,unlitOpacity:4,pixelGlow:true,backlightGlow:true,glowIntensity:12,backlightStrength:14,colonAnimation:'static',pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:80,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'grid',shortcutGridRows:5,shortcutPositions:{},shortcutColumns:12,shortcutGridWidth:90,shortcutCellHeight:104,customThemes:[],shortcutSize:80,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,weekStart:1,highlightWeekends:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',firefoxDismissedUrls:[],shortcuts:[]};
+  const defaults = {enableNotifications:false,notifiedReminderKeys:[],shortcutBorderOpacity:24,dockBgOpacity:93,dockScale:100,dockAlignment:'center',dockIconsOnly:false,notes:[],clockShowNotes:true,clockShowUpcoming:true,clockMaxNotes:4,showQuickNote:true,clockDoubleClickNote:false,calendarMarkers:'icons',calendarScale:100,calendarTileOpacity:7,shortcutBgOpacity:11,viewBackgrounds:{shortcuts:{...defaultViewBackground},clock:{...defaultViewBackground},calendar:{...defaultViewBackground}},wallpaperModes:{shortcuts:'shared',clock:'shared',calendar:'shared'},wallpaperEnabled:false,wallpaperScope:'shared',wallpaperTarget:'clock',wallpapers:{shared:'',shortcuts:'',clock:'',calendar:''},wallpaperFit:'cover',wallpaperDim:20,dotGridEnabled:true,dotGridColor:'#ffffff',dotGridSize:1,dotGridGap:14,dotGridScale:110,dotGridRounding:40,dotGridOpacity:11,syncDotTexture:false,pinPreview:true,theme:'rose',themeColors:{},themeBackgrounds:{},themeRounds:{},clockScale:90,unlitOpacity:4,pixelGlow:true,backlightGlow:true,glowIntensity:12,backlightStrength:14,colonAnimation:'static',pixelSize:78,timeFormat:'24',seconds:false,date:true,dateFormat:'long',weekday:true,weekdayStyle:'long',dateSeparator:'dot',dateFont:'system',dateSize:80,dateCustom:'dddd · D MMMM YYYY',clockFont:'system',matchDateColor:true,themeDateColors:{},awake:false,showSwitchButtons:true,autoHideDock:false,showShortcutLabels:true,shortcutLayout:'grid',shortcutGridRows:5,shortcutPositions:{},shortcutColumns:12,shortcutGridWidth:90,shortcutCellHeight:104,customThemes:[],shortcutSize:80,shortcutGap:12,shortcutRounding:28,showOutsideDates:true,weekStart:1,highlightWeekends:true,calendarStyle:'soft',calendarFont:'system',calendarDensity:'comfortable',startPage:'clock',firefoxDismissedUrls:[],shortcuts:[]};
   let state={...defaults};
   try {
     const saved=JSON.parse(localStorage.getItem('little-pixel-clock')||'{}');
@@ -54,6 +54,7 @@
   }
   state.dockScale=Number.isFinite(Number(state.dockScale))?Math.min(150,Math.max(65,Number(state.dockScale))):100;
   state.dockAlignment=['left','center','right'].includes(state.dockAlignment)?state.dockAlignment:'center';
+  state.dockIconsOnly=state.dockIconsOnly===true;
   state.calendarMarkers=['dots','icons'].includes(state.calendarMarkers)?state.calendarMarkers:'icons';
   state.showQuickNote=state.showQuickNote!==false;
   state.clockDoubleClickNote=!!state.clockDoubleClickNote;
@@ -236,13 +237,22 @@
     $('calendarTileOpacity').value=state.calendarTileOpacity;$('calendarTileOpacityValue').textContent=state.calendarTileOpacity+'%';
     $('pageSwitch').hidden=!state.showSwitchButtons;
     $('dockAlignment').value=state.dockAlignment;
+    $('dockIconsOnly').checked=state.dockIconsOnly;
+    $('bottomDock').classList.toggle('dock-icons-only',state.dockIconsOnly);
     $('dockScale').value=state.dockScale;
     $('dockScaleValue').textContent=state.dockScale+'%';
     $('bottomDock').dataset.align=state.dockAlignment;
     screen.style.setProperty('--lp-dock-scale',String(state.dockScale/100));
     screen.style.setProperty('--lp-dock-mobile-scale',String(Math.min(1.05,state.dockScale/100)));
     $('autoHideDock').checked=!!state.autoHideDock;
-    screen.style.setProperty('--dock-opacity',state.dockBgOpacity+'%');
+    // Apply to the actual dock: no opaque fallback or full-strength blur behind transparent menu.
+    const dockElement=$('bottomDock');
+    dockElement.style.setProperty('--dock-opacity',state.dockBgOpacity+'%');
+    dockElement.style.setProperty('--dock-blur',Math.round(state.dockBgOpacity*0.12)+'px');
+    // Use real alpha rather than an inherited opaque fallback from older CSS.
+    // Setting the shorthand with !important overrides the v6.3 display-mode rule.
+    dockElement.style.setProperty('background',colorCss(background,state.dockBgOpacity/100),'important');
+    dockElement.style.setProperty('backdrop-filter',`blur(${Math.round(state.dockBgOpacity*0.12)}px)`,'important');
     $('dockBgOpacity').value=state.dockBgOpacity;
     $('dockBgOpacityValue').textContent=state.dockBgOpacity+'%';
     updateDockMode();
@@ -963,14 +973,17 @@
   $('nextMonth').addEventListener('click',()=>shiftMonth(1));
   $('calendarToday').addEventListener('click',()=>{selectedDate=new Date();displayMonth=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1);renderCalendar();});
   let touchStart=null, suppressClickUntil=0;
-  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,.view-tabs,#exitFs,.clock-note-shelf,a');
+  // A deliberate drag across the empty page switches views on desktop as well
+  // as touchscreens. Interactive elements (including draggable shortcuts) are excluded.
+  const gestureIgnored=target=>!!target.closest('#previousMonth,#nextMonth,#calendarToday,.view-tabs,#exitFs,.clock-note-shelf,a,button,input,select,textarea,[contenteditable],.shortcut-entry,.group-popover,.settings-open');
   screen.addEventListener('pointerdown',e=>{
-    if(e.pointerType==='touch' && !shortcutsEditMode && !gestureIgnored(e.target)) touchStart={x:e.clientX,y:e.clientY,pointerId:e.pointerId};
+    if((e.pointerType==='touch'||e.pointerType==='mouse') && e.button===0 && !shortcutsEditMode && !gestureIgnored(e.target))
+      touchStart={x:e.clientX,y:e.clientY,pointerId:e.pointerId,pointerType:e.pointerType};
   });
   screen.addEventListener('pointerup',e=>{
-    if(!touchStart||e.pointerType!=='touch'||touchStart.pointerId!==e.pointerId)return;
-    const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;
-    if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.4)return;
+    if(!touchStart||touchStart.pointerId!==e.pointerId)return;
+    const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y,threshold=touchStart.pointerType==='mouse'?85:48;touchStart=null;
+    if(Math.abs(dx)<threshold||Math.abs(dx)<Math.abs(dy)*1.4)return;
     suppressClickUntil=Date.now()+550;
     if(currentView==='shortcuts' && (dx<0 || ($('shortcutEmpty').hidden===false && dx>0))){
       // The no-shortcuts card is not a dead end: swipe either way to get back to the clock.
@@ -981,22 +994,24 @@
     else if(dx>0&&currentView==='clock')showView('shortcuts');
   });
   screen.addEventListener('pointercancel',()=>{touchStart=null;});
-  for(const id of ['calendarGrid','shortcutEmpty'])$(id).addEventListener('click',e=>{
+  screen.addEventListener('click',e=>{
     if(Date.now()<suppressClickUntil){e.preventDefault();e.stopImmediatePropagation();}
   },true);
-  screen.addEventListener('keydown',e=>{
-    if(e.target.closest('button,input,select,a'))return;
-    if(e.key==='ArrowLeft'){
-      if(currentView==='calendar')showView('clock');
-      else if(currentView==='clock')showView('shortcuts');
-      e.preventDefault();
-    }else if(e.key==='ArrowRight'){
-      if(currentView==='shortcuts')showView('clock');
-      else if(currentView==='clock')showView('calendar');
-      e.preventDefault();
-    }else if(e.key==='Escape'&&currentView!=='clock'){
-      showView('clock');e.preventDefault();
-    }
+  // Arrow navigation works even when a dock button has keyboard focus.
+  // Do not intercept text editing, settings widgets, or active dialogs.
+  document.addEventListener('keydown',e=>{
+    if(e.defaultPrevented||e.ctrlKey||e.altKey||e.metaKey||e.shiftKey)return;
+    if(!['ArrowLeft','ArrowRight'].includes(e.key))return;
+    const target=e.target instanceof Element?e.target:null;
+    if(!target)return;
+    if(target.closest('input,select,textarea,[contenteditable="true"],dialog[open],[role="dialog"]'))return;
+    if(document.querySelector('dialog[open]'))return;
+    if(target.closest('button,a,[role="tab"],[tabindex]')&&!target.closest('#bottomDock'))return;
+    if(document.documentElement.classList.contains('settings-open')&&!target.closest('#bottomDock'))return;
+    const next=e.key==='ArrowLeft'
+      ?({calendar:'clock',clock:'shortcuts'}[currentView])
+      :({shortcuts:'clock',clock:'calendar'}[currentView]);
+    if(next){showView(next);e.preventDefault();}
   });
 
   // Shortcuts use DOM APIs (never inject user-supplied markup).
@@ -1391,10 +1406,12 @@
       remove.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();quickDeleteGridItem(item);});
       entry.appendChild(remove);
     }
-    if(shortcutsEditMode){
-      entry.draggable=true;entry.title=isGroup(item)?'Drop another shortcut here to add it to this group':'Drag to arrange or drop onto a folder to group; hold to move on touchscreens';
+    {
+      entry.draggable=true;
+      tile.draggable=true;
+      entry.title=isGroup(item)?'Drag to move the group or drop a shortcut onto it':'Drag to reorder, swap cells, or move into a group (hold on touchscreens)';
       bindHoldToMove(tile,{
-        enabled:()=>shortcutsEditMode,
+        enabled:()=>true,
         source:()=>entry,preview:()=>tile,
         targetSelector:state.shortcutLayout==='grid'?'.shortcut-slot':'.shortcut-entry[data-id]',
         drop:target=>{
@@ -1470,11 +1487,11 @@
             });wrapper.appendChild(btn);
           }
         }
-        if(shortcutsEditMode){
+        {
           wrapper.addEventListener('dragover',event=>{event.preventDefault();wrapper.classList.add('is-drop-target');});
           wrapper.addEventListener('dragleave',()=>wrapper.classList.remove('is-drop-target'));
           wrapper.addEventListener('drop',event=>{wrapper.classList.remove('is-drop-target');if(!draggedShortcutId)return;event.preventDefault();event.stopPropagation();const from=draggedShortcutId;if(from)putInSlot(from,slot);draggedShortcutId=null;});
-          if(match&&movingShortcutId&&movingShortcutId!==match.id){
+          if(shortcutsEditMode&&match&&movingShortcutId&&movingShortcutId!==match.id){
             wrapper.addEventListener('click',event=>{if(event.target.closest('.shortcut-tile,.shortcut-move-actions'))return;putInSlot(movingShortcutId,slot);});
           }
         }
@@ -1980,6 +1997,7 @@
   }
   $('dockAlignment').addEventListener('change',e=>set('dockAlignment',e.target.value));
   $('dockScale').addEventListener('input',e=>set('dockScale',Number(e.target.value)));
+  $('dockIconsOnly').addEventListener('change',e=>set('dockIconsOnly',e.target.checked));
   $('autoHideDock').addEventListener('change',e=>set('autoHideDock',e.target.checked));
   handle.addEventListener('click',()=>{
     clearTimeout(dockLeaveTimeout);

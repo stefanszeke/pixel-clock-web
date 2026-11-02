@@ -1,3 +1,20 @@
+## v6.21.10 native PiP-only check
+
+- [ ] Dock shows one ▣ PiP icon immediately before the ⛶ fullscreen icon, including in icon-only and scaled menu modes.
+- [ ] No Window Tests panel or four-way window mode menu remains.
+- [ ] PiP opens the current view and can close without closing the main browser window.
+- [ ] Unsupported PiP shows an in-app error without falling back to Firefox Popup/Panel.
+- [ ] Shortcuts still drag/reorder outside Edit Mode and previous settings remain intact.
+
+## v6.21.9 UI regression checks
+
+- [x] Local simulated browser: normal-view drag swap, move to empty slot, move link into a group; group still opens on click.
+- [x] Local simulated browser: menu icons-only saves preference, opacity renders transparent at 0% and opaque at 100% after input; desktop mouse swipe switches clock/calendar.
+- [x] Local simulated browser: arrow keys work with the bottom navigation button focused and do not hijack keys in settings sliders.
+- [ ] Firefox for Windows: confirm native HTML5 drag and drop of links/groups, keyboard arrows, menu opacity/position/scale and desktop swipe.
+- [ ] Firefox for Windows: verify temporary favicon-import tabs close after a lookup, including unreachable websites and timeouts.
+- [ ] Native Firefox Document PiP still retains browser-owned window chrome; no claim of a borderless window.
+
 ## v6.21.8 manual regression checks
 
 - [ ] Test **fresh Firefox profile**: automatic New Tab import should bring in shortcuts and native icons, then discover missing icons such as Duolingo's via temporary tabs. Verify tabs close and no page reload occurs.
@@ -49,8 +66,8 @@
 - [ ] On an empty profile, native New Tab shortcuts import automatically and show without a manual Refresh.
 - [ ] Shortcut Edit Mode → X displays an **in-app** confirmation; Cancel preserves the shortcut, Confirm deletes it.
 - [ ] Notes list always has checkboxes; Delete selected works even if website dialogs are suppressed.
-- [ ] Try Window tests → PiP, Panel, Popup, window.open. Report any title/URL bar and always-on-top behavior for each one.
-- [ ] In the floating Panel/Popup, inner X closes only the test window, not the main Firefox window.
+- [ ] Click the bottom dock PiP icon (immediately before Full screen). Confirm only native PiP opens.
+- [ ] The in-content PiP X closes only the PiP window, not the main Firefox window.
 
 ## v6.21.4 Firefox/Windows test matrix
 
@@ -60,7 +77,7 @@
 - [ ] Delete a group from the group editor with **Also permanently delete** checked: its links disappear. Confirm Cancel is non-destructive.
 - [ ] Save a new Duolingo shortcut with Website favicon; the icon should be found from Firefox cache or known website paths without enabling background repair. Open Edit → Refresh favicon to retry on demand.
 - [ ] Check existing custom-uploaded icons and symbols are not overwritten by tab icon recovery; cached faviconData is preferred.
-- [ ] Open Window tests → Panel: Little Pixel's *internal* top strip should be absent. Windows title bar may remain.
+- [ ] Confirm the Window Tests UI no longer appears anywhere in the dashboard.
 - [ ] Optional Windows test: run AutoHotkey v2 `LittlePixel-Floating-Helper.ahk`, focus **Panel**, Ctrl+Win+P to remove OS caption & pin; press again to restore. Do not apply to the main browser window.
 - [ ] Native Firefox/Windows behavior has not been validated in this environment. Do not submit to AMO until the manual checks above pass.
 

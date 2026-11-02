@@ -1,3 +1,21 @@
+## v6.21.10 — PiP-only launcher in bottom menu
+
+- Kept Firefox Document Picture-in-Picture as the sole floating-window mode; one dock icon `▣` appears immediately before the Full screen icon `⛶`.
+- Removed Window Tests and the alternative Panel, Popup, and `window.open` experimental launchers and related UI/CSS.
+- PiP opens the currently selected page; if Firefox cannot open PiP, an in-app error is displayed instead of an unrelated popup.
+- No changes to shortcut drag-and-drop, favicon import, notes, bottom menu customization, or saved settings.
+- Syntax and local PiP smoke-tested. Native Firefox/Windows still controls PiP chrome and needs a real-world check.
+
+## v6.21.9 — Direct drag, menu display fixes, desktop gestures and arrow keys
+
+- Normal Shortcuts view: drag a shortcut or group onto an empty grid cell to move it, an occupied cell to swap positions, or a group tile to add the link to that group. Auto-arrange mode also accepts drag reordering. Click still opens a shortcut. Edit Mode remains for add/edit/bulk selection and delete.
+- Desktop mouse gestures: drag across blank page areas to switch between Shortcuts, Clock and Calendar. A deliberate mouse gesture uses a larger threshold than touch; shortcuts, buttons and input fields are excluded to avoid accidental navigation.
+- Bottom menu: icons-only mode hides the three page labels but retains accessible names and tooltips. Position (left/center/right) and scale (65–150%) continue to be independent settings.
+- Fixed menu background opacity: apply the actual background alpha directly to the dock and reduce blur in tandem. Removed the background transition that made rapid slider changes appear unresponsive.
+- Fixed keyboard arrows after selecting a bottom navigation button: document-level arrow handler allows focused dock buttons, but leaves text fields, sliders, dialog controls, and settings tabs alone.
+- No changes to the one-time Firefox favicon-import logic: it may open briefly visible inactive tabs, and closes those created for lookup.
+- Verified via local Chromium UI interactions and JavaScript syntax checks. Firefox/Windows behavior remains to be tested; native PiP window chrome is still Firefox-controlled.
+
 ## v6.21.8 — One-time import favicons + bottom menu controls
 
 - First-run Firefox New Tab import now reuses native favicon data and asks Firefox to visit only missing-icon websites in temporary inactive tabs. Imports are bounded, de-duplicated per hostname, use at most four simultaneous tabs, and save everything once. The same enrichment runs on a manual native import; no continuous favicon monitoring is enabled.

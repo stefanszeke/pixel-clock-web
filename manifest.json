@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Little Pixel – New Tab",
-  "version": "6.21.8",
+  "version": "6.21.10",
   "description": "Customizable New Tab with clock, calendar, shortcut folders, notes, reminders, Firefox shortcut import and desktop-profile sync.",
   "permissions": [
     "storage",

@@ -1,4 +1,4 @@
-# Little Pixel — Firefox add-on v6.21.8 (unsigned experimental build)
+# Little Pixel — Firefox add-on v6.21.10 (unsigned experimental build)
 
 Little Pixel replaces Firefox's New Tab page with a customizable mini-desktop: clock, calendar, shortcuts, groups, notes and reminders.
 
@@ -9,8 +9,9 @@ Little Pixel replaces Firefox's New Tab page with a customizable mini-desktop: c
 3. Choose **Load Temporary Add-on** → `manifest.json`.
 4. Open a new tab. Temporary add-ons unload when Firefox restarts. A permanent install requires Mozilla signing.
 
-## Shortcut UX (v6.21.5)
+## Shortcut UX (v6.21.9)
 
+- **Regular view:** drag a shortcut or group to a different cell to move/swap it, or drop a standalone shortcut on a group to move it into the group. Normal clicks still open shortcuts.
 - **Edit shortcuts** with the pencil/cog button on Shortcuts. In **Free grid** mode, click an empty cell and choose Shortcut or Group. Newly created items appear in that exact cell. To group several links, check their selection boxes and click **Make group**. Drag tiles directly in the main grid to rearrange, including folders. Drag a link onto a folder tile to add it to that group. Mobile: long-press and move.
 - Click a group in Edit mode to open the **visual group editor**. Check or uncheck tiles to select group members; **drag selected tiles directly in that same grid to reorder them** (Alt + arrow keys for keyboard). The redundant second reorder list has been removed. Removed members return to the main shortcuts grid when you save.
 - New shortcuts use **Website favicon**. The extension prefers actual favicons cached by Firefox (`topSites.get({includeFavicon:true})`) for eligible sites, then tries common icon URLs on that site's own origin; if an icon is genuinely unavailable, it shows the site's initial, not a generic arrow. There is no third-party icon proxy.
@@ -19,16 +20,11 @@ Little Pixel replaces Firefox's New Tab page with a customizable mini-desktop: c
 - **Firefox New Tab auto-import:** on the first run with an empty grid, the extension initializes its profile snapshot and imports native Firefox New Tab/pinned sites automatically. After a successful import, shortcut data updates in place (no whole-page reload and no forced page switch). Lookups have time limits and show an error/retry if they fail; the manual Import button remains available. The initial automatic check runs once per profile to avoid repeated imports on every New Tab.
 - **Favicon repairs:** old default ↗ placeholders are rendered as website icons rather than permanent symbols. Cached icons returned by Firefox are preserved, including for existing group members; missing icon responses never erase cached data. Extra same-site favicon locations are tried, and a site initial remains the fallback if no icon is reachable. No external favicon-proxy service is used.
 
-## Floating window experiment (v6.21.4)
+## Floating Picture-in-Picture (v6.21.10)
 
-The top-left **▣ Window tests** button now opens four distinctly labeled experiments:
+The bottom dock has a single **▣ Picture-in-Picture** icon, immediately before **⛶ Full screen**. Clicking it launches Firefox's native Document PiP with the current Little Pixel view. The four-mode Window Tests UI and its Panel, Popup, and `window.open` launchers have been removed. The usual bottom menu, shortcuts, notes and other behavior are unchanged.
 
-1. **Picture-in-Picture** (Document PiP): attempts a clean, always-on-top window. This requires `documentPictureInPicture.requestWindow` to be exposed to extension pages. Firefox's VIDEO PiP is not the same API; the request may fail. Failure is shown in the test panel, not hidden by a popup fallback.
-2. **Firefox Panel**: calls `browser.windows.create({type:'panel', ...})`; MDN describes the panel type as having no normal address bar or toolbars, but Firefox and Windows may still display browser/window decoration.
-3. **Firefox Popup**: calls `browser.windows.create({type:'popup', ...})`; Firefox may display a location bar, as earlier versions did on the user's Windows installation.
-4. **window.open()**: a separate user-gesture window test with feature flags (`location=no`, `toolbar=no`, `popup=yes`); these flags are advisory, and Firefox can ignore them.
-
-PiP sends a hint to hide the Return to Opener UI, but Firefox may ignore it and still display its address bar and title bar. The experiments report errors inside Little Pixel. **None of the normal window APIs guarantees always-on-top**; PiP might, when available. The new X button inside the experimental Panel/Popup attempts to close only its own small window. These window modes have **not** been tested in native Firefox/Windows yet. They are explicitly tests, not a promised borderless solution.
+Firefox supplies PiP's always-on-top behavior and owns any native URL bar, title bar and window controls; the extension cannot hide those browser decorations. If Document PiP is unavailable, Little Pixel shows an in-app explanation and does **not** open a normal popup as a substitute. PiP can be closed using its native controls or the small optional hover Close button within the content. You can also use the hover Tab button to open the regular dashboard.
 
 ## Browser-independent app dialogs and Notes
 
@@ -57,14 +53,14 @@ The builder creates a versioned **unsigned** ZIP in `dist/` containing the eleve
 
 ## Before publishing
 
-Complete the release checklist. This package passed JavaScript syntax checks, Chromium UI simulation of window test controls, browser-independent deletion/notes selection, and mocked Firefox background import tests. It has **not** been tested in a real Firefox installation. Verify the actual window chrome, shortcut import and data persistence before publishing.
+Complete the release checklist. This package passed JavaScript syntax checks and local PiP launcher smoke tests. Previous features were covered by local browser/Firefox API simulations. It has **not** been tested in a real Firefox installation. Verify the actual window chrome, shortcut import and data persistence before publishing.
 
 ## v6.21.4: bulk cleanup, favicons, floating experiments
 
 - **Edit Shortcuts:** checkboxes now appear on ordinary shortcuts. Select several or use **Select all**, then **Delete selected**. This works only on standalone shortcuts in the main grid; group contents are not affected. A Little Pixel confirmation appears before deletion. Followed Firefox New Tab items are added to the dismiss list so they do not immediately return on auto-import.
 - **Delete a group (X or group editor):** the confirmation has an **Also permanently delete the shortcuts inside** checkbox. Unchecked (default) means the group is removed and its shortcuts become normal shortcuts; checked removes both. Neither operation changes Firefox bookmarks.
-- **Floating experiments:** the 36-pixel-wide top header inside the experiment window is gone. The app now uses the full window height, with a tiny Tab/Close overlay revealed on hover at top-left. Firefox/Windows OS title bars remain unchanged by the extension.
-- **Optional Windows-only enhancement:** the repo contains `LittlePixel-Floating-Helper.ahk`, an AutoHotkey v2 script. Open the Firefox **Panel** mode, focus its window, and press `Ctrl+Win+P` to toggle its title bar off and pin it above other windows. Press the hotkey again to restore. It changes only the focused Firefox Little Pixel window; no additional browser permission is needed. This helper is **not** bundled in the Firefox install package; test it separately and exit via Alt+F4 if necessary.
+- **Legacy floating experiments:** the 36-pixel-wide top header inside the experiment window was removed in v6.21.4. The app now uses the full window height, with a tiny Tab/Close overlay revealed on hover at top-left. Firefox/Windows OS title bars remain unchanged by the extension.
+- **Optional Windows-only enhancement:** the repo contains `LittlePixel-Floating-Helper.ahk`, an AutoHotkey v2 script. Open a Firefox **Panel** mode from an older build, focus its window, and press `Ctrl+Win+P` to toggle its title bar off and pin it above other windows. Press the hotkey again to restore. It changes only the focused Firefox Little Pixel window; no additional browser permission is needed. This helper is **not** bundled in the Firefox install package; test it separately and exit via Alt+F4 if necessary.
 
 ### Shortcut website icons (6.21.6)
 
@@ -83,3 +79,11 @@ Native Firefox New Tab imports (automatic first-run or manual) now keep Firefox-
 **Required permissions:** `topSites` and `bookmarks` are retained; `tabs` is now also a required permission at installation because an automatic import cannot trigger a Firefox permissions prompt. It allows access to tab URLs/favicon metadata. The extension does not read web page text; the icon lookup itself causes a real website visit that may be visible in History. Optional Sync data permissions remain opt-in.
 
 Settings → Display → Startup & Navigation now offers **Bottom menu position** (Left / Center / Right) and **Bottom menu scale** (65–150%, 100% default). These change only the navigation menu, not the shortcut-grid or clock scale. Auto-hide now closes shortly (~75 ms) after mouse leave, unless Settings are open or the menu has keyboard focus. Mobile scale is capped at 105% to avoid covering the narrow screen.
+
+### v6.21.9 — Menu and mouse gestures
+
+Settings → Display → Startup & Navigation offers Bottom menu scale (65–150%), alignment (Left/Center/Right), and **Icons only** (hide page names). Bottom menu background opacity goes from 0% transparent to 100% opaque, independently of shortcut-grid opacity. Auto-hide collapses after around 75 ms of mouse leave. The arrow keys switch Shortcuts ↔ Clock ↔ Calendar even after clicking a bottom navigation button; controls inside editors, settings or dialogs keep their own keyboard interaction.
+
+On desktop, click and drag horizontally on empty page background to move between views. Starting on a shortcut tile starts a shortcut move instead, not a page swipe. On touchscreens, long-press remains the way to move shortcuts.
+
+**Custom floating windows:** The current Document PiP retains Firefox's native URL and OS chrome. An extension can customize content inside that window but cannot remove Firefox-owned browser UI. The included AutoHotkey helper can alter a Firefox Panel window on Windows experimentally, but a guaranteed borderless and always-on-top experience would require a separately maintained native companion (for example a WPF/WebView2 window) plus data synchronization with the extension. No native companion is bundled in this version.
